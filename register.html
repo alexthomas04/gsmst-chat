@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/angular/angular.min.js"></script>
+    <script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+    <script src="controllers/error.js"></script>
+    <script src="controllers/register.js"></script>
+   
+
+</head>
+<body ng-app="register">
+    <h2>Register</h2>
+    <div id='errors'>
+        <errors></errors>
+    </div>
+    <div ng-controller="RegisterCtrl">
+        <form class=" col-lg-3 col-md-5 col-sm-12" role="form">
+            <div class="form-group">
+                <label>Username</label>
+                <input ng-model="username" class='form-control' type="text">
+            </div>
+            <div class="form-group">
+                <label>password</label>
+                <input ng-model="password" class='form-control' type="password">
+            </div>
+            <div class="form-group">
+                <label>Re-type password</label>
+                <input ng-model="repassword" class='form-control' type="password">
+            </div>
+            <div class="form-group">
+                <label>First name</label>
+                <input ng-model="firstname" class='form-control' type="text">
+            </div>
+            <div class="form-group">
+                <label>Last name</label>
+                <input ng-model="lastname" class='form-control' type="text">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input ng-model="email" class='form-control' type="text">
+            </div>
+            <button ng-click="submit()" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
