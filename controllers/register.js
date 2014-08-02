@@ -1,7 +1,7 @@
 /**
  * Created by Sonicdeadlock on 8/1/2014.
  */
-var app = angular.module('register',['error']);
+var app = angular.module('register',['util']);
 
 app.controller('RegisterCtrl',['$scope',function($scope){
     $scope.submit = function(){

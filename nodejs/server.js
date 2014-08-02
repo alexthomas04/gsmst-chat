@@ -12,11 +12,10 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 var mysql = require('mysql');
 var crypto = require('crypto');
-var cookieParser = require('cookie-parser')
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 
-server.listen(port,function(){
-    console.log("Server litening at port %d",port);
-});
+
 
 var config = JSON.parse(fs.readFileSync('nodejs/config.json','utf8'));
 
@@ -26,14 +25,24 @@ connection.connect(function(err){console.log(err)});
 
 
 //routing
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser());
+app.use( bodyParser.json() );
+var sessionStore = new session.MemoryStore;
+app.use(session({secret:'gsmstchat',store:sessionStore}));
 var loc = __dirname;
 loc = loc.split('\\');
 loc.pop(loc.length-1);
 loc = loc.join('\\');
 app.use(express.static(loc));
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use( bodyParser.urlencoded() ); // to support URL-encoded bodies
-//app.use(cookieParser);
+
+server.listen(port,function(){
+    console.log("Server listening at port %d",port);
+});
+
+
+
 app.post('/reguser',function(req,res){
     isValidUser(req.body,function(errors){
         if(errors.length==0){
@@ -44,23 +53,38 @@ app.post('/reguser',function(req,res){
             req.session.username = req.body.username;
             res.json(result);
         }else{
-             var result = {};
-            result.status='errors';
-            result.errors = errors;
-            console.log(errors);
-            res.json(result);
-        }
-    });
+           var result = {};
+           result.status='errors';
+           result.errors = errors;
+           console.log(errors);
+           res.json(result);
+       }
+   });
 
 });
 
 app.post('/me',function(req,res){
     if(req.session.username==undefined)
-        res.json({"ststus":"Not logged in"});
+        res.json({"status":"Not logged in"});
+    else
+        res.json({"status":"Logged in"});
 });
 
 app.post('/login',function(req,res){
+    var body = req.body;
+    login(body.username,body.password,function(sucessful){
+        if(sucessful){
+            req.session.username=body.username;
+            res.json({"status":"OK"});
+        }
+        else{
+            res.json({"status":"failure"})
+        }
+    });
+});
 
+app.get('/forgot',function(req,res){
+    res.send(200,'<h1>HAHA that sucks</h1>')
 });
 
 var isValidUser=function(data,callback){
@@ -78,24 +102,24 @@ var isValidUser=function(data,callback){
             setTimeout(function(){next(errors);},1);
         }
 
-       else if(rule == 'max'){
+        else if(rule == 'max'){
             if (value.length >= ruleVal)
                 errors.push({'rule': rule, 'ruleVal': ruleVal, "element": dataKey, "text": dataKey + " must be less than " + ruleVal + " characters"});
             setTimeout(function(){next(errors);},1);
         }
 
-       else if(rule == 'unique'){
+        else if(rule == 'unique'){
             connection.query("SELECT `id` from "+ruleVal.table+" where "+ruleVal.column+" = '"+value+"'",function(err,result){
                 console.log(err);
                 if(result !== undefined && result.length>1)
-                 errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
-             setTimeout(function(){next(errors);},1);
-         });
+                   errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
+               setTimeout(function(){next(errors);},1);
+           });
         }
         else if(rule== 'matches'){
             if(value !== data[ruleVal])
                 errors.push({'rule': rule, 'ruleVal': ruleVal, "element": dataKey, "text": dataKey + " must be match " + ruleVal + "."});
-             next(errors);
+            next(errors);
         }
         else
             next(errors);
@@ -108,34 +132,34 @@ var isValidUser=function(data,callback){
       var rule = rules[currentValidation];
 
       var ruleVal = config.register_validataions[dataKey][rule];
-        currentValidation++;
+      currentValidation++;
 
-    if(j==0 && currentValidation == rules.length)
+      if(j==0 && currentValidation == rules.length)
         validate(rule,ruleVal,dataKey,value,callback);
     else {
-       if(currentValidation  >= rules.length)
-       {
-         j--;
-         currentValidation=0;
-        }
-        validate(rule,ruleVal,dataKey,value,runNextValidation);
-
+     if(currentValidation  >= rules.length)
+     {
+       j--;
+       currentValidation=0;
+   }
+   validate(rule,ruleVal,dataKey,value,runNextValidation);
+   
 }
 };
-    var rules = Object.keys(config.register_validataions);
-      for (var i = rules.length - 1; i >= 0; i--) {
-          var ruleKey = rules[i];
-          var datavalue = data[ruleKey];
-          if(config.register_validataions[ruleKey].required == true && (datavalue === undefined || datavalue.trim() ==='' )) {
-              errors.push({"element": ruleKey, "rule": "required", "text": ruleKey + " is required"});
-              delete data[ruleKey];
-          }
-      };
-     dataKeys = Object.keys(data);
-    if(dataKeys !== undefined && dataKeys.length>0)
-        runNextValidation(null);
-    else
-        callback(errors);
+var rules = Object.keys(config.register_validataions);
+for (var i = rules.length - 1; i >= 0; i--) {
+  var ruleKey = rules[i];
+  var datavalue = data[ruleKey];
+  if(config.register_validataions[ruleKey].required == true && (datavalue === undefined || datavalue.trim() ==='' )) {
+      errors.push({"element": ruleKey, "rule": "required", "text": ruleKey + " is required"});
+      delete data[ruleKey];
+  }
+};
+dataKeys = Object.keys(data);
+if(dataKeys !== undefined && dataKeys.length>0)
+    runNextValidation(null);
+else
+    callback(errors);
 
 
 };
@@ -159,9 +183,9 @@ var insertUser = function(userData){
 };
 
 var getUser = function(username,callback){
-     var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
-        callback(results[0]);
-    });
+   var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
+    callback(results[0]);
+});
 };
 
 
