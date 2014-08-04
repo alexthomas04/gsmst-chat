@@ -12,6 +12,18 @@ socket.on('rooms',function(message){
 		var scope = angular.element('#rooms').scope();
 		scope.rooms = message.rooms;
 		scope.$apply();
+		scope = angular.element('#room').scope();
+		var id = (scope.room||{}).id;
+		if(id!=undefined)
+		{
+			for (var i = message.rooms.length - 1; i >= 0; i--) {
+				var room = message.rooms[i];
+				if(room.id==id)
+					scope.room=room;
+			};
+			scope.$apply();
+		}
+		
 		console.log(message);
 	});
 });

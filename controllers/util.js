@@ -49,6 +49,9 @@ app.directive('roomButton', [function () {
 		templateUrl:"templates/roomButton.html",
 		link: function (scope, iElement, iAttrs) {
 			$(iElement).data('roomData',scope.room);
+			scope.deleteRoom = function(id){
+				socket.emit('deleteRoom',{"id":id});
+			}
 		}
 	};
 
@@ -59,8 +62,13 @@ app.directive('room', [function () {
 		restrict: 'A',
 		link: function (scope, iElement, iAttrs) {
 			scope.chat = function(){
+				if(state.status==='Logged in')
+	    		{
 				socket.emit('chat',{'chat':scope.message});
 				scope.message='';
+			}
+				
+				
 			}
 		}
 	};

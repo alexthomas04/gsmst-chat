@@ -54,10 +54,17 @@ server.listen(port,function(){
 
 io.on('connection',function(socket){
     var user;
-
-//    socket.on('disconnect',function(){
-//        users.splice(users.indexOf(user),1);
-//    });
+    socket.on('disconnect',function(){
+        if(user!==undefined){
+            var matching = getUsersByRoom(user.room);
+            for (var i = matching.length - 1; i >= 0; i--) {
+                var match = matching[i];
+                match.socket.emit('alert',{"alert":"left",'user':user.username})
+            };
+            user.room=undefined;
+            emitRooms();
+        }
+    });
 
     socket.on('login',function(message){
         login(message.username,message.password,function(success){
@@ -68,6 +75,7 @@ io.on('connection',function(socket){
                         user.socket = socket;
                         users.push(user);
                         var result={"status":"Logged in","username":user.username};
+                         result.permissions = user.permissions;
                         socket.emit('me',result)
                     });
                 }
@@ -90,7 +98,7 @@ io.on('connection',function(socket){
     });
 
     socket.on('chat',function(message){
-        if(user.room != undefined){
+        if(user !== undefined &&user.room != undefined){
             var matching = getUsersByRoom(user.room);
             var chat = sanitize(message.chat);
             for (var i = matching.length - 1; i >= 0; i--) {
@@ -104,18 +112,27 @@ io.on('connection',function(socket){
         var result={};
         if(user==={})
             result = {"status":"Not logged in"};
-        else
-            result = {"status":"Logged in"};
+        else{
+            result = {"status":"Logged in","username":user.username};
+            result.permissions = user.permissions;
+        }
 
         socket.emit('me',result)
     });
 
     socket.on('addRoom',function(message){
-        if(true)//has permission
+        if(user != undefined && user.permissions.create)
         {
             addRoom(message,updateRooms(function(){
-                 emitRooms()
+                 emitRooms();
+            }));
+        }
+    });
 
+    socket.on('deleteRoom',function(message){
+        if(user != undefined && user.permissions.delete){
+            deleteRoom(message,updateRooms(function(){
+                 emitRooms();
             }));
         }
     });
@@ -136,13 +153,19 @@ io.on('connection',function(socket){
         
         updateRooms(function(){ 
             for (var i = rooms.length - 1; i >= 0; i--) {
-            room = rooms[i];
-            room.userCount=getUsersByRoom(room).length;
+            var room = rooms[i];
+            var roomUsers =getUsersByRoom(room);
+            room.userCount=roomUsers.length || 0;
+            room.users=[];
+            for (var j = roomUsers.length - 1; j >= 0; j--) {
+                   room.users.push(roomUsers[j].username);
+               };   
         };
          io.emit('rooms',{"rooms":rooms});});
     }
 
    emitRooms();
+    setInterval(emitRooms,60000);
 
 
 });
@@ -313,6 +336,15 @@ var addRoom = function(data,callback){
     });
 };
 
+var deleteRoom = function(data,callback){
+    connection.query('DELETE FROM rooms WHERE id = '+data.id,function(err,result){
+       if(err !== null)
+            console.error("At Add room: %s",err);
+        if(callback!== null && callback!== undefined)
+            callback();
+    });
+}
+
 var updateRooms = function(callback){
     var query = connection.query("SELECT * FROM rooms",function(err,result){
      if(err !== null)
@@ -329,7 +361,13 @@ var updateRooms = function(callback){
 
 var getUser = function(username,callback){
    var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
-    callback(result[0]);
+    var user =result[0];
+    connection.query('SELECT * from groups where id = '+user.group_id,function(err,res){
+        console.error("At get User group : "+err);
+        user.permissions = JSON.parse(res[0].permissions);
+         callback(user);
+    }); 
+   
 });
 };
 
