@@ -5,24 +5,63 @@ app.directive('errors', [function () {
 		restrict: 'E',
 		templateUrl:'templates/error.html'
 	};
-}])
+}]);
 
 app.directive('login', [function () {
 	return {
 		restrict: 'E',
 		templateUrl:'templates/login.html',
 		link: function (scope, iElement, iAttrs) {
-			scope.submit = function(){
-				$.post('/login', {'username':scope.username,'password':scope.password}, function(data, textStatus, xhr) {
-					getState();
-					if(data.status == "OK")
-                        scope.state.status='Logged in';
-                    scope.$apply();
-				});
-
+			scope.login = function(){
+				socket.emit('login',{'username':scope.username,'password':scope.password});
 			};
-			scope.state = state;
+
+			socket.on('me',function(message){
+				scope.state = state;
+				scope.$apply();
+				console.log(scope);
+			});
+			
+		}
+	};
+}]);
+
+
+app.directive('addroom', [function () {
+	return {
+		restrict: 'E',
+		templateUrl:'templates/addRoom.html',
+		link: function (scope, iElement, iAttrs) {
+			scope.addRoom=function(){
+				var data = {};
+				data.name = scope.roomName;
+				socket.emit('addRoom',data);
+				scope.roomName = "";
+				$(iElement).hide();
+			}
+		}
+	};
+}]);
+
+app.directive('roomButton', [function () {
+	return {
+		restrict: 'E',
+		templateUrl:"templates/roomButton.html",
+		link: function (scope, iElement, iAttrs) {
+			$(iElement).data('roomData',scope.room);
+		}
+	};
+
+}]);
+
+app.directive('room', [function () {
+	return {
+		restrict: 'A',
+		link: function (scope, iElement, iAttrs) {
+			scope.chat = function(){
+				socket.emit('chat',{'chat':scope.message});
+				scope.message='';
+			}
 		}
 	};
 }])
-

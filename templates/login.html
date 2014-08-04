@@ -1,7 +1,9 @@
 
 <div ng-hide="state.status==='Logged in'">
+<div class="container">
 <button class="btn btn-primary"  id="loginButton">Login</button>
-<div style="display:none" id="loginArea" class="well">
+</div>
+<div style="display:none;" id="loginArea" class="well">
 	<form>
 		<div class="form-group">
 			<label>Username</label>
@@ -11,7 +13,7 @@
 			<label>Password</label>
 			<input class="form-control" type="password" ng-model='password'>
 		</div>
-		<button ng-click="submit()" class="btn btn-primary">Go</button>
+		<button ng-click="login()" class="btn btn-primary">Go</button>
 	</form>
 	<a href="register.html">Register</a><span class='text-primary'> | </span>
 	<a href="forgot">Forgot Password?</a><span class='text-primary'> | </span>

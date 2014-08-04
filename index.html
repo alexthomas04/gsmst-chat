@@ -1,23 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%">
 <head lang="en">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-     <script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
-    <script src="js/jquery-2.1.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/angular/angular.min.js"></script>
-    <script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
+	<script src="js/jquery-2.1.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/angular/angular.min.js"></script>
+	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
-    <script src="controllers/util.js"></script>
-
-    <script src='js/functions.js'></script>
-    <script type="text/javascript"> getState();</script>
+	<script src="controllers/util.js"></script>
+	<style type="text/css">
+	#chatArea>p{
+		word-wrap: break-word;
+	}
+	</style>
+	<script src='js/functions.js'></script>
 </head>
-<body ng-app="util">
-    <h1>WELCOME USER</h1>
-    <login class='col-md-3' style='float:right'></login>
+<body ng-app="util" style="height:100%">
+	<h1 id='title'>WELCOME USER</h1>
+	<login class='col-md-3' style='float:right;z-index:2'></login>
+	</br>
+	<div class='footer'>
+		<span class='glyphicon glyphicon-plus-sign' style='font-size:x-large' id='addRoom'></span>
+	</div>
+	<div id='rooms' style="position:fixed;width:100%">
+		<room-button ng-repeat='room in rooms' ></room-button>
+	</div>
+	<addroom style='display:none'></addroom>
+	<div room style="display:none;height:70%" id='room'  >
+		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large' id='leaveRoom'></span>
+		<div class="well" style="height:100%">
+			<div id='chatArea' style="overflow:auto;height:100%;width:100%">
+				
+			</div>
+			
+		</div>
+		<form>
+			<div class='form-group'>
+				<input class="form-control" ng-model='message'>
+				<button class="btn btn-primary" ng-click='chat()'>send</button>
+				</div>
+			</form>
+		
+
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#addRoom').on('click', function(event) {
+				event.stopPropagation();
+				$('addroom').show();
+			});
+			$('addroom').on('click',function(event){
+				event.stopPropagation();
+			});
+			$('html').on('click', function(event) {
+				$('addroom').hide();
+			});
+			$(document).on('click','room-button',function(event) {
+
+	    		// var buttons = $('room-button');
+	    		// var id=0;
+	    		// var animateButton = function(button,callback){
+	    		// 	$(button).css('position','fixed').animate({
+	    		// 		left:"-=200px"},
+	    		// 		'500', function() {
+	    		// 		callback();
+	    		// 	});
+	    		// };
+	    		// var next=function(){
+	    		// 	if(id<buttons.length){
+	    		// 		var button = buttons[id];
+	    		// 		id++;
+	    		// 		animateButton(button,next);
+	    		// 	}
+	    		// };
+	    		// next();
+	    		if(state.status==='Logged in')
+	    		{
+	    			socket.emit('join-room',{roomId:$(this).data('roomData').id});
+	    			var title = $(this).data('roomData').name;
+	    			$('#rooms').animate({left:"-100%"}, 500,function(){
+	    				$('#title').text(title);
+	    				$('#room').slideDown();
+	    			});
+	    		}
+	    	});
+	    	$('#leaveRoom').click(function(event) {
+	    		$('#title').text('Welcome '+state.username);
+	    		socket.emit('leave room',{})
+	    		$('#room').slideUp('400',function(){
+	    			$('#chatArea').text('');
+	    		});
+	    		$('#rooms').animate({left:"0%"}, 500,function(){});
+
+	    	});
+		});
+	</script>
 </body>
 </html>
