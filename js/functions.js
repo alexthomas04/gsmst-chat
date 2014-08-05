@@ -35,9 +35,15 @@ socket.on('chat',function(message){
 
 socket.on('alert',function(message){
 	var text='';
-	if(message.alert=='entered')
+	if(message.alert=='entered'){
 		text = message.user +' entered room';
-	else if(message.alert=='left')
+		if(message.entrance != undefined){
+		$('#chatArea').append($('<strong></strong>').text(message.entrance));	
+		text='';
+		}
+	}
+	else if(message.alert=='left'){
 		text = message.user+' left room';
+	}
 	$('#chatArea').append($('<footer></footer>').text(text));
 });

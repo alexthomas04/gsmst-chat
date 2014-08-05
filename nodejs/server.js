@@ -62,6 +62,7 @@ io.on('connection',function(socket){
                 match.socket.emit('alert',{"alert":"left",'user':user.username})
             };
             user.room=undefined;
+            user.socket=undefined;
             emitRooms();
         }
     });
@@ -69,16 +70,18 @@ io.on('connection',function(socket){
     socket.on('login',function(message){
         login(message.username,message.password,function(success){
             if(success){
-                if(user===undefined){
-                    getUser(message.username,function(param){
-                        user=param;
-                        user.socket = socket;
-                        users.push(user);
-                        var result={"status":"Logged in","username":user.username};
-                         result.permissions = user.permissions;
-                        socket.emit('me',result)
-                    });
+                if(user!==undefined){
+                    user.socket=undefined;
                 }
+                getUser(message.username,function(param){
+                    user=param;
+                    user.socket = socket;
+                    users.push(user);
+                    var result={"status":"Logged in","username":user.username};
+                    result.permissions = user.permissions;
+                    socket.emit('me',result)
+                });
+                
             }
         });
     });
@@ -87,20 +90,47 @@ io.on('connection',function(socket){
         if(user != undefined && user.room == undefined){
             user.room = getRoomById(message.roomId);
             emitRooms();
-
-            var matching = getUsersByRoom(user.room);
-            for (var i = matching.length - 1; i >= 0; i--) {
-                var match = matching[i];
-                match.socket.emit('alert',{"alert":"entered",'user':user.username})
+            connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                var matching = getUsersByRoom(user.room);
+                for (var i = matching.length - 1; i >= 0; i--) {
+                   var match = matching[i];
+                   var entrance;
+                   if(result!= undefined &&result.length > 0) {
+                    entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                }
+                match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
             };
 
-        }
-    });
+        });
+
+    }else{
+        user = {};
+        user.room = getRoomById(message.roomId);
+        user.socket = socket;
+        user.group_id=0;
+        users.push(user);
+        emitRooms();
+            connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                var matching = getUsersByRoom(user.room);
+                for (var i = matching.length - 1; i >= 0; i--) {
+                   var match = matching[i];
+                   var entrance;
+                   if(result!= undefined &&result.length > 0) {
+                    entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                }
+                match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
+            };
+
+        });
+    }
+});
 
     socket.on('chat',function(message){
-        if(user !== undefined &&user.room != undefined){
+        if(user !== undefined &&user.room != undefined && user.username!=undefined){
+
             var matching = getUsersByRoom(user.room);
             var chat = sanitize(message.chat);
+            connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
             for (var i = matching.length - 1; i >= 0; i--) {
                 var match = matching[i];
                 match.socket.emit('chat',{"chat":chat,'user':user.username})
@@ -124,21 +154,21 @@ io.on('connection',function(socket){
         if(user != undefined && user.permissions.create)
         {
             addRoom(message,updateRooms(function(){
-                 emitRooms();
-            }));
+               emitRooms();
+           }));
         }
     });
 
     socket.on('deleteRoom',function(message){
         if(user != undefined && user.permissions.delete){
             deleteRoom(message,updateRooms(function(){
-                 emitRooms();
-            }));
+               emitRooms();
+           }));
         }
     });
 
     socket.on('leave room',function(){
-        if(user!==undefined){
+        if(user!==undefined && user.username!=undefined){
             var matching = getUsersByRoom(user.room);
             for (var i = matching.length - 1; i >= 0; i--) {
                 var match = matching[i];
@@ -146,25 +176,28 @@ io.on('connection',function(socket){
             };
             user.room=undefined;
             emitRooms();
-        }
-    });
+        }else if(user!==undefined ){
+          user.room=undefined;
+          emitRooms();
+      }
+  });
 
     var emitRooms=function(){
         
         updateRooms(function(){ 
             for (var i = rooms.length - 1; i >= 0; i--) {
-            var room = rooms[i];
-            var roomUsers =getUsersByRoom(room);
-            room.userCount=roomUsers.length || 0;
-            room.users=[];
-            for (var j = roomUsers.length - 1; j >= 0; j--) {
-                   room.users.push(roomUsers[j].username);
-               };   
-        };
+                var room = rooms[i];
+                var roomUsers =getUsersByRoom(room);
+                room.userCount=roomUsers.length || 0;
+                room.users=[];
+                for (var j = roomUsers.length - 1; j >= 0; j--) {
+                 room.users.push(roomUsers[j].username);
+             };   
+         };
          io.emit('rooms',{"rooms":rooms});});
     }
 
-   emitRooms();
+    emitRooms();
     setInterval(emitRooms,60000);
 
 
@@ -182,13 +215,13 @@ app.post('/reguser',function(req,res){
             req.session.username = req.body.username;
             res.json(result);
         }else{
-           var result = {};
-           result.status='errors';
-           result.errors = errors;
-           console.log(errors);
-           res.json(result);
-       }
-   });
+         var result = {};
+         result.status='errors';
+         result.errors = errors;
+         console.log(errors);
+         res.json(result);
+     }
+ });
 
 });
 
@@ -257,9 +290,9 @@ var isValidUser=function(data,callback){
             connection.query("SELECT `id` from "+ruleVal.table+" where "+ruleVal.column+" = '"+value+"'",function(err,result){
                 console.log(err);
                 if(result !== undefined && result.length>1)
-                   errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
-               setTimeout(function(){next(errors);},1);
-           });
+                 errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
+             setTimeout(function(){next(errors);},1);
+         });
         }
         else if(rule== 'matches'){
             if(value !== data[ruleVal])
@@ -282,14 +315,14 @@ var isValidUser=function(data,callback){
       if(j==0 && currentValidation == rules.length)
         validate(rule,ruleVal,dataKey,value,callback);
     else {
-     if(currentValidation  >= rules.length)
-     {
-       j--;
-       currentValidation=0;
-   }
-   validate(rule,ruleVal,dataKey,value,runNextValidation);
+       if(currentValidation  >= rules.length)
+       {
+         j--;
+         currentValidation=0;
+     }
+     validate(rule,ruleVal,dataKey,value,runNextValidation);
 
-}
+ }
 };
 var rules = Object.keys(config.register_validataions);
 for (var i = rules.length - 1; i >= 0; i--) {
@@ -338,36 +371,37 @@ var addRoom = function(data,callback){
 
 var deleteRoom = function(data,callback){
     connection.query('DELETE FROM rooms WHERE id = '+data.id,function(err,result){
-       if(err !== null)
-            console.error("At Add room: %s",err);
-        if(callback!== null && callback!== undefined)
-            callback();
-    });
+     if(err !== null)
+        console.error("At Add room: %s",err);
+    if(callback!== null && callback!== undefined)
+        callback();
+});
 }
 
 var updateRooms = function(callback){
     var query = connection.query("SELECT * FROM rooms",function(err,result){
-     if(err !== null)
+       if(err !== null)
         console.error("At Update room: %s",err);
     rooms=[];
     for (var i = result.length - 1; i >= 0; i--) {
         rooms.push(result[i]);
-        };
-        if(callback!== null && callback!== undefined)
-            callback();
+    };
+    if(callback!== null && callback!== undefined)
+        callback();
     
 });
 }
 
 var getUser = function(username,callback){
-   var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
+ var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
     var user =result[0];
     connection.query('SELECT * from groups where id = '+user.group_id,function(err,res){
-        console.error("At get User group : "+err);
+        if(err != null)
+            console.error("At get User group : "+err);
         user.permissions = JSON.parse(res[0].permissions);
-         callback(user);
+        callback(user);
     }); 
-   
+    
 });
 };
 
@@ -404,7 +438,7 @@ return function() {
 var getUserBySocket = function(socket){
     for (var i = users.length - 1; i >= 0; i--) {
         var user = users[i];
-        if(user.socket.id==socket.id)
+        if(user.socket!=undefined && user.socket.id==socket.id)
             return user;
     };
 }
@@ -421,7 +455,7 @@ var getUsersByRoom = function(room){
     var matching = [];
     for (var i = users.length - 1; i >= 0; i--) {
         var user = users[i];
-        if(user.room !== undefined && room !== undefined &&user.room.id==room.id)
+        if(user.room !== undefined && user.socket!=undefined && room !== undefined &&user.room.id==room.id)
             matching.push(user);
     };
     return matching;
@@ -437,3 +471,12 @@ var sanitize = function(chat){
     };
     return chat;
 }
+
+setInterval(function(){
+    for (var i = users.length - 1; i >= 0; i--) {
+        user = users[i];
+        if(user.socket == undefined){
+            users.splice(users.indexOf(user),1)
+        }
+    };
+},60000);

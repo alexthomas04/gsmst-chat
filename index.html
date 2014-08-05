@@ -32,7 +32,7 @@
 	<addroom style='display:none'></addroom>
 	<div room style="display:none;height:70%" id='room'  >
 
-		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large' id='leaveRoom'></span>
+		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large;float:left' id='leaveRoom'></span>
 		<div class="col-md-1">
 			<p ng-repeat='user in room.users'>{{user}}</p>
 		</div>
@@ -44,8 +44,8 @@
 		</div>
 		<form>
 			<div class='form-group' ng-show="state.permissions.chat">
-				<input class="form-control" ng-model='message'>
-				<button class="btn btn-primary" ng-click='chat()'>send</button>
+				<input class="form-control" ng-model='message' style="float:left">
+				<button class="btn btn-primary" ng-click='chat()' style="float:right">send</button>
 				</div>
 			</form>
 		
@@ -84,10 +84,10 @@
 	    		// next();
 	    		var target = $(event.target); 
 	    		if(!target.hasClass('btn')){
-		    		if(state.status==='Logged in')
-		    		{
+		    		
+		    		
 		    			socket.emit('join-room',{roomId:$(this).data('roomData').id});
-		    		}
+		    			$('login,#addRoom').slideUp();
 		    			var data = $(this).data('roomData');
 		    			$('#rooms').animate({left:"-100%"}, 500,function(){
 		    				$('#title').text(data.name);
@@ -98,8 +98,12 @@
 	    		}
 	    	});
 	    	$('#leaveRoom').click(function(event) {
-	    		$('#title').text('Welcome '+state.username+"!");
+		    	if(state.username!=undefined)
+		    		$('#title').text('Welcome '+state.username+"!");
+		    	else
+		    		$('#title').text('Welcome user! Please Login');
 	    		socket.emit('leave room',{})
+	    		$('login,#addRoom').slideDown();
 	    		$('#room').slideUp('400',function(){
 	    			$('#chatArea').text('');
 	    		});
