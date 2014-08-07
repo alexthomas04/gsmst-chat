@@ -31,7 +31,7 @@ connection.connect(function(err){console.log(err)});
 
 var rooms=[];
 var users=[];
-
+var classes=[];
 
 //routing
 
@@ -44,7 +44,10 @@ var loc = __dirname;
 loc = loc.split('\\');
 loc.pop(loc.length-1);
 loc = loc.join('\\');
+if(config.useDirName)
 app.use(express.static(loc));
+else
+app.use(express.static("/home/ec2-user/chat"));
 
 //io.use( socketSessions() );
 
@@ -93,9 +96,9 @@ io.on('connection',function(socket){
             connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
                 var matching = getUsersByRoom(user.room);
                 for (var i = matching.length - 1; i >= 0; i--) {
-                   var match = matching[i];
-                   var entrance;
-                   if(result!= undefined &&result.length > 0) {
+                 var match = matching[i];
+                 var entrance;
+                 if(result!= undefined &&result.length > 0) {
                     entrance = result[Math.floor(Math.random() * result.length)].entrance;
                 }
                 match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
@@ -103,102 +106,143 @@ io.on('connection',function(socket){
 
         });
 
-    }else{
-        user = {};
-        user.room = getRoomById(message.roomId);
-        user.socket = socket;
-        user.group_id=0;
-        users.push(user);
-        emitRooms();
+        }else{
+            user = {};
+            user.room = getRoomById(message.roomId);
+            user.socket = socket;
+            user.group_id=0;
+            users.push(user);
+            emitRooms();
             connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
                 var matching = getUsersByRoom(user.room);
                 for (var i = matching.length - 1; i >= 0; i--) {
-                   var match = matching[i];
-                   var entrance;
-                   if(result!= undefined &&result.length > 0) {
+                 var match = matching[i];
+                 var entrance;
+                 if(result!= undefined &&result.length > 0) {
                     entrance = result[Math.floor(Math.random() * result.length)].entrance;
                 }
                 match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
             };
 
         });
+        }
+    });
+
+socket.on('chat',function(message){
+    if(user !== undefined &&user.room != undefined && user.username!=undefined){
+
+        var matching = getUsersByRoom(user.room);
+        var chat = sanitize(message.chat);
+        connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
+        var response = {"chat":chat,'user':user.username};
+        var class=getClassById(user.group);
+        if(user.color != undefined){
+            response.color = user.color;
+        }
+        else if(class != undefined && class.color != undefined){
+            response.color=class.color;
+        }
+        for (var i = matching.length - 1; i >= 0; i--) {
+            var match = matching[i];
+            match.socket.emit('chat',response)
+        };
     }
 });
 
-    socket.on('chat',function(message){
-        if(user !== undefined &&user.room != undefined && user.username!=undefined){
-
-            var matching = getUsersByRoom(user.room);
-            var chat = sanitize(message.chat);
-            connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
-            for (var i = matching.length - 1; i >= 0; i--) {
-                var match = matching[i];
-                match.socket.emit('chat',{"chat":chat,'user':user.username})
-            };
-        }
-    });
-
-    socket.on('me',function(message){
-        var result={};
-        if(user==={})
-            result = {"status":"Not logged in"};
-        else{
-            result = {"status":"Logged in","username":user.username};
-            result.permissions = user.permissions;
-        }
-
-        socket.emit('me',result)
-    });
-
-    socket.on('addRoom',function(message){
-        if(user != undefined && user.permissions.create)
-        {
-            addRoom(message,updateRooms(function(){
-               emitRooms();
-           }));
-        }
-    });
-
-    socket.on('deleteRoom',function(message){
-        if(user != undefined && user.permissions.delete){
-            deleteRoom(message,updateRooms(function(){
-               emitRooms();
-           }));
-        }
-    });
-
-    socket.on('leave room',function(){
-        if(user!==undefined && user.username!=undefined){
-            var matching = getUsersByRoom(user.room);
-            for (var i = matching.length - 1; i >= 0; i--) {
-                var match = matching[i];
-                match.socket.emit('alert',{"alert":"left",'user':user.username})
-            };
-            user.room=undefined;
-            emitRooms();
-        }else if(user!==undefined ){
-          user.room=undefined;
-          emitRooms();
-      }
-  });
-
-    var emitRooms=function(){
-        
-        updateRooms(function(){ 
-            for (var i = rooms.length - 1; i >= 0; i--) {
-                var room = rooms[i];
-                var roomUsers =getUsersByRoom(room);
-                room.userCount=roomUsers.length || 0;
-                room.users=[];
-                for (var j = roomUsers.length - 1; j >= 0; j--) {
-                 room.users.push(roomUsers[j].username);
-             };   
-         };
-         io.emit('rooms',{"rooms":rooms});});
+socket.on('me',function(message){
+    var result={};
+    if(user==={})
+        result = {"status":"Not logged in"};
+    else{
+        result = {"status":"Logged in","username":user.username};
+        result.permissions = user.permissions;
     }
 
-    emitRooms();
-    setInterval(emitRooms,60000);
+    socket.emit('me',result)
+});
+
+socket.on('addRoom',function(message){
+    if(user != undefined && user.permissions.create)
+    {
+        addRoom(message,updateRooms(function(){
+         emitRooms();
+     }));
+    }
+});
+
+socket.on('deleteRoom',function(message){
+    if(user != undefined && user.permissions.delete){
+        deleteRoom(message,updateRooms(function(){
+         emitRooms();
+     }));
+    }
+});
+
+socket.on('leave room',function(){
+    if(user!==undefined && user.username!=undefined){
+        var matching = getUsersByRoom(user.room);
+        for (var i = matching.length - 1; i >= 0; i--) {
+            var match = matching[i];
+            match.socket.emit('alert',{"alert":"left",'user':user.username})
+        };
+        user.room=undefined;
+        emitRooms();
+    }else if(user!==undefined ){
+      user.room=undefined;
+      emitRooms();
+  }
+ });
+    socket.on('startTyping',function(){
+    if(user !=undefined && user.username != undefined && user.room != undefined){
+        var matching = getUsersByRoom(user.room);
+        for (var i = matching.length - 1; i >= 0; i--) {
+           var match =  matching[i];
+           if(match.socket != undefined)
+            match.socket.emit('startTyping',{'username':user.username});
+        }
+    }
+});
+socket.on('stopTyping',function(message){
+    if(user !=undefined && user.username != undefined && user.room != undefined){
+        var matching = getUsersByRoom(user.room);
+        for (var i = matching.length - 1; i >= 0; i--) {
+           var match =  matching[i];
+           if(match.socket != undefined)
+            match.socket.emit('stopTyping',{'username':user.username});
+        };
+    }
+    });
+
+
+
+var emitRooms=function(){
+    
+    updateRooms(function(){ 
+        for (var i = rooms.length - 1; i >= 0; i--) {
+            var room = rooms[i];
+            var roomUsers =getUsersByRoom(room);
+            room.guestCount=0;
+            room.userCount=0;
+            room.users=[];
+            for (var j = roomUsers.length - 1; j >= 0; j--) {
+                var user = roomUsers[j];
+                if(user!=undefined)
+                { 
+                    if(user.username!=undefined){
+                        room.users.push(user.username);
+                        room.userCount++;
+                    }
+                    else{
+                        room.guestCount++;
+                    }
+                }
+            };   
+        };
+        io.emit('rooms',{"rooms":rooms});});
+};
+
+emitRooms();
+setInterval(emitRooms,60000);
 
 
 });
@@ -215,13 +259,13 @@ app.post('/reguser',function(req,res){
             req.session.username = req.body.username;
             res.json(result);
         }else{
-         var result = {};
-         result.status='errors';
-         result.errors = errors;
-         console.log(errors);
-         res.json(result);
-     }
- });
+           var result = {};
+           result.status='errors';
+           result.errors = errors;
+           console.log(errors);
+           res.json(result);
+       }
+   });
 
 });
 
@@ -290,9 +334,9 @@ var isValidUser=function(data,callback){
             connection.query("SELECT `id` from "+ruleVal.table+" where "+ruleVal.column+" = '"+value+"'",function(err,result){
                 console.log(err);
                 if(result !== undefined && result.length>1)
-                 errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
-             setTimeout(function(){next(errors);},1);
-         });
+                   errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
+               setTimeout(function(){next(errors);},1);
+           });
         }
         else if(rule== 'matches'){
             if(value !== data[ruleVal])
@@ -315,14 +359,14 @@ var isValidUser=function(data,callback){
       if(j==0 && currentValidation == rules.length)
         validate(rule,ruleVal,dataKey,value,callback);
     else {
-       if(currentValidation  >= rules.length)
-       {
-         j--;
-         currentValidation=0;
-     }
-     validate(rule,ruleVal,dataKey,value,runNextValidation);
+     if(currentValidation  >= rules.length)
+     {
+       j--;
+       currentValidation=0;
+   }
+   validate(rule,ruleVal,dataKey,value,runNextValidation);
 
- }
+}
 };
 var rules = Object.keys(config.register_validataions);
 for (var i = rules.length - 1; i >= 0; i--) {
@@ -371,7 +415,7 @@ var addRoom = function(data,callback){
 
 var deleteRoom = function(data,callback){
     connection.query('DELETE FROM rooms WHERE id = '+data.id,function(err,result){
-     if(err !== null)
+       if(err !== null)
         console.error("At Add room: %s",err);
     if(callback!== null && callback!== undefined)
         callback();
@@ -380,7 +424,7 @@ var deleteRoom = function(data,callback){
 
 var updateRooms = function(callback){
     var query = connection.query("SELECT * FROM rooms",function(err,result){
-       if(err !== null)
+     if(err !== null)
         console.error("At Update room: %s",err);
     rooms=[];
     for (var i = result.length - 1; i >= 0; i--) {
@@ -393,7 +437,7 @@ var updateRooms = function(callback){
 }
 
 var getUser = function(username,callback){
- var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
+   var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
     var user =result[0];
     connection.query('SELECT * from groups where id = '+user.group_id,function(err,res){
         if(err != null)
@@ -406,13 +450,12 @@ var getUser = function(username,callback){
 };
 
 var hash=function(salt,raw){
-    return crypto.pbkdf2Sync(raw, salt, config.hash.itterations, config.hash.length).toString();
+    return crypto.pbkdf2Sync(raw, salt, config.hash.itterations, config.hash.length).toString('base64');
 };
 
 var login = function(username,password,callback){
     var query = connection.query('SELECT `username`,`password`,`salt` from users where username = "'+username+'"',function(err,result){
         if(result.length>0 && result[0].password === hash(result[0].salt,password)){
-            console.log('logged in');
             if(callback!== undefined)
                 callback(true);
         }
@@ -470,6 +513,18 @@ var sanitize = function(chat){
         chat = chat.replace(match,"<a target='_blank' href='"+match+"'>"+match+"</a>");
     };
     return chat;
+}
+
+var getClasses = function(){
+    connection.query('Select * from groups',function(err,result){classes=result;});
+};
+
+var getClassById(id){
+    for (var i = classes.length - 1; i >= 0; i--) {
+       var class= classes[i];
+       if(class.id==id)
+        return class;
+    };
 }
 
 setInterval(function(){

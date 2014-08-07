@@ -65,6 +65,7 @@ app.directive('room', [function () {
 				if(state.status==='Logged in')
 	    		{
 				socket.emit('chat',{'chat':scope.message});
+				socket.emit('stopTyping',{});
 				scope.message='';
 			}
 				

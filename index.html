@@ -3,7 +3,7 @@
 <head lang="en">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
+	<title>GSMST CHAT</title>
 	<script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
 	<script src="js/jquery-2.1.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
@@ -34,17 +34,19 @@
 
 		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large;float:left' id='leaveRoom'></span>
 		<div class="col-md-1">
-			<p ng-repeat='user in room.users'>{{user}}</p>
+			<strong>Users</strong></br>
+			<p ng-repeat='user in room.users'>{{user}}</p></br>
+			<strong>Guests: </strong>{{room.guestCount}}
 		</div>
 		<div class="well col-md-10" style="height:100%">
 			<div id='chatArea' style="overflow:auto;height:100%;width:100%">
-				
+				<p id='typing' style="position:absolute;bottom:0px">{{typing}}</p>
 			</div>
 			
 		</div>
 		<form>
 			<div class='form-group' ng-show="state.permissions.chat">
-				<input class="form-control" ng-model='message' style="float:left">
+				<input class="form-control" ng-model='message' style="float:left" id='chatbox'>
 				<button class="btn btn-primary" ng-click='chat()' style="float:right">send</button>
 				</div>
 			</form>
@@ -53,6 +55,9 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function() {
+			$('#chatbox').keypress(function(event) {
+				startTyping();
+			});
 			$('#addRoom').on('click', function(event) {
 				event.stopPropagation();
 				$('addroom').show();
@@ -105,7 +110,7 @@
 	    		socket.emit('leave room',{})
 	    		$('login,#addRoom').slideDown();
 	    		$('#room').slideUp('400',function(){
-	    			$('#chatArea').text('');
+	    			$('#chatArea').children().not('#typing').remove();
 	    		});
 	    		$('#rooms').animate({left:"0%"}, 500,function(){});
 
