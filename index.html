@@ -15,16 +15,43 @@
 	<style type="text/css">
 	#chatArea>p{
 		word-wrap: break-word;
+
+
+	}
+	::-webkit-scrollbar{
+		width: 15px;
+	}
+	::-webkit-scrollbar-track{
+		background-color:#4e5d6c;
+	}
+	::-webkit-scrollbar-thumb{
+		background-color: #2b3e50;
+	}
+	::-webkit-scrollbar-button{
+		background-color:#4e5d6c;
+	}
+	::-webkit-scrollbar-corner{
+		background-color:#4e5d6c;
+	}
+	body{
+
 	}
 	</style>
 	<script src='js/functions.js'></script>
 </head>
 <body ng-app="util" style="height:100%">
-	<h1 id='title'>WELCOME USER! Please Login</h1>
-	<login class='col-md-3' style='float:right;z-index:2'></login>
+	<div class="page-header">
+		<h1 id='title'>WELCOME USER! Please Login</h1>
+	</div>
+	<nav class='navbar navbar-default'>
+		<login class='col-md-3' style='float:right;z-index:2'></login>
+		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span>
+		<span class='glyphicon glyphicon-plus-sign' style='font-size:x-large' id='addRoom' ng-show="state.permissions.create"></span>
+	</nav>
+	
 	</br>
 	<div class='footer'>
-		<span class='glyphicon glyphicon-plus-sign' style='font-size:x-large' id='addRoom' ng-show="state.permissions.create"></span>
+
 	</div>
 	<div id='rooms' style="position:fixed;width:100%">
 		<room-button ng-repeat='room in rooms' ></room-button>
@@ -32,7 +59,7 @@
 	<addroom style='display:none'></addroom>
 	<div room style="display:none;height:70%" id='room'  >
 
-		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large;float:left' id='leaveRoom'></span>
+		
 		<div class="col-md-1">
 			<strong>Users</strong></br>
 			<p ng-repeat='user in room.users'>{{user}}</p></br>
@@ -45,9 +72,12 @@
 			
 		</div>
 		<form>
-			<div class='form-group' ng-show="state.permissions.chat">
-				<input class="form-control" ng-model='message' style="float:left" id='chatbox'>
-				<button class="btn btn-primary" ng-click='chat()' style="float:right">send</button>
+			<div  ng-show="state.permissions.chat">
+				<div class='col-md-11'>
+				<input class="form-control " ng-model='message' style="float:left" id='chatbox'>
+				
+				</div>
+				<button class="btn btn-primary col-md-1" ng-click='chat()' style="float:right">send</button>
 				</div>
 			</form>
 		
@@ -100,9 +130,11 @@
 		    				angular.element('#room').scope().room =data;
 		    				angular.element('#room').scope().$apply();
 		    			});
+		    			$('#leaveRoom').show();
 	    		}
 	    	});
 	    	$('#leaveRoom').click(function(event) {
+	    		$('#leaveRoom').hide();
 		    	if(state.username!=undefined)
 		    		$('#title').text('Welcome '+state.username+"!");
 		    	else

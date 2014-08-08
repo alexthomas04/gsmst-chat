@@ -34,7 +34,7 @@ socket.on('chat',function(message){
 	var $strong = $('<strong></strong>');
 	var $text =$('<span></span>');
 	$strong.text(message.user+" : ");
-	$text.text(message.chat);
+	$text.append(message.chat);
 	console.log(message);
 	if(message.color!=undefined){
 		var color = message.color;
