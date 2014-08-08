@@ -11,6 +11,7 @@
     <script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
+    <script src="js/jquery.cookie.js"></script>
     <script src="controllers/util.js"></script>
     <script src="controllers/register.js"></script>
    
@@ -50,5 +51,12 @@
             <button ng-click="submit()" class="btn btn-primary">Submit</button>
         </form>
     </div>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        if($.cookie('css')){
+                $('link').attr('href', $.cookie('css'));
+            }
+    });
+    </script>
 </body>
 </html>
