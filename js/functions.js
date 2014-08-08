@@ -5,7 +5,6 @@ var typing = {};
 socket.on('me',function(message){
 	state = message;
 	$('#title').text('Welcome '+state.username);
-	console.log(message);
 });
 
 socket.on('rooms',function(message){
@@ -25,13 +24,36 @@ socket.on('rooms',function(message){
 			scope.$apply();
 		}
 		
-		console.log(message);
+		
 	});
 });
 var height=10;
 socket.on('chat',function(message){
 	height+=100;
-	$('#chatArea').append('<p><strong>'+message.user+':</strong> '+message.chat+'<p>').scrollTop(height);
+	var $p = $('<p></p>');
+	var $strong = $('<strong></strong>');
+	var $text =$('<span></span>');
+	$strong.text(message.user+" : ");
+	$text.text(message.chat);
+	console.log(message);
+	if(message.color!=undefined){
+		var color = message.color;
+		if(color.nameColor!=undefined){
+			$strong.css('color', color.nameColor);
+		}
+		if(color.backgroundName!=undefined){
+			$strong.css('background-color',color.backgroundName);
+		}
+		if(color.textColor!=undefined){
+			$text.css('color', color.textColor);
+		}
+		if(color.textBackground!=undefined){
+			$text.css('background-color',color.textBackground);
+		}
+	}
+	$p.append($strong);
+	$p.append($text);
+	$('#chatArea').append($p).scrollTop(height);
 	if(document.body.className=='blurred'){
 		clearInterval(interval);
 		interval = setInterval(function(){
@@ -60,7 +82,7 @@ socket.on('alert',function(message){
 });
 
 socket.on('startTyping',function(message){
-	console.log(message);
+	
 	if(typing.whois==undefined)
 		typing.whois = [];
 	typing.whois.push(message.username);
@@ -113,7 +135,6 @@ var updateAngularTyping = function(){
 	 };
 	 if(typing.whois.length>0)
 	 	typing.text+=typing.whois[typing.whois.length-1]+(typing.whois.length>1?" are":" is")+" Typing";
-	 console.log(typing.whois);
 	var scope = angular.element('#typing').scope();
 	scope.typing= typing.text;
 	scope.$apply();

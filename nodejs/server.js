@@ -31,7 +31,7 @@ connection.connect(function(err){console.log(err)});
 
 var rooms=[];
 var users=[];
-var classes=[];
+var groups=[];
 
 //routing
 
@@ -45,9 +45,9 @@ loc = loc.split('\\');
 loc.pop(loc.length-1);
 loc = loc.join('\\');
 if(config.useDirName)
-app.use(express.static(loc));
+    app.use(express.static(loc));
 else
-app.use(express.static("/home/ec2-user/chat"));
+    app.use(express.static("/home/ec2-user/chat"));
 
 //io.use( socketSessions() );
 
@@ -135,12 +135,12 @@ socket.on('chat',function(message){
         var chat = sanitize(message.chat);
         connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
         var response = {"chat":chat,'user':user.username};
-        var class=getClassById(user.group);
-        if(user.color != undefined){
-            response.color = user.color;
+        var group=getGroupById(user.group_id);
+        if(user.attributes != undefined&&user.attributes != '' && JSON.parse(user.attributes).color != undefined){
+            response.color = JSON.parse(user.attributes).color;
         }
-        else if(class != undefined && class.color != undefined){
-            response.color=class.color;
+        else if(group != undefined && group.attributes!=undefined && group.attributes!='' && JSON.parse(group.attributes).color != undefined){
+            response.color=JSON.parse(group.attributes).color;
         }
         for (var i = matching.length - 1; i >= 0; i--) {
             var match = matching[i];
@@ -191,16 +191,16 @@ socket.on('leave room',function(){
       user.room=undefined;
       emitRooms();
   }
- });
-    socket.on('startTyping',function(){
+});
+socket.on('startTyping',function(){
     if(user !=undefined && user.username != undefined && user.room != undefined){
         var matching = getUsersByRoom(user.room);
         for (var i = matching.length - 1; i >= 0; i--) {
            var match =  matching[i];
            if(match.socket != undefined)
             match.socket.emit('startTyping',{'username':user.username});
-        }
     }
+}
 });
 socket.on('stopTyping',function(message){
     if(user !=undefined && user.username != undefined && user.room != undefined){
@@ -209,14 +209,14 @@ socket.on('stopTyping',function(message){
            var match =  matching[i];
            if(match.socket != undefined)
             match.socket.emit('stopTyping',{'username':user.username});
-        };
-    }
-    });
+    };
+}
+});
 
 
 
 var emitRooms=function(){
-    
+
     updateRooms(function(){ 
         for (var i = rooms.length - 1; i >= 0; i--) {
             var room = rooms[i];
@@ -515,17 +515,18 @@ var sanitize = function(chat){
     return chat;
 }
 
-var getClasses = function(){
-    connection.query('Select * from groups',function(err,result){classes=result;});
+var getGroups = function(){
+    connection.query('Select * from groups',function(err,result){groups=result;});
 };
+getGroups();
 
-var getClassById(id){
-    for (var i = classes.length - 1; i >= 0; i--) {
-       var class= classes[i];
-       if(class.id==id)
-        return class;
+var getGroupById=function(id){
+    for (var i = groups.length - 1; i >= 0; i--) {
+       var group= groups[i];
+       if(group.id==id)
+        return group;
     };
-}
+};
 
 setInterval(function(){
     for (var i = users.length - 1; i >= 0; i--) {
