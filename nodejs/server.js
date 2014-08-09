@@ -90,42 +90,66 @@ io.on('connection',function(socket){
     });
 
     socket.on('join-room',function(message){
-        if(user != undefined && user.room == undefined){
-            user.room = getRoomById(message.roomId);
-            emitRooms();
-            connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
-                var matching = getUsersByRoom(user.room);
-                for (var i = matching.length - 1; i >= 0; i--) {
-                 var match = matching[i];
-                 var entrance;
-                 if(result!= undefined &&result.length > 0) {
-                    entrance = result[Math.floor(Math.random() * result.length)].entrance;
+        var canEnterRoom=function(user,room){
+            if(user != undefined && user.permissions!=undefined && user.permissions.god)
+                return true;
+            if(room.requirements){
+                if(room.requirements.rank){
+
+                    if(user.permissions==undefined || !(user.permissions[room.requirements.rank]))
+                        return false;
+
+                    }
+                 if(room.requirements.hasPassword && message.password!=room.requirements.password){
+                        return false;
                 }
-                match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
-            };
+            }
+            return true;
 
-        });
-
-        }else{
-            user = {};
-            user.room = getRoomById(message.roomId);
-            user.socket = socket;
-            user.group_id=0;
-            users.push(user);
-            emitRooms();
-            connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
-                var matching = getUsersByRoom(user.room);
-                for (var i = matching.length - 1; i >= 0; i--) {
-                 var match = matching[i];
-                 var entrance;
-                 if(result!= undefined &&result.length > 0) {
-                    entrance = result[Math.floor(Math.random() * result.length)].entrance;
-                }
-                match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
-            };
-
-        });
         }
+
+
+        var room = getRoomById(message.roomId);
+        if(canEnterRoom(user,room)){
+            if(user != undefined && user.room == undefined){
+                user.room = room;
+                emitRooms();
+                connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                    var matching = getUsersByRoom(user.room);
+                    for (var i = matching.length - 1; i >= 0; i--) {
+                       var match = matching[i];
+                       var entrance;
+                       if(result!= undefined &&result.length > 0) {
+                        entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                    }
+                    match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
+                };
+
+            });
+            }else{
+                user = {};
+                user.room = getRoomById(message.roomId);
+                user.socket = socket;
+                user.group_id=0;
+                users.push(user);
+                emitRooms();
+                connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                    var matching = getUsersByRoom(user.room);
+                    for (var i = matching.length - 1; i >= 0; i--) {
+                       var match = matching[i];
+                       var entrance;
+                       if(result!= undefined &&result.length > 0) {
+                        entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                    }
+                    match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
+                };
+
+            });
+            }
+        }else{
+            socket.emit('alert',{'alert':'invalid password'});
+        }
+        
     });
 
 socket.on('chat',function(message){
@@ -165,16 +189,17 @@ socket.on('addRoom',function(message){
     if(user != undefined && user.permissions.create)
     {
         addRoom(message,updateRooms(function(){
-         emitRooms();
-     }));
+           emitRooms();
+       }));
     }
 });
 
 socket.on('deleteRoom',function(message){
-    if(user != undefined && user.permissions.delete){
+    var room = getRoomById(message.id);
+    if(user != undefined && user.permissions.delete && room.requirements.isDeleteable){
         deleteRoom(message,updateRooms(function(){
-         emitRooms();
-     }));
+           emitRooms();
+       }));
     }
 });
 
@@ -196,8 +221,8 @@ socket.on('startTyping',function(){
     if(user !=undefined && user.username != undefined && user.room != undefined){
         var matching = getUsersByRoom(user.room);
         for (var i = matching.length - 1; i >= 0; i--) {
-           var match =  matching[i];
-           if(match.socket != undefined)
+         var match =  matching[i];
+         if(match.socket != undefined)
             match.socket.emit('startTyping',{'username':user.username});
     }
 }
@@ -206,8 +231,8 @@ socket.on('stopTyping',function(message){
     if(user !=undefined && user.username != undefined && user.room != undefined){
         var matching = getUsersByRoom(user.room);
         for (var i = matching.length - 1; i >= 0; i--) {
-           var match =  matching[i];
-           if(match.socket != undefined)
+         var match =  matching[i];
+         if(match.socket != undefined)
             match.socket.emit('stopTyping',{'username':user.username});
     };
 }
@@ -218,6 +243,7 @@ socket.on('stopTyping',function(message){
 var emitRooms=function(){
 
     updateRooms(function(){ 
+        var tempRooms=[];
         for (var i = rooms.length - 1; i >= 0; i--) {
             var room = rooms[i];
             var roomUsers =getUsersByRoom(room);
@@ -237,8 +263,14 @@ var emitRooms=function(){
                     }
                 }
             };   
+            //clone
+            var tempRoom =JSON.parse(JSON.stringify(room));
+            if(tempRoom.requirements != undefined && tempRoom.requirements.password != undefined)
+                delete tempRoom.requirements.password;
+            tempRooms.push(tempRoom);
+
         };
-        io.emit('rooms',{"rooms":rooms});});
+        io.emit('rooms',{"rooms":tempRooms});});
 };
 
 emitRooms();
@@ -246,7 +278,6 @@ setInterval(emitRooms,60000);
 
 
 });
-
 
 
 app.post('/reguser',function(req,res){
@@ -259,13 +290,13 @@ app.post('/reguser',function(req,res){
             req.session.username = req.body.username;
             res.json(result);
         }else{
-           var result = {};
-           result.status='errors';
-           result.errors = errors;
-           console.log(errors);
-           res.json(result);
-       }
-   });
+         var result = {};
+         result.status='errors';
+         result.errors = errors;
+         console.log(errors);
+         res.json(result);
+     }
+ });
 
 });
 
@@ -334,9 +365,9 @@ var isValidUser=function(data,callback){
             connection.query("SELECT `id` from "+ruleVal.table+" where "+ruleVal.column+" = '"+value+"'",function(err,result){
                 console.log(err);
                 if(result !== undefined && result.length>1)
-                   errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
-               setTimeout(function(){next(errors);},1);
-           });
+                 errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
+             setTimeout(function(){next(errors);},1);
+         });
         }
         else if(rule== 'matches'){
             if(value !== data[ruleVal])
@@ -359,14 +390,14 @@ var isValidUser=function(data,callback){
       if(j==0 && currentValidation == rules.length)
         validate(rule,ruleVal,dataKey,value,callback);
     else {
-     if(currentValidation  >= rules.length)
-     {
-       j--;
-       currentValidation=0;
-   }
-   validate(rule,ruleVal,dataKey,value,runNextValidation);
+       if(currentValidation  >= rules.length)
+       {
+         j--;
+         currentValidation=0;
+     }
+     validate(rule,ruleVal,dataKey,value,runNextValidation);
 
-}
+ }
 };
 var rules = Object.keys(config.register_validataions);
 for (var i = rules.length - 1; i >= 0; i--) {
@@ -405,7 +436,14 @@ var insertUser = function(userData){
 };
 
 var addRoom = function(data,callback){
-    var query = connection.query('INSERT INTO rooms SET ?',{"name":data.name},function(err,result){
+    var requirements = {};
+    requirements.hasPassword = data.hasPassword;
+    if(data.hasPassword)
+        requirements.password = data.password;
+    requirements.isDeleteable = data.isDeleteable;
+    if(data.rank !== 'Guest')
+        requirements.rank=data.rank;
+    var query = connection.query('INSERT INTO rooms SET ?',{"name":data.name,'requirements':JSON.stringify(requirements)},function(err,result){
         if(err !== null)
             console.error("At Add room: %s",err);
         if(callback!== null && callback!== undefined)
@@ -415,7 +453,7 @@ var addRoom = function(data,callback){
 
 var deleteRoom = function(data,callback){
     connection.query('DELETE FROM rooms WHERE id = '+data.id,function(err,result){
-       if(err !== null)
+     if(err !== null)
         console.error("At Add room: %s",err);
     if(callback!== null && callback!== undefined)
         callback();
@@ -424,10 +462,11 @@ var deleteRoom = function(data,callback){
 
 var updateRooms = function(callback){
     var query = connection.query("SELECT * FROM rooms",function(err,result){
-     if(err !== null)
+       if(err !== null)
         console.error("At Update room: %s",err);
     rooms=[];
     for (var i = result.length - 1; i >= 0; i--) {
+        result[i].requirements = JSON.parse(result[i].requirements);
         rooms.push(result[i]);
     };
     if(callback!== null && callback!== undefined)
@@ -437,7 +476,7 @@ var updateRooms = function(callback){
 }
 
 var getUser = function(username,callback){
-   var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
+ var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
     var user =result[0];
     connection.query('SELECT * from groups where id = '+user.group_id,function(err,res){
         if(err != null)
@@ -522,10 +561,10 @@ getGroups();
 
 var getGroupById=function(id){
     for (var i = groups.length - 1; i >= 0; i--) {
-       var group= groups[i];
-       if(group.id==id)
+     var group= groups[i];
+     if(group.id==id)
         return group;
-    };
+};
 };
 
 setInterval(function(){

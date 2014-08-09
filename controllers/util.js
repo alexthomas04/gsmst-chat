@@ -29,16 +29,35 @@ app.directive('login', [function () {
 
 app.directive('addroom', [function () {
 	return {
-		restrict: 'E',
-		templateUrl:'templates/addRoom.html',
+		restrict: 'A',
 		link: function (scope, iElement, iAttrs) {
+			var deleteAble = true;
+			scope.reqRank='Guest';
 			scope.addRoom=function(){
 				var data = {};
 				data.name = scope.roomName;
+				if(scope.roomPassword != "" && scope.roomPassword!=undefined){
+					data.hasPassword=true;
+					data.password=scope.roomPassword;
+				}
+				else{
+					data.hasPassword=false;
+				}
+				data.rank=scope.reqRank;
+				data.isDeleteable = deleteAble;
+
 				socket.emit('addRoom',data);
+
+				//reset form
 				scope.roomName = "";
-				$(iElement).hide();
+				deleteAble = true;
+				$('isDeleteable').addClass('active');
+				scope.roomPassword='';
+
 			}
+			scope.toggleDelete=function(){
+				deleteAble = !deleteAble;
+			};
 		}
 	};
 }]);
@@ -51,6 +70,19 @@ app.directive('roomButton', [function () {
 			$(iElement).data('roomData',scope.room);
 			scope.deleteRoom = function(id){
 				socket.emit('deleteRoom',{"id":id});
+			}
+			scope.enterRoom=function(){
+				if(canEnterRoom(state,scope.room)){
+				socket.emit('join-room',{roomId:scope.room.id,password:scope.roomPassword});
+	    			$('login,#addRoomButton').slideUp();
+	    			$('#rooms').animate({left:"-100%"}, 500,function(){
+	    				$('#title').text(scope.room.name);
+	    				$('#room').slideDown();
+	    				angular.element('#room').scope().room =scope.room;
+	    				angular.element('#room').scope().$apply();
+	    			});
+	    			$('#leaveRoom').show();
+	    		}
 			}
 		}
 	};

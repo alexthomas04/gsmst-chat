@@ -3,7 +3,7 @@
 <head lang="en">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>GSMST CHAT</title>
+	<title>Homework</title>
 	<script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
 	<script src="js/jquery-2.1.1.min.js"></script>
 	<script src="js/jquery.cookie.js"></script>
@@ -15,29 +15,29 @@
 
 	<script src="controllers/util.js"></script>
 	<style type="text/css">
-	#chatArea>p{
-		word-wrap: break-word;
+		#chatArea>p{
+			word-wrap: break-word;
 
 
-	}
-	::-webkit-scrollbar{
-		width: 15px;
-	}
-	::-webkit-scrollbar-track{
-		background-color:#4e5d6c;
-	}
-	::-webkit-scrollbar-thumb{
-		background-color: #2b3e50;
-	}
-	::-webkit-scrollbar-button{
-		background-color:#4e5d6c;
-	}
-	::-webkit-scrollbar-corner{
-		background-color:#4e5d6c;
-	}
-	body{
+		}
+		::-webkit-scrollbar{
+			width: 15px;
+		}
+		::-webkit-scrollbar-track{
+			background-color:#4e5d6c;
+		}
+		::-webkit-scrollbar-thumb{
+			background-color: #2b3e50;
+		}
+		::-webkit-scrollbar-button{
+			background-color:#4e5d6c;
+		}
+		::-webkit-scrollbar-corner{
+			background-color:#4e5d6c;
+		}
+		body{
 
-	}
+		}
 	</style>
 	<script src='js/functions.js'></script>
 </head>
@@ -47,7 +47,7 @@
 	</div>
 	<nav class='navbar navbar-default'>
 		<login class='col-md-3' style='float:right;z-index:2'></login>
-		<span class='glyphicon glyphicon-plus-sign' style='font-size:x-large' id='addRoom' ng-show="state.permissions.create"></span>
+		<span class='glyphicon glyphicon-plus-sign' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span>
 		<div class="btn-group" style="float:right">
 			<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>Change Style<span class='caret'></span></button>
 			<ul class="dropdown-menu" role='menu' id="styleSelect">
@@ -63,113 +63,121 @@
 		<span class='glyphicon glyphicon-circle-arrow-right'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span>
 		
 	</nav>
-	
-	</br>
-	<div class='footer'>
-
-	</div>
 	<div id='rooms' style="position:fixed;width:100%">
 		<room-button ng-repeat='room in rooms' ></room-button>
 	</div>
-	<addroom style='display:none'></addroom>
-	<div room style="display:none;height:70%" id='room'  >
-
-		
-		<div class="col-md-1">
-			<strong>Users</strong></br>
-			<p ng-repeat='user in room.users'>{{user}}</p></br>
-			<strong>Guests: </strong>{{room.guestCount}}
-		</div>
-		<div class="well col-md-10" style="height:100%">
-			<div id='chatArea' style="overflow:auto;height:100%;width:100%">
-				<p id='typing' style="position:absolute;bottom:0px">{{typing}}</p>
-			</div>
-			
-		</div>
-		<form>
-			<div  ng-show="state.permissions.chat">
-				<div class='col-md-11'>
-				<input class="form-control " ng-model='message' style="float:left" id='chatbox'>
-				
+	<div class="modal fade" id="addRoom">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Add Room</h4>
 				</div>
-				<button class="btn btn-primary col-md-1" ng-click='chat()' style="float:right">send</button>
+				<div class="modal-body" addRoom>
+					<div class="form-group">
+						<label for="roomName">Room Name</label>
+						<input ng-model='roomName' class="form-control" id='roomName'>
+					</div>
+					<div class="form-group">
+						<label for="roomPassword">Room Password</label>
+						<input ng-model='roomPassword' class="form-control" id='roomPassword' placeholder='Leave Blank for no Password'>
+					</div>
+					<button type="button" class="btn btn-success active" data-toggle='button' ng-click="toggleDelete()" id='isDeleteable'>Is Deleteable</button></br>
+					<label style="font-size:large">Permissons</label >
+						<div class="btn-group" style="float:right">
+							<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>{{reqRank}}<span class='caret'></span></button>
+							<ul class="dropdown-menu" role='menu' id="">
+								<li><a href="#" ng-click="reqRank = 'Guest'">Guest</a></li>
+								<li><a href="#" ng-click="reqRank = 'User'">User</a></li>
+								<li><a href="#" ng-click="reqRank = 'Mod'">Mod</a></li>
+								<li><a href="#" ng-click="reqRank = 'Admin'">Admin</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" ng-click='addRoom()' class="btn btn-primary"  data-dismiss="modal">Submit</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div room style="display:none;height:70%" id='room'  >
+
+
+			<div class="col-md-1">
+				<strong>Users</strong></br>
+				<p ng-repeat='user in room.users'>{{user}}</p></br>
+				<strong>Guests: </strong>{{room.guestCount}}
+			</div>
+			<div class="well col-md-10" style="height:100%">
+				<div id='chatArea' style="overflow:auto;height:100%;width:100%">
+					<p id='typing' style="position:absolute;bottom:0px">{{typing}}</p>
+				</div>
+
+			</div>
+			<form>
+				<div  ng-show="state.permissions.chat">
+					<div class='col-md-11'>
+						<input class="form-control " ng-model='message' style="float:left" id='chatbox'>
+
+					</div>
+					<button class="btn btn-primary col-md-1" ng-click='chat()' style="float:right">send</button>
 				</div>
 			</form>
-		
 
-	</div>
-	<script type="text/javascript">
-		$(document).ready(function() {
-			$('#styleSelect>li>a').click(function(event) {
-				$('link').attr('href', $(this).attr('rel'),{path:'/'});
-				$.cookie('css',$(this).attr('rel'));
-			});
-			if($.cookie('css')){
-				$('link').attr('href', $.cookie('css'));
-			}
-			$('#chatbox').keypress(function(event) {
-				startTyping();
-			});
-			$('#addRoom').on('click', function(event) {
-				event.stopPropagation();
-				$('addroom').show();
-			});
-			$('addroom').on('click',function(event){
-				event.stopPropagation();
-			});
-			$('html').on('click', function(event) {
-				$('addroom').hide();
-			});
-			$(document).on('click','room-button',function(event) {
 
-	    		// var buttons = $('room-button');
-	    		// var id=0;
-	    		// var animateButton = function(button,callback){
-	    		// 	$(button).css('position','fixed').animate({
-	    		// 		left:"-=200px"},
-	    		// 		'500', function() {
-	    		// 		callback();
-	    		// 	});
-	    		// };
-	    		// var next=function(){
-	    		// 	if(id<buttons.length){
-	    		// 		var button = buttons[id];
-	    		// 		id++;
-	    		// 		animateButton(button,next);
-	    		// 	}
-	    		// };
-	    		// next();
-	    		var target = $(event.target); 
-	    		if(!target.hasClass('btn')){
-		    		
-		    		
-		    			socket.emit('join-room',{roomId:$(this).data('roomData').id});
-		    			$('login,#addRoom').slideUp();
-		    			var data = $(this).data('roomData');
-		    			$('#rooms').animate({left:"-100%"}, 500,function(){
-		    				$('#title').text(data.name);
-		    				$('#room').slideDown();
-		    				angular.element('#room').scope().room =data;
-		    				angular.element('#room').scope().$apply();
-		    			});
-		    			$('#leaveRoom').show();
-	    		}
-	    	});
-	    	$('#leaveRoom').click(function(event) {
-	    		$('#leaveRoom').hide();
-		    	if(state.username!=undefined)
-		    		$('#title').text('Welcome '+state.username+"!");
-		    	else
-		    		$('#title').text('Welcome user! Please Login');
-	    		socket.emit('leave room',{})
-	    		$('login,#addRoom').slideDown();
-	    		$('#room').slideUp('400',function(){
-	    			$('#chatArea').children().not('#typing').remove();
-	    		});
-	    		$('#rooms').animate({left:"0%"}, 500,function(){});
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('#styleSelect>li>a').click(function(event) {
+					$('link').attr('href', $(this).attr('rel'),{path:'/'});
+					$.cookie('css',$(this).attr('rel'));
+				});
+				if($.cookie('css')){
+					$('link').attr('href', $.cookie('css'));
+				}
+				$('#chatbox').keypress(function(event) {
+					startTyping();
+				});
+				$(document).on('click','room-button',function(event) {
 
-	    	});
-		});
-	</script>
+
+					var target = $(event.target); 
+					if(!target.hasClass('btn')){
+						var data = $(this).data('roomData');
+						console.log(data);
+						if(canEnterRoom(state,data)){
+							if(!(data.requirements!=undefined && data.requirements.hasPassword)){
+								socket.emit('join-room',{roomId:$(this).data('roomData').id});
+								$('login,#addRoomButton').slideUp();
+
+								$('#rooms').animate({left:"-100%"}, 500,function(){
+									$('#title').text(data.name);
+									$('#room').slideDown();
+									angular.element('#room').scope().room =data;
+									angular.element('#room').scope().$apply();
+								});
+								$('#leaveRoom').show();
+							}else{angular.element(this).scope().showPasswordInput=true;
+								angular.element(this).scope().$apply();}
+							}
+						}
+					});
+				$('#leaveRoom').click(function(event) {
+					$('#leaveRoom').hide();
+					if(state.username!=undefined)
+						$('#title').text('Welcome '+state.username+"!");
+					else
+						$('#title').text('Welcome user! Please Login');
+					socket.emit('leave room',{})
+					$('login,#addRoomButton').slideDown();
+					$('#room').slideUp('400',function(){
+						$('#chatArea').children().not('#typing').remove();
+					});
+					$('#rooms').animate({left:"0%"}, 500,function(){});
+
+				});
+			});
+</script>
 </body>
 </html>

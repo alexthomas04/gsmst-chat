@@ -12,6 +12,7 @@ socket.on('rooms',function(message){
 		var scope = angular.element('#rooms').scope();
 		scope.rooms = message.rooms;
 		scope.$apply();
+		// if in room update current room
 		scope = angular.element('#room').scope();
 		var id = (scope.room||{}).id;
 		if(id!=undefined)
@@ -57,10 +58,10 @@ socket.on('chat',function(message){
 	if(document.body.className=='blurred'){
 		clearInterval(interval);
 		interval = setInterval(function(){
-			if(document.title=="New Message"){
+			if(document.title=="New Assignment"){
 				document.title='You have'
 			}else{
-				document.title='New Message';
+				document.title='New Assignment';
 			}
 		},1000);
 	}
@@ -77,8 +78,10 @@ socket.on('alert',function(message){
 	}
 	else if(message.alert=='left'){
 		text = message.user+' left room';
+	}else if(message.alert=='invalid password'){
+		text = '<span class="text-danger">Invalid Room Password</span>';
 	}
-	$('#chatArea').append($('<footer></footer>').text(text));
+	$('#chatArea').append($('<footer></footer>').append(text));
 });
 
 socket.on('startTyping',function(message){
@@ -99,7 +102,7 @@ function onBlur() {
 function onFocus(){
 	document.body.className = 'focused';
 	clearInterval(interval);
-	document.title='GSMST CHAT';
+	document.title='Homework';
 };
 
 if (/*@cc_on!@*/false) { // check for Internet Explorer
@@ -138,4 +141,17 @@ var updateAngularTyping = function(){
 	var scope = angular.element('#typing').scope();
 	scope.typing= typing.text;
 	scope.$apply();
+}
+var canEnterRoom=function(user,room){
+	if(user.permissions!=undefined && user.permissions.god)
+		return true;
+	if(room.requirements){
+		if(room.requirements.rank){
+
+			if(user.permissions==undefined || !(user.permissions[room.requirements.rank]))
+				return false;
+		}
+	}
+	return true;
+
 }
