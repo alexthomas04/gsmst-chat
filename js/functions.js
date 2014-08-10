@@ -34,9 +34,12 @@ socket.on('chat',function(message){
 	var $p = $('<p></p>');
 	var $strong = $('<strong></strong>');
 	var $text =$('<span></span>');
+	var $small = $('<small></small>');
+	if(message.rank != 'user')
+		$small.append('['+message.rank+'] ');
 	$strong.text(message.user+" : ");
 	$text.append(message.chat);
-	console.log(message);
+	
 	if(message.color!=undefined){
 		var color = message.color;
 		if(color.nameColor!=undefined){
@@ -52,6 +55,7 @@ socket.on('chat',function(message){
 			$text.css('background-color',color.textBackground);
 		}
 	}
+	$p.append($small);
 	$p.append($strong);
 	$p.append($text);
 	$('#chatArea').append($p).scrollTop(height);
@@ -79,7 +83,7 @@ socket.on('alert',function(message){
 	else if(message.alert=='left'){
 		text = message.user+' left room';
 	}else if(message.alert=='invalid password'){
-		text = '<span class="text-danger">Invalid Room Password</span>';
+		text = '<span class="alert alert-danger">Invalid Room Password</span>';
 	}
 	$('#chatArea').append($('<footer></footer>').append(text));
 });
@@ -94,6 +98,33 @@ socket.on('startTyping',function(message){
 socket.on('stopTyping',function(message){
 	typing.whois.splice(typing.whois.indexOf(message.username),1);
 	updateAngularTyping();
+});
+
+socket.on('file',function(message){
+	var $p = $('<p></p>');
+	var $strong = $('<strong></strong>');
+	var $img = $('<img></img>');
+	$img.attr('src',message.file);
+	$img.addClass('drag_image');
+	$strong.text(message.user+" : ");
+	if(message.color!=undefined){
+		var color = message.color;
+		if(color.nameColor!=undefined){
+			$strong.css('color', color.nameColor);
+		}
+		if(color.backgroundName!=undefined){
+			$strong.css('background-color',color.backgroundName);
+		}
+		if(color.textColor!=undefined){
+			$text.css('color', color.textColor);
+		}
+		if(color.textBackground!=undefined){
+			$text.css('background-color',color.textBackground);
+		}
+	}
+	$p.append($strong);
+	$p.append($img);
+	$('#chatArea').append($p).scrollTop(height);
 });
 
 function onBlur() {

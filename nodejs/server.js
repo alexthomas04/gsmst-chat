@@ -12,14 +12,15 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var socketSessions = require('socket.io-handshake');
-var io = require('socket.io')(server);
+
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+//var RedisStore = require('connect-redis')(session);
 var validator = require('validator');
-
+var io = require('socket.io')(server);
 
 
 
@@ -38,8 +39,9 @@ var groups=[];
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser());
 app.use( bodyParser.json() );
-var sessionStore = new session.MemoryStore;
-app.use(session({secret:'gsmstchat',store:sessionStore}));
+//var sessionStore = new session.MemoryStore;
+//var sessionStore = new RedisStore();
+//app.use(session({secret:'gsmstchat',store:sessionStore}));
 var loc = __dirname;
 loc = loc.split('\\');
 loc.pop(loc.length-1);
@@ -49,7 +51,7 @@ if(config.useDirName)
 else
     app.use(express.static("/home/ec2-user/chat"));
 
-//io.use( socketSessions() );
+//io.use( socketSessions({store: sessionStore, key:'sid', secret:'gsmstchat', parser:cookieParser()}));
 
 server.listen(port,function(){
     console.log("Server listening at port %d",port);
@@ -166,6 +168,7 @@ socket.on('chat',function(message){
         else if(group != undefined && group.attributes!=undefined && group.attributes!='' && JSON.parse(group.attributes).color != undefined){
             response.color=JSON.parse(group.attributes).color;
         }
+        response.rank=group.name;
         for (var i = matching.length - 1; i >= 0; i--) {
             var match = matching[i];
             match.socket.emit('chat',response)
@@ -236,6 +239,26 @@ socket.on('stopTyping',function(message){
             match.socket.emit('stopTyping',{'username':user.username});
     };
 }
+});
+
+socket.on('sendFile',function(message){
+    if(user !== undefined &&user.room != undefined && user.username!=undefined){
+
+        var matching = getUsersByRoom(user.room);
+        //connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
+        var response = {"file":message,'user':user.username};
+        var group=getGroupById(user.group_id);
+        if(user.attributes != undefined&&user.attributes != '' && JSON.parse(user.attributes).color != undefined){
+            response.color = JSON.parse(user.attributes).color;
+        }
+        else if(group != undefined && group.attributes!=undefined && group.attributes!='' && JSON.parse(group.attributes).color != undefined){
+            response.color=JSON.parse(group.attributes).color;
+        }
+        for (var i = matching.length - 1; i >= 0; i--) {
+            var match = matching[i];
+            match.socket.emit('file',response);
+        };
+    }
 });
 
 
@@ -549,7 +572,11 @@ var sanitize = function(chat){
     var matches = chat.match(reg_exUrl) || [];
     for (var i = matches.length - 1; i >= 0; i--) {
         var match = matches[i];
-        chat = chat.replace(match,"<a target='_blank' href='"+match+"'>"+match+"</a>");
+        var image_regex = new RegExp(/(png|jpg|jpeg|gif)$/g);
+        if(match.match(image_regex))
+            chat = chat.replace(match,"<img src='"+match+"'></img>");
+        else
+             chat = chat.replace(match,"<a target='_blank' href='"+match+"'>"+match+"</a>");
     };
     return chat;
 }
