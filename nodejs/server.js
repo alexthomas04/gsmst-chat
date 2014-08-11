@@ -39,9 +39,9 @@ var groups=[];
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser());
 app.use( bodyParser.json() );
-//var sessionStore = new session.MemoryStore;
+var sessionStore = new session.MemoryStore;
 //var sessionStore = new RedisStore();
-//app.use(session({secret:'gsmstchat',store:sessionStore}));
+app.use(session({secret:'gsmstchat',store:sessionStore}));
 var loc = __dirname;
 loc = loc.split('\\');
 loc.pop(loc.length-1);
@@ -334,7 +334,7 @@ app.post('/login',function(req,res){
     var body = req.body;
     login(body.username,body.password,function(sucessful){
         if(sucessful){
-            req.session.username=body.username;
+            //req.session.username=body.username;
             res.json({"status":"OK"});
         }
         else{
@@ -512,20 +512,27 @@ var getUser = function(username,callback){
 };
 
 var hash=function(salt,raw){
+
     return crypto.pbkdf2Sync(raw, salt, config.hash.itterations, config.hash.length).toString('base64');
 };
 
 var login = function(username,password,callback){
-    var query = connection.query('SELECT `username`,`password`,`salt` from users where username = "'+username+'"',function(err,result){
-        if(result.length>0 && result[0].password === hash(result[0].salt,password)){
-            if(callback!== undefined)
-                callback(true);
-        }
-        else{
-            if(callback!== undefined)
-                callback(false);
-        }
-    });
+    if(password!='' && password!=undefined) {
+        var query = connection.query('SELECT `username`,`password`,`salt` from users where username = "' + username + '"', function (err, result) {
+            if (result.length > 0 && result[0].password === hash(result[0].salt, password)) {
+                if (callback !== undefined)
+                    callback(true);
+            }
+            else {
+                if (callback !== undefined)
+                    callback(false);
+            }
+        });
+    }
+    else{
+         if (callback !== undefined)
+                    callback(false);
+    }
 };
 
 var guid = function() {
