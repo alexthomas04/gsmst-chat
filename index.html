@@ -11,6 +11,7 @@
 	<script src="js/angular/angular.min.js"></script>
 	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
 	<script src="js/bootstrap-dropdown.js"></script>
+	<script src="js/bootstrap-tooltip.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 	<script src="controllers/util.js"></script>
@@ -59,7 +60,8 @@
 		<ul class="nav ">
 			
 			<li><span class='glyphicon glyphicon-plus-sign navbar-text' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span></li>
-			<li class="navbar-right"><button class="btn btn-info navbar-nav navbar-btn" data-toggle="modal" data-target="#Change_Settings" >Change Settings</button></li>
+			<li class="navbar-right"><button class="btn btn-info navbar-nav navbar-btn" data-toggle="modal" data-target="#Change_Settings"  style="z-index:3">Change Settings</button></li>
+			<li class="navbar-right"><button class="btn btn-success navbar-nav navbar-btn" data-toggle="modal" data-target="#just_the_tip" style="z-index:3" >Pro Tips</button></li>
 			<li class="navbar-right"><button class="btn btn-info navbar-nav navbar-btn" id='clearChat' style="display:none">Clear Chat</button></li>
 			<li class="navbar-right" style="z-index:2"><div class="btn-group icon-bar " >
 				<button type="button" class="btn btn-info dropdown-toggle navbar-btn " data-toggle='dropdown'>Change Style<span class='caret'></span></button>
@@ -122,7 +124,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-					<h4 class="modal-title"></h4>
+					<h4 class="modal-title">Settings</h4>
 				</div>
 				<div class="modal-body" >
 					<form>
@@ -143,7 +145,31 @@
 			</div>
 		</div>
 	</div>
-
+	<div class="modal fade" id="just_the_tip" >
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Pro Tips</h4>
+				</div>
+				<div class="modal-body" >
+					<ul>
+						<li>Enter a room by clicking on it</li>
+						<li>Exit a room by clicking on the arrow at the top left</li>
+						<li>If you put a link in chat it will automagically become a clickable link</li>
+						<li>Change your theme with the Change Style button</li>
+						<li>Change what is shown with the Change Settings button</li>
+						<li>Clear the chat room by exiting and coming back or with the Clear Chat button</li>
+						<li>Share an image with a chat by dragging and dropping it into chat</li>
+						<li>A link of an iamge will be come an image in chat</li>
+					</ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div room style="display:none;height:70%" id='room'  >
 		
 	
@@ -173,7 +199,9 @@
 </div>
 </div>
 <script type="text/javascript">
+setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
 	$(document).ready(function() {
+
 		$('#styleSelect>li>a').click(function(event) {
 			$('link').attr('href', $(this).attr('rel'));
 			$.cookie('css',$(this).attr('rel'),{path:'/',expires:1000});
@@ -235,7 +263,10 @@
 			}
 			for (var i = 0; i < files.length; i++) 
 			{
+				if(files[i].size<1024*1024*5)
 				reader.readAsDataURL(files[i]);
+				else
+					$('#chatArea').append('<p class="text-danger">File is too large must be less that 5 MB</p>')
 			}
 			console.log(files[0]);
 		});

@@ -106,6 +106,7 @@ io.on('connection',function(socket){
                         return false;
                 }
             }
+
             return true;
 
         }
@@ -601,6 +602,14 @@ var getGroupById=function(id){
         return group;
 };
 };
+var ban=function(user,room,duration){
+    var insertVars = {user_id:user,room_id:room,duration:duration,time:new Date()};
+    connection.query("INSERT INTO kicks SET ?",insertVars,function(err,result){
+        if(err!=null)
+            console.error(err);
+    });
+}
+
 
 setInterval(function(){
     for (var i = users.length - 1; i >= 0; i--) {
@@ -609,4 +618,5 @@ setInterval(function(){
             users.splice(users.indexOf(user),1)
         }
     };
+    getGroups();
 },60000);
