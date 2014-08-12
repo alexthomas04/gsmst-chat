@@ -57,6 +57,7 @@ app.directive('addroom', [function () {
 			}
 			scope.toggleDelete=function(){
 				deleteAble = !deleteAble;
+				$('#isDeleteable').toggleClass('btn-danger').toggleClass('btn-success');
 			};
 		}
 	};

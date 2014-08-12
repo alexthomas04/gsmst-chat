@@ -3,7 +3,7 @@
 		<p class='text-center'>{{room.name}}</p>
 		<p>Users: {{room.userCount}}</p>
 		<p ng-show="room.requirements && room.requirements.rank" class="text-danger">{{room.requirements.rank}} only*</p>
-		<button ng-click='deleteRoom(room.id)' class="btn btn-danger" ng-show="state.permissions.delete && room.requirements.isDeleteable"><span class='glyphicon glyphicon-remove'></span> Delete</button>
+		<button ng-click='deleteRoom(room.id)' class="btn btn-danger" ng-show="state.permissions.delete && (room.requirements.isDeleteable||state.permissions.god)"><span class='glyphicon glyphicon-remove'></span> Delete</button>
 		<div ng-show="showPasswordInput">
 			<label>Password</label>
 			<input ng-model='roomPassword' type="password" class="form-control">

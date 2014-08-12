@@ -201,7 +201,7 @@ socket.on('addRoom',function(message){
 
 socket.on('deleteRoom',function(message){
     var room = getRoomById(message.id);
-    if(user != undefined && user.permissions.delete && room.requirements.isDeleteable){
+    if(user != undefined && room!=undefined && user.permissions.delete && (room.requirements.isDeleteable==undefined || room.requirements.isDeleteable || user.permissions.god)){
         deleteRoom(message,updateRooms(function(){
            emitRooms();
        }));
