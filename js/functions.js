@@ -10,8 +10,8 @@ socket.on('me',function(message){
 socket.on('rooms',function(message){
 	$(document).ready(function(){
 		var scope = angular.element('#rooms').scope();
-		scope.rooms = message.rooms;
-		scope.$apply();
+		scope.rooms=$.extend(true, scope.rooms, message.rooms);
+			scope.$apply();
 		// if in room update current room
 		scope = angular.element('#room').scope();
 		var id = (scope.room||{}).id;
@@ -23,7 +23,7 @@ socket.on('rooms',function(message){
 					scope.room=room;
 			};
 			scope.$apply();
-		}
+					}
 		
 		
 	});
