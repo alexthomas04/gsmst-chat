@@ -155,7 +155,7 @@ io.on('connection',function(socket){
     });
 
 socket.on('chat',function(message){
-    if(user !== undefined &&user.room != undefined && user.username!=undefined){
+    if(user !== undefined &&user.room != undefined && user.username!=undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '')!== ''){
 
         var matching = getUsersByRoom(user.room);
         var chat = sanitize(message.chat);
@@ -169,6 +169,7 @@ socket.on('chat',function(message){
             response.color=JSON.parse(group.attributes).color;
         }
         response.rank=group.name;
+    response.time=new Date();
         for (var i = matching.length - 1; i >= 0; i--) {
             var match = matching[i];
             match.socket.emit('chat',response)

@@ -35,11 +35,32 @@ socket.on('chat',function(message){
 	var $strong = $('<strong></strong>');
 	var $text =$('<span></span>');
 	var $small = $('<small></small>');
+	var $time = $('<small></small>');
 	if(message.rank != 'user')
 		$small.append('['+message.rank+'] ');
 	$strong.text(message.user+" : ");
+	$small.addClass('chat_rank');
 	$text.append(message.chat);
-	
+	var dt = new Date(message.time);
+	var hours = dt.getHours();
+    var minutes = dt.getMinutes();
+    var seconds = dt.getSeconds();
+    if (hours < 10) 
+     hours = '0' + hours;
+
+    if (minutes < 10) 
+     minutes = '0' + minutes;
+
+    if (seconds < 10) 
+     seconds = '0' + seconds;
+//var timeString = hours+":"+miuntes+":"+seconds
+	$time.text(hours+":"+minutes+":"+seconds);
+	$time.addClass('chat_time');
+
+	if(!settings.showTime)
+		$time.hide();
+	if(!settings.showRank)
+		$small.hide();
 	if(message.color!=undefined){
 		var color = message.color;
 		if(color.nameColor!=undefined){
@@ -58,13 +79,14 @@ socket.on('chat',function(message){
 	$p.append($small);
 	$p.append($strong);
 	$p.append($text);
+	$p.append($time)
 	$('#chatArea').append($p).scrollTop(height);
 	if(document.body.className=='blurred'){
 		clearInterval(interval);
 		interval = setInterval(function(){
 			if(document.title=="New Assignment"){
 				document.title='You have'
-			}else{
+			}else if(document.title='You have'){
 				document.title='New Assignment';
 			}
 		},1000);
@@ -185,4 +207,43 @@ var canEnterRoom=function(user,room){
 	}
 	return true;
 
+}
+
+
+
+var updateSettings= function(data){
+	if(data!=undefined){
+		if($.cookie('settings')){
+			data = $.extend(true, $.cookie('settings'), data);
+		}
+		$.cookie('settings',JSON.stringify(data),{path:'/',expires:1000});
+		settings = data;
+	}
+	else{
+		$.cookie('settings',JSON.stringify(settings),{path:'/',expires:1000});
+	}
+	if(!settings.showRank)
+		$('.chat_rank').hide();
+	else
+		$('.chat_rank').show();
+	if(!settings.showTime)
+		$('.chat_time').hide();
+	else
+		$('.chat_time').show();
+}
+
+
+
+
+
+
+
+
+
+var settings = {};
+if(!$.cookie('settings')){
+	updateSettings({showRank:true,showTime:true});
+}
+else {
+settings = $.parseJSON($.cookie('settings'));
 }

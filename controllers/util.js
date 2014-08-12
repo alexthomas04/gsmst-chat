@@ -105,4 +105,37 @@ app.directive('room', [function () {
 			}
 		}
 	};
+}]);
+
+app.directive('settings', [function () {
+	return {
+		restrict: 'A',
+		link: function (scope, iElement, iAttrs) {
+			scope.showRankState='hide';
+			scope.showTimeState='hide';
+			var updateShows=function(){
+			if(settings.showRank)
+				scope.showRankState='hide';
+			else
+				scope.showRankState='show'
+			if(settings.showTime)
+				scope.showTimeState='hide';
+			else
+				scope.showTimeState='show'
+		}
+		updateShows();
+		scope.toggleTime=function(){
+			settings.showTime=!settings.showTime;
+			updateShows();
+		}
+		scope.toggleRank=function(){
+			settings.showRank=!settings.showRank;
+			updateShows();
+		}
+
+			scope.saveSettings = function(){
+				updateSettings();
+			};
+		}	
+	};
 }])
