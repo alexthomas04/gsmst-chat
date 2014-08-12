@@ -57,14 +57,14 @@
 		<h1 id='title'>WELCOME USER! Please Login</h1>
 	</div>
 	<nav class='navbar navbar-default'>
-		<ul class="nav ">
-			
+		<ul class="nav navbar-nav ">
+			<li class="navbar-left"><span class='glyphicon glyphicon-circle-arrow-right navbar-text'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span></li>
 			<li><span class='glyphicon glyphicon-plus-sign navbar-text' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span></li>
-			<li class="navbar-right"><button class="btn btn-info navbar-nav navbar-btn" data-toggle="modal" data-target="#Change_Settings"  style="z-index:3">Change Settings</button></li>
-			<li class="navbar-right"><button class="btn btn-success navbar-nav navbar-btn" data-toggle="modal" data-target="#just_the_tip" style="z-index:3" >Pro Tips</button></li>
-			<li class="navbar-right"><button class="btn btn-info navbar-nav navbar-btn" id='clearChat' style="display:none">Clear Chat</button></li>
-			<li class="navbar-right" style="z-index:2"><div class="btn-group icon-bar " >
-				<button type="button" class="btn btn-info dropdown-toggle navbar-btn " data-toggle='dropdown'>Change Style<span class='caret'></span></button>
+			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings" >Change Settings</a></li>
+			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip"  >Pro Tips</a></li>
+			<li class="navbar-right"><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a></li>
+			<li class="dropdown " style="z-index:2">
+				<a  class="dropdown-toggle " data-toggle='dropdown'>Change Style <span class='caret'></span></button>
 				<ul class="dropdown-menu" role='menu' id="styleSelect">
 					<li><a href="#" rel='css/bootstrap.min.css'>Bootstrap</a></li>
 					<li><a href="#" rel='css/superhero.css'>Superhero</a></li>
@@ -75,8 +75,9 @@
 					<li><a href="#" rel='css/spacelab.css'>Spacelab</a></li>
 				</ul>
 			</li>
-			<li><login class='icon-bar col-md-3 navbar-right' style=''></login></li>
-			<li><span class='glyphicon glyphicon-circle-arrow-right navbar-text'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span></li>
+			<li ng-hide="state.status==='Logged in'" class=""><a class=""  id="loginButton">Login</a><login class='' style=''></login></li>
+			<li ng-hide="state.status==='Logged in'" ><a class="" onclick="window.location='/register.html'">Register</a></li>
+			
 		</ul>
 		
 	</div>

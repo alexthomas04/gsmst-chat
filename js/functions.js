@@ -38,7 +38,7 @@ socket.on('chat',function(message){
 	var $time = $('<small></small>');
 	if(message.rank != 'user')
 		$small.append('['+message.rank+'] ');
-	$strong.text(message.user+" : ");
+	$strong.text(message.user+": ");
 	$small.addClass('chat_rank');
 	$text.append(message.chat);
 	var dt = new Date(message.time);
