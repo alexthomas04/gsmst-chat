@@ -57,237 +57,321 @@
 		<h1 id='title'>WELCOME USER! Please Login</h1>
 	</div>
 	<nav class='navbar navbar-default'>
-		<ul class="nav navbar-nav ">
+		<ul class="nav navbar-nav " style="width:100%">
 			<li class="navbar-left"><span class='glyphicon glyphicon-circle-arrow-right navbar-text'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span></li>
 			<li><span class='glyphicon glyphicon-plus-sign navbar-text' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span></li>
-			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings" >Change Settings</a></li>
-			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip"  >Pro Tips</a></li>
-			<li class="navbar-right"><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a></li>
-			<li class="dropdown " style="z-index:2">
-				<a  class="dropdown-toggle " data-toggle='dropdown'>Change Style <span class='caret'></span></button>
-				<ul class="dropdown-menu" role='menu' id="styleSelect">
-					<li><a href="#" rel='css/bootstrap.min.css'>Bootstrap</a></li>
-					<li><a href="#" rel='css/superhero.css'>Superhero</a></li>
-					<li><a href="#" rel='css/slate.css'>Slate</a></li>
-					<li><a href="#" rel='css/darkly.css'>Darkly</a></li>
-					<li><a href="#" rel='css/cyborg.css'>Cyborg</a></li>
-					<li><a href="#" rel='css/readable.css'>Readable</a></li>
-					<li><a href="#" rel='css/spacelab.css'>Spacelab</a></li>
+			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip"  >ProTip!</a></li>
+				<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings" >Change Settings</a></li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle='dropdown'>Contact <span class='caret'></span></a>
+				<ul class="dropdown-menu" role='menu'>	
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#about"  >About</a></li>
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#requestTicket"  >Request Feature</a></li>
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#reportBug"  >Report Bug</a></li>
 				</ul>
 			</li>
-			<li ng-hide="state.status==='Logged in'" class=""><a class=""  id="loginButton">Login</a><login class='' style=''></login></li>
-			<li ng-hide="state.status==='Logged in'" ><a class="" onclick="window.location='/register.html'">Register</a></li>
-			
-		</ul>
-		
+			<li class="dropdown " style="z-index:2">
+				<a  class="dropdown-toggle " data-toggle='dropdown'>Change Style <span class='caret'></span></a>
+					<ul class="dropdown-menu" role='menu' id="styleSelect">
+						<li><a href="#" rel='css/bootstrap.min.css'>Bootstrap</a></li>
+						<li><a href="#" rel='css/superhero.css'>Superhero</a></li>
+						<li><a href="#" rel='css/slate.css'>Slate</a></li>
+						<li><a href="#" rel='css/darkly.css'>Darkly</a></li>
+						<li><a href="#" rel='css/cyborg.css'>Cyborg</a></li>
+						<li><a href="#" rel='css/readable.css'>Readable</a></li>
+						<li><a href="#" rel='css/spacelab.css'>Spacelab</a></li>
+					</ul>
+				</li>
+				<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a></li>
+				<li ng-hide="state.status==='Logged in'" id="loginSection" class="navbar-right"><a class=""  id="loginButton">Login</a><login class='' style=''></login></li>
+				<li ng-hide="state.status==='Logged in'" id="registerButton" class="navbar-right"><a class="" onclick="window.location='/register.html'">Register</a></li>
+
+			</ul>
+
+		</div>
+	</nav>
+	<div id='rooms' style="width:100%;position:absolute">
+		<room-button class='clickable' ng-repeat='room in rooms' ></room-button>
 	</div>
-</nav>
-<div id='rooms' style="width:100%;position:absolute">
-	<room-button class='clickable' ng-repeat='room in rooms' ></room-button>
-</div>
-<div class="modal fade" id="addRoom">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title">Add Room</h4>
-			</div>
-			<div class="modal-body" addRoom>
-				<div class="form-group">
-					<label for="roomName">Room Name</label>
-					<input ng-model='roomName' class="form-control" id='roomName'>
+	<div class="modal fade" id="addRoom">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Add Room</h4>
 				</div>
-				<div class="form-group">
-					<label for="roomPassword">Room Password</label>
-					<input ng-model='roomPassword' class="form-control" id='roomPassword' placeholder='Leave Blank for no Password'>
-				</div>
-				<button type="button" class="btn btn-success active" data-toggle='button' ng-click="toggleDelete()" id='isDeleteable'>Is Deleteable</button></br>
-				<label style="font-size:large">Permissons</label >
-					<div class="btn-group" style="float:right">
-						<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>{{reqRank}}<span class='caret'></span></button>
-						<ul class="dropdown-menu" role='menu' id="">
-							<li><a href="#" ng-click="reqRank = 'Guest'">Guest</a></li>
-							<li><a href="#" ng-click="reqRank = 'User'">User</a></li>
-							<li><a href="#" ng-click="reqRank = 'Mod'">Mod</a></li>
-							<li><a href="#" ng-click="reqRank = 'Admin'">Admin</a></li>
-						</ul>
+				<div class="modal-body" addRoom>
+					<div class="form-group">
+						<label for="roomName">Room Name</label>
+						<input ng-model='roomName' class="form-control" id='roomName'>
+					</div>
+					<div class="form-group">
+						<label for="roomPassword">Room Password</label>
+						<input ng-model='roomPassword' class="form-control" id='roomPassword' placeholder='Leave Blank for no Password'>
+					</div>
+					<label>*Green means it is deletable red means that it is not</label></br>
+					<button type="button" class="btn btn-success active" data-toggle='button' ng-click="toggleDelete()" id='isDeleteable'>Is Deleteable</button></br>
+					<label style="font-size:large">Permissons</label >
+						<div class="btn-group" style="float:right">
+							<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>{{reqRank}}<span class='caret'></span></button>
+							<ul class="dropdown-menu" role='menu' id="">
+								<li><a href="#" ng-click="reqRank = 'Guest'">Guest</a></li>
+								<li><a href="#" ng-click="reqRank = 'User'">User</a></li>
+								<li><a href="#" ng-click="reqRank = 'Mod'">Mod</a></li>
+								<li><a href="#" ng-click="reqRank = 'Admin'">Admin</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" ng-click='addRoom()' class="btn btn-primary"  data-dismiss="modal">Submit</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div class="modal fade" id="reportBug">
+			<div class="modal-dialog">
+				<div class="modal-content" report>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4 class="modal-title">Report Bug</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="roomName">Name</label>
+							<input ng-model='name' class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="roomPassword">Email</label>
+							<input ng-model='email' class="form-control">
+						</div>
+						<div class="form-group">
+							<label>Bug</label>
+							<textarea class="form-control" ng-model='info'></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" ng-click='report("bug")' class="btn btn-primary"  data-dismiss="modal">Submit</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div class="modal fade" id="requestTicket">
+			<div class="modal-dialog">
+				<div class="modal-content" report>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4 class="modal-title">Request Ticket</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="roomName">Name</label>
+							<input ng-model='name' class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="roomPassword">Email</label>
+							<input ng-model='email' class="form-control">
+						</div>
+						<div class="form-group">
+							<label>Request</label>
+							<textarea class="form-control" ng-model='info'></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" ng-click='report("request")' class="btn btn-primary"  data-dismiss="modal">Submit</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div class="modal fade" id="about">
+			<div class="modal-dialog">
+				<div class="modal-content" >
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4 class="modal-title">About us</h4>
+					</div>
+					<div class="modal-body">
+						<h5>Creator:</h5><p>Alex Thomas(Sonicdeadlock)</p>
+						<h5>Contact:</h5><p><a href="mailto:alexthomas.gsmst@gmail.com">alex.thomas.gsmst@gmail.com</a></p>
+						<h5>Source Code:</h5><p><a href="https://github.com/Sonicdeadlock/gsmst-chat">GitHub</a></p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div class="modal fade" id="Change_Settings" settings>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4 class="modal-title">Settings</h4>
+					</div>
+					<div class="modal-body" >
+						<form>
+							<div class="form-group">
+								<label>Show Rank</label>
+								<button class='btn btn-primary'ng-model='showRank' ng-click="toggleRank()">{{showRankState}}</button>
+							</div>
+							<div class="form-group">
+								<label>Show Time</label>
+								<button class='btn btn-primary'ng-model='showTime' ng-click="toggleTime()">{{showTimeState}}</button>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" ng-click='saveSettings()' class="btn btn-primary"  data-dismiss="modal">Save</button>
 					</div>
 				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='addRoom()' class="btn btn-primary"  data-dismiss="modal">Submit</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-	<div class="modal fade" id="Change_Settings" settings>
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-					<h4 class="modal-title">Settings</h4>
-				</div>
-				<div class="modal-body" >
-					<form>
-						<div class="form-group">
-							<label>Show Rank</label>
-							<button class='btn btn-primary'ng-model='showRank' ng-click="toggleRank()">{{showRankState}}</button>
-						</div>
-						<div class="form-group">
-							<label>Show Time</label>
-							<button class='btn btn-primary'ng-model='showTime' ng-click="toggleTime()">{{showTimeState}}</button>
-						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='saveSettings()' class="btn btn-primary"  data-dismiss="modal">Save</button>
+			</div>
+		</div>
+		<div class="modal fade" id="just_the_tip" >
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<h4 class="modal-title">Pro Tips</h4>
+					</div>
+					<div class="modal-body" >
+						<ul>
+							<li>Enter a room by clicking on it</li>
+							<li>Exit a room by clicking on the arrow at the top left</li>
+							<li>If you put a link in chat it will automagically become a clickable link</li>
+							<li>Change your theme with the Change Style button</li>
+							<li>Change what is shown with the Change Settings button</li>
+							<li>Clear the chat room by exiting and coming back or with the Clear Chat button</li>
+							<li>Share an image with a chat by dragging and dropping it into chat</li>
+							<li>A link of an image will be come an image in chat</li>
+						</ul>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="modal fade" id="just_the_tip" >
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-					<h4 class="modal-title">Pro Tips</h4>
-				</div>
-				<div class="modal-body" >
-					<ul>
-						<li>Enter a room by clicking on it</li>
-						<li>Exit a room by clicking on the arrow at the top left</li>
-						<li>If you put a link in chat it will automagically become a clickable link</li>
-						<li>Change your theme with the Change Style button</li>
-						<li>Change what is shown with the Change Settings button</li>
-						<li>Clear the chat room by exiting and coming back or with the Clear Chat button</li>
-						<li>Share an image with a chat by dragging and dropping it into chat</li>
-						<li>A link of an iamge will be come an image in chat</li>
-					</ul>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
+		<div room style="display:none;height:60%" id='room'  >
+
+
+
+
+			<div class="col-md-1">
+				<strong>Users</strong></br>
+				<p ng-repeat='user in room.users'>{{user}}</p></br>
+				<strong>Guests: </strong>{{room.guestCount}}
 			</div>
-		</div>
-	</div>
-	<div room style="display:none;height:70%" id='room'  >
-		
-	
-
-
-	<div class="col-md-1">
-		<strong>Users</strong></br>
-		<p ng-repeat='user in room.users'>{{user}}</p></br>
-		<strong>Guests: </strong>{{room.guestCount}}
-	</div>
-	<div class="well col-md-10" style="height:100%">
-		<div id='chatArea' style="overflow:auto;height:100%;width:100%">
-			<p id='typing' style="position:absolute;bottom:0px">{{typing}}</p>
-		</div>
-
-	</div>
-	<form>
-		<div  ng-show="state.permissions.chat">
-			<div class='col-md-11'>
-				<input class="form-control " ng-model='message' style="float:left" id='chatbox'>
+			<div class="well col-md-10" style="height:100%">
+				<div id='chatArea' style="overflow:auto;height:100%;width:100%">
+					<p id='typing' style="position:absolute;bottom:0px">{{typing}}</p>
+				</div>
 
 			</div>
-			<button class="btn btn-primary col-md-1" ng-click='chat()' style="float:right">send</button>
+			<form>
+				<div  ng-show="state.permissions.chat">
+					<div class='col-md-11'>
+						<input class="form-control " ng-model='message' style="float:left" id='chatbox'>
+
+					</div>
+					<button class="btn btn-primary col-md-1" ng-click='chat()' style="float:right">send</button>
+				</div>
+			</form>
+
 		</div>
-	</form>
+	</div>
+	<script type="text/javascript">
+// setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
+$(document).ready(function() {
 
-</div>
-</div>
-<script type="text/javascript">
-setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
-	$(document).ready(function() {
-
-		$('#styleSelect>li>a').click(function(event) {
-			$('link').attr('href', $(this).attr('rel'));
-			$.cookie('css',$(this).attr('rel'),{path:'/',expires:1000});
-		});
-		if($.cookie('css')){
-			$('link').attr('href', $.cookie('css'));
-		}
-		$('#chatbox').keypress(function(event) {
-			startTyping();
-		});
-		$(document).on('click','room-button',function(event) {
+	$('#styleSelect>li>a').click(function(event) {
+		$('link').attr('href', $(this).attr('rel'));
+		$.cookie('css',$(this).attr('rel'),{path:'/',expires:1000});
+	});
+	if($.cookie('css')){
+		$('link').attr('href', $.cookie('css'));
+	}
+	$('#chatbox').keypress(function(event) {
+		startTyping();
+	});
+	$(document).on('click','room-button',function(event) {
 
 
-			var target = $(event.target); 
-			if(!target.hasClass('btn')){
-				var data = $(this).data('roomData');
-				console.log(data);
-				if(canEnterRoom(state,data)){
-					if(!(data.requirements!=undefined && data.requirements.hasPassword)){
-						socket.emit('join-room',{roomId:$(this).data('roomData').id});
-						$('login,#addRoomButton').slideUp();
+		var target = $(event.target); 
+		if(!target.hasClass('btn')){
+			var data = $(this).data('roomData');
+			console.log(data);
+			if(canEnterRoom(state,data)){
+				if(!(data.requirements!=undefined && data.requirements.hasPassword)){
+					socket.emit('join-room',{roomId:$(this).data('roomData').id});
+					$('#loginSection,#registerButton,#addRoomButton').slideUp();
 
-						$('#rooms').animate({left:"-100%"}, 500,function(){
-							$('#title').text(data.name);
-							$('#room,#clearChat').slideDown();
-							angular.element('#room').scope().room =data;
-							angular.element('#room').scope().$apply();
-						});
-						$('#leaveRoom').show();
-					}else{angular.element(this).scope().showPasswordInput=true;
-						angular.element(this).scope().$apply();}
-					}
+					$('#rooms').animate({left:"-100%"}, 500,function(){
+						$('#title').text(data.name);
+						$('#room,#clearChat').slideDown();
+						angular.element('#room').scope().room =data;
+						angular.element('#room').scope().$apply();
+					});
+					$('#leaveRoom').show();
+				}else{angular.element(this).scope().showPasswordInput=true;
+					angular.element(this).scope().$apply();}
 				}
-			});
-		$('#leaveRoom').click(function(event) {
-			$('#leaveRoom').hide();
-			if(state.username!=undefined)
-				$('#title').text('Welcome '+state.username+"!");
-			else
-				$('#title').text('Welcome user! Please Login');
-			socket.emit('leave room',{})
-			$('login,#addRoomButton').slideDown();
-			$('#room,#clearChat').slideUp('400',function(){
-				$('#chatArea').children().not('#typing').remove();
-			});
-			$('#rooms').animate({left:"0%"}, 500,function(){});
-
+			}
 		});
-		$('#clearChat').click(function(event) {
+	$('#leaveRoom').click(function(event) {
+		$('#leaveRoom').hide();
+		if(state.username!=undefined)
+			$('#title').text('Welcome '+state.username+"!");
+		else
+			$('#title').text('Welcome user! Please Login');
+		socket.emit('leave room',{})
+		$('#loginSection,#registerButton,#addRoomButton').slideDown();
+		$('#room,#clearChat').slideUp('400',function(){
 			$('#chatArea').children().not('#typing').remove();
 		});
-		$('#room').on('drop', function(event) {
-			event.preventDefault();
-			var files = event.originalEvent.dataTransfer.files;
-			var reader = new FileReader();
-			reader.onloadend=function(){
-				socket.emit('sendFile',reader.result);
-				console.log(reader.result);
-			}
-			for (var i = 0; i < files.length; i++) 
-			{
-				if(files[i].size<1024*1024*5)
-				reader.readAsDataURL(files[i]);
-				else
-					$('#chatArea').append('<p class="text-danger">File is too large must be less that 5 MB</p>')
-			}
-			console.log(files[0]);
-		});
-		$(document).on('drop', function (e) 
-		{
-			e.stopPropagation();
-			e.preventDefault();
-		});
-		$(document).on('dragenter', function (e) 
-		{
-			e.stopPropagation();
-			e.preventDefault();
-		});
-		$(document).on('dragover', function (e) 
-		{
-			e.stopPropagation();
-			e.preventDefault();
-		});
+		$('#rooms').animate({left:"0%"}, 500,function(){});
+
 	});
+	$('#clearChat').click(function(event) {
+		$('#chatArea').children().not('#typing').remove();
+	});
+	$('#room').on('drop', function(event) {
+		event.preventDefault();
+		var files = event.originalEvent.dataTransfer.files;
+		var reader = new FileReader();
+		reader.onloadend=function(){
+			socket.emit('sendFile',reader.result);
+			console.log(reader.result);
+		}
+		for (var i = 0; i < files.length; i++) 
+		{
+			if(files[i].size<1024*1024*5)
+				reader.readAsDataURL(files[i]);
+			else
+				$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
+		}
+		console.log(files[0]);
+	});
+	$(document).on('drop', function (e) 
+	{
+		e.stopPropagation();
+		e.preventDefault();
+	});
+	$(document).on('dragenter', function (e) 
+	{
+		e.stopPropagation();
+		e.preventDefault();
+	});
+	$(document).on('dragover', function (e) 
+	{
+		e.stopPropagation();
+		e.preventDefault();
+	});
+});
 
 </script>
+<script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-53769917-1', 'auto'); ga('send', 'pageview'); </script>
 </body>
 </html>

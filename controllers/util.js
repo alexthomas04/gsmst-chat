@@ -140,4 +140,15 @@ app.directive('settings', [function () {
 			};
 		}	
 	};
-}])
+}]);
+app.directive('report', [function () {
+	return {
+		restrict: 'A',
+		link: function (scope, iElement, iAttrs) {
+			scope.report = function(type){
+				socket.emit('report',{name:scope.name,email:scope.email,report:scope.info,'type':type});
+			}
+		}
+	};
+}]);
+

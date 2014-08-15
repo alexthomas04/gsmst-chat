@@ -12,6 +12,11 @@ socket.on('rooms',function(message){
 		var scope = angular.element('#rooms').scope();
 		scope.rooms=$.extend(true, scope.rooms, message.rooms);
 			scope.$apply();
+			for (var i = scope.rooms.length - 1; i >= 0; i--) {
+				if(message.roooms.indexof(scope.rooms[i])==-1)
+					scope.rooms.splice(i,1);
+			};
+
 		// if in room update current room
 		scope = angular.element('#room').scope();
 		var id = (scope.room||{}).id;

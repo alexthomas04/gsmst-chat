@@ -21,7 +21,7 @@ var session = require('express-session');
 //var RedisStore = require('connect-redis')(session);
 var validator = require('validator');
 var io = require('socket.io')(server);
-
+var simplesmtp = require('simplesmtp');
 
 
 
@@ -113,45 +113,47 @@ io.on('connection',function(socket){
 
 
         var room = getRoomById(message.roomId);
-        if(canEnterRoom(user,room)){
-            if(user != undefined && user.room == undefined){
-                user.room = room;
-                emitRooms();
-                connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
-                    var matching = getUsersByRoom(user.room);
-                    for (var i = matching.length - 1; i >= 0; i--) {
-                       var match = matching[i];
-                       var entrance;
-                       if(result!= undefined &&result.length > 0) {
-                        entrance = result[Math.floor(Math.random() * result.length)].entrance;
-                    }
-                    match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
-                };
+        if(room!=undefined){
+            if(canEnterRoom(user,room)){
+                if(user != undefined && user.room == undefined){
+                    user.room = room;
+                    emitRooms();
+                    connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                        var matching = getUsersByRoom(user.room);
+                        for (var i = matching.length - 1; i >= 0; i--) {
+                           var match = matching[i];
+                           var entrance;
+                           if(result!= undefined &&result.length > 0) {
+                            entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                        }
+                        match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
+                    };
 
-            });
+                });
+                }else{
+                    user = {};
+                    user.room = getRoomById(message.roomId);
+                    user.socket = socket;
+                    user.group_id=0;
+                    users.push(user);
+                    emitRooms();
+                    connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
+                        var matching = getUsersByRoom(user.room);
+                        for (var i = matching.length - 1; i >= 0; i--) {
+                           var match = matching[i];
+                           var entrance;
+                           if(result!= undefined &&result.length > 0) {
+                            entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                        }
+                        match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
+                    };
+
+                });
+                }
             }else{
-                user = {};
-                user.room = getRoomById(message.roomId);
-                user.socket = socket;
-                user.group_id=0;
-                users.push(user);
-                emitRooms();
-                connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
-                    var matching = getUsersByRoom(user.room);
-                    for (var i = matching.length - 1; i >= 0; i--) {
-                       var match = matching[i];
-                       var entrance;
-                       if(result!= undefined &&result.length > 0) {
-                        entrance = result[Math.floor(Math.random() * result.length)].entrance;
-                    }
-                    match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
-                };
-
-            });
+                socket.emit('alert',{'alert':'invalid password'});
             }
-        }else{
-            socket.emit('alert',{'alert':'invalid password'});
-        }
+    }
         
     });
 
@@ -201,7 +203,12 @@ socket.on('addRoom',function(message){
 
 socket.on('deleteRoom',function(message){
     var room = getRoomById(message.id);
-    if(user != undefined && room!=undefined && user.permissions.delete && (room.requirements.isDeleteable==undefined || room.requirements.isDeleteable || user.permissions.god)){
+    if(user != undefined && room!=undefined && user.permissons !=undefined && user.permissions.delete && (room.requirements.isDeleteable==undefined || room.requirements.isDeleteable || user.permissions.god)){
+        var usersInRoom = getUsersByRoom(room);
+        for (var i = usersInRoom.length - 1; i >= 0; i--) {
+             usersInRoom[i].socket.emit('alert',{"alert":"danger","text":"The Room has been deleted"});
+            usersInRoom[i].room=undefined;
+        };
         deleteRoom(message,updateRooms(function(){
            emitRooms();
        }));
@@ -261,6 +268,19 @@ socket.on('sendFile',function(message){
             match.socket.emit('file',response);
         };
     }
+});
+
+socket.on('report',function(message){
+    if(user !=undefined && user.id != undefined){
+        message.user_id = user.id;
+        if(message.email != undefined &&  message.email.replace(/^\s+/, '').replace(/\s+$/, '')!== '')
+            message.email = user.email;
+    }
+    connection.query('INSERT INTO reports SET ?',message,function(err,result){
+        if(err != undefined && err != null)
+            console.error(err);
+        sendEmails();
+    });
 });
 
 
@@ -455,6 +475,7 @@ var insertUser = function(userData){
     var query = connection.query('INSERT INTO users SET ?', user, function(err, result) {
         console.log(err);
         login(userData.username,userData.password,undefined);
+        sendEmails();
     });
 
 
@@ -620,3 +641,83 @@ setInterval(function(){
     };
     getGroups();
 },60000);
+
+
+
+function mail(from, to, message) {
+    var client = simplesmtp.connect(465, 'smtp.gmail.com', {
+        secureConnection: true,
+        auth: {
+            user: config.mail.username,
+            pass: config.mail.password
+        },
+        debug: false
+    });
+
+    client.once('idle', function() {
+        client.useEnvelope({
+            from: from,
+            to: [].concat(to || [])
+        });
+    });
+
+    client.on('message', function() {
+        client.write(message.replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..'));
+        client.end();
+    });
+
+    client.on('ready', function(success) {
+        client.quit();
+    });
+
+    client.on('error', function(err) {
+        console.log('ERROR');
+        console.log(err);
+    });
+
+    client.on('end', function() {
+        console.log('DONE')
+    });
+}
+
+var sendEmails = function(){
+    connection.query('SELECT `id`,`name`,`email`,`type`,`report` FROM `chat`.`reports` WHERE informed = 0',function(err,results){
+        for (var i = results.length - 1; i >= 0; i--) {
+            var result = results[i];
+            var message = 'subject: NOREPLY\r\n\r\n';
+            var admin_message = '';
+            if(result.type=='request'){
+                message += 'Thank you '+ result.name + " for submitting request\n\n" +  result.report +"\n\nWe will be looking into it shortly";
+                 admin_message = 'subject: NEW REQUEST\r\n\r\n';
+                admin_message+=result.name+' submitted request "' + result.report+'"';
+                connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
+            }
+            else if(result.type='bug'){
+                 message += 'Thank you '+ result.name + " for submitting bug report\n\n" +  result.report +"\n\nWe will be looking into it shortly. Your Ticket Id is "+result.id;
+                admin_message = 'subject: NEW BUG\r\n\r\n';
+                admin_message+=result.name+' submitted bug "' + result.report+'"';
+                 connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
+            }
+            mail('gsmstchat@gmail.com',result.email,message);
+            connection.query('SELECT `email` FROM `chat`.`users` WHERE group_id=4 or group_id=5',function(error,admins){
+                for (var j = admins.length - 1; j >= 0; j--) {
+                    var admin = admins[j];
+                  //   mail('gsmstchat@gmail.com',admin.email,admin_message);
+                };
+            });
+        };
+    });
+    connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0',function(err,results){
+        for (var i = results.length - 1; i >= 0; i--) {
+            var result = results[i];
+            var message = 'subject: NOREPLY\r\n\r\n';
+
+                 message += 'Thank you '+ result.first_name + ' '+ result.last_name + " for registering at GSMSTCHAT.com";
+                 connection.query('UPDATE `chat`.`users` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
+
+            mail('gsmstchat@gmail.com',result.email,message);
+        };
+    });
+};
+
+sendEmails();
