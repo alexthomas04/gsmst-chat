@@ -1,0 +1,76 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Archive</title>
+	<script src="js/jquery-2.1.1.min.js"></script>
+	<script src="js/jquery.cookie.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/angular/angular.min.js"></script>
+	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
+	<script src="js/bootstrap-dropdown.js"></script>
+	<script src="js/bootstrap-tooltip.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    
+    <script src="controllers/archive.js"></script>
+</head>
+<body ng-app ='archive' ng-controller='ArchiveCtrl as archive'>
+	<nav class='navbar navbar-default'>
+        <ul class="nav navbar-nav" >
+            <li><a ng-click='archive.select("chat")'>Chat</a></li>
+            <li><a ng-click='archive.select("users")'>Users</a></li>
+        </ul>
+		
+	</nav>
+    <div class="alert alert-danger" id="error" style="display:none"><p>ERROR: <span></span></p></div>
+    <div id="login" class="col-md-2 well " style="float:right">
+        <form>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" ng-model='archive.username' id="username">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class='form-control' ng-model='archive.password' id='password'>
+        </div>
+            </form>
+        <button class='btn btn-primary' ng-click='archive.login()'>Login</button>        
+    </div>
+    <div style="float:left" class="well col-md-2">
+        <div class="form-group">
+            <label>From</label>
+            <input class="form-control" ng-model='archive.range.start' value=0 type="number">
+            <label>To</label>
+            <input class="form-control" ng-model='archive.range.stop' value="100" type="number">
+        </div>
+        <div class="form-group">
+            <label>Where (field)</label>
+            <input class="form-control" type='text' ng-model='archive.where.field'>
+            <label>is equal to</label>
+            <input class="form-control" ng-model='archive.where.equals' type='text'>
+        </div>
+    </div>
+    <div class='container'>
+        	<table class="table table-bordered">
+        		<thead>
+        			<th ng-repeat="(key, value) in archive.selected[0]">{{key}}</th>
+        		</thead>
+        		<tbody>
+        			<tr ng-repeat="(key, value) in archive.selected">
+        				<td ng-repeat="val in value">{{val}}</td>
+        			</tr>
+        		</tbody>
+        	</table>
+        </div>
+    
+	
+	 <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        if($.cookie('css')){
+                $('link').attr('href', $.cookie('css'));
+            }
+    });
+    </script>
+     <script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-53769917-1', 'auto'); ga('send', 'pageview'); </script>
+</body>
+</html>

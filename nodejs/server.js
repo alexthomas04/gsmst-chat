@@ -101,9 +101,9 @@ io.on('connection',function(socket){
                     if(user.permissions==undefined || !(user.permissions[room.requirements.rank]))
                         return false;
 
-                    }
-                 if(room.requirements.hasPassword && message.password!=room.requirements.password){
-                        return false;
+                }
+                if(room.requirements.hasPassword && message.password!=room.requirements.password){
+                    return false;
                 }
             }
 
@@ -121,9 +121,9 @@ io.on('connection',function(socket){
                     connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
                         var matching = getUsersByRoom(user.room);
                         for (var i = matching.length - 1; i >= 0; i--) {
-                           var match = matching[i];
-                           var entrance;
-                           if(result!= undefined &&result.length > 0) {
+                         var match = matching[i];
+                         var entrance;
+                         if(result!= undefined &&result.length > 0) {
                             entrance = result[Math.floor(Math.random() * result.length)].entrance;
                         }
                         match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
@@ -140,9 +140,9 @@ io.on('connection',function(socket){
                     connection.query('Select `entrance` from `entrances` where group_id='+user.group_id,function(err,result){
                         var matching = getUsersByRoom(user.room);
                         for (var i = matching.length - 1; i >= 0; i--) {
-                           var match = matching[i];
-                           var entrance;
-                           if(result!= undefined &&result.length > 0) {
+                         var match = matching[i];
+                         var entrance;
+                         if(result!= undefined &&result.length > 0) {
                             entrance = result[Math.floor(Math.random() * result.length)].entrance;
                         }
                         match.socket.emit('alert',{"alert":"entered",'user':user.username,"entrance":entrance});
@@ -153,7 +153,7 @@ io.on('connection',function(socket){
             }else{
                 socket.emit('alert',{'alert':'invalid password'});
             }
-    }
+        }
         
     });
 
@@ -172,7 +172,7 @@ socket.on('chat',function(message){
             response.color=JSON.parse(group.attributes).color;
         }
         response.rank=group.name;
-    response.time=new Date();
+        response.time=new Date();
         for (var i = matching.length - 1; i >= 0; i--) {
             var match = matching[i];
             match.socket.emit('chat',response)
@@ -196,8 +196,8 @@ socket.on('addRoom',function(message){
     if(user != undefined && user.permissions.create)
     {
         addRoom(message,updateRooms(function(){
-           emitRooms();
-       }));
+         emitRooms();
+     }));
     }
 });
 
@@ -206,13 +206,13 @@ socket.on('deleteRoom',function(message){
     if(user != undefined && room!=undefined && user.permissons !=undefined && user.permissions.delete && (room.requirements.isDeleteable==undefined || room.requirements.isDeleteable || user.permissions.god)){
         var usersInRoom = getUsersByRoom(room);
         for (var i = usersInRoom.length - 1; i >= 0; i--) {
-             usersInRoom[i].socket.emit('alert',{"alert":"danger","text":"The Room has been deleted"});
-            usersInRoom[i].room=undefined;
-        };
-        deleteRoom(message,updateRooms(function(){
-           emitRooms();
-       }));
-    }
+           usersInRoom[i].socket.emit('alert',{"alert":"danger","text":"The Room has been deleted"});
+           usersInRoom[i].room=undefined;
+       };
+       deleteRoom(message,updateRooms(function(){
+         emitRooms();
+     }));
+   }
 });
 
 socket.on('leave room',function(){
@@ -233,8 +233,8 @@ socket.on('startTyping',function(){
     if(user !=undefined && user.username != undefined && user.room != undefined){
         var matching = getUsersByRoom(user.room);
         for (var i = matching.length - 1; i >= 0; i--) {
-         var match =  matching[i];
-         if(match.socket != undefined)
+           var match =  matching[i];
+           if(match.socket != undefined)
             match.socket.emit('startTyping',{'username':user.username});
     }
 }
@@ -243,8 +243,8 @@ socket.on('stopTyping',function(message){
     if(user !=undefined && user.username != undefined && user.room != undefined){
         var matching = getUsersByRoom(user.room);
         for (var i = matching.length - 1; i >= 0; i--) {
-         var match =  matching[i];
-         if(match.socket != undefined)
+           var match =  matching[i];
+           if(match.socket != undefined)
             match.socket.emit('stopTyping',{'username':user.username});
     };
 }
@@ -335,13 +335,13 @@ app.post('/reguser',function(req,res){
             req.session.username = req.body.username;
             res.json(result);
         }else{
-         var result = {};
-         result.status='errors';
-         result.errors = errors;
-         console.log(errors);
-         res.json(result);
-     }
- });
+           var result = {};
+           result.status='errors';
+           result.errors = errors;
+           console.log(errors);
+           res.json(result);
+       }
+   });
 
 });
 
@@ -356,13 +356,110 @@ app.post('/login',function(req,res){
     var body = req.body;
     login(body.username,body.password,function(sucessful){
         if(sucessful){
-            //req.session.username=body.username;
+            req.session.username=body.username;
             res.json({"status":"OK"});
         }
         else{
             res.json({"status":"failure"})
         }
     });
+});
+
+app.post('/archive',function(req,res){
+    var body = JSON.parse(req.body.blarg);
+    body.order = body.order || {};
+    body.order.by = body.order.by || 'id';
+    body.order.direction = body.order.direction || 'ASC';
+    if(req.session.username){
+        getUser(req.session.username,function(user){
+            if(user && user.permissions && user.permissions.archive) {
+                try {
+                    if (body.type == 'chat') {
+                        var sql = 'SELECT user_id,room_id,message,time FROM chat ';
+                        if (body.where.field) {
+                            sql += 'WHERE ' + body.where.field + ' ' + body.where.equals + ' ';
+                        }
+                        if (body.range.stop != 0) {
+                            sql += ' LIMIT ' + body.range.start + ',' + body.range.stop + ' ';
+                        }
+                        connection.query(sql, function (err1, results) {
+                            if(!results){ res.json({'success': false, 'message': 'SQL ERROR/NO RESULTS'})}
+                            else {
+                                connection.query('SELECT id,username FROM users', function (err2, users) {
+                                    if (err1 || err2) {
+                                        res.json({'success': false, 'message': 'SQL ERROR'})
+                                    }
+                                    else {
+                                        var getUser = function (id) {
+
+                                            for (var j = users.length - 1; j >= 0; j--) {
+                                                if (users[j].id == id)
+                                                    return users[j];
+                                            }
+                                            ;
+                                        }
+                                        for (var i = results.length - 1; i >= 0; i--) {
+                                            var result = results[i];
+                                            var user = getUser(result.user_id);
+                                            var room = getRoomById(result.room_id);
+                                            result.username = user.username || '*REMOVED*';
+                                            result['room_name*'] = room ? room.name : '*DELETED*';
+                                        }
+                                        ;
+                                        res.json({success: true, info: results});
+                                    }
+                                });
+                            }
+                         });
+
+                    } else if (body.type == 'users') {
+                        var sql = 'SELECT id,username,first_name,last_name,email,group_id FROM users ';
+                        if (body.where.field) {
+                            sql += 'WHERE ' + body.where.field + '  =  "' + body.where.equals + '" ';
+                        }
+                        if (body.range.stop != 0) {
+                            sql += ' LIMIT ' + body.range.start + ',' + body.range.stop + ' ';
+                        }
+                        connection.query(sql, function (err1, results) {
+                             if(!results){ res.json({'success': false, 'message': 'SQL ERROR/NO RESULTS'})}
+                            else {
+                                 connection.query('SELECT id,name FROM groups', function (err2, groups) {
+                                     if (err1 || err2) {
+                                         res.json({'success': false, 'message': 'SQL ERROR'})
+                                     }
+                                     else {
+                                         var getGroup = function (id) {
+
+                                             for (var j = groups.length - 1; j >= 0; j--) {
+                                                 if (groups[j].id == id)
+                                                     return groups[j];
+                                             }
+                                             ;
+                                         }
+                                         for (var i = results.length - 1; i >= 0; i--) {
+                                             var result = results[i];
+                                             var group = getGroup(result.group_id);
+                                             result.grou_name = group ? group.name : '*DELETED*';
+                                         }
+                                         ;
+                                         res.json({success: true, info: results});
+                                     }
+                                 });
+                             }
+                        });
+                    }
+                }catch(error) {
+                    res.json({'success':false,'message':'SQL ERROR'})
+                }
+            }
+            else{
+                res.json({'success':false,'message':'INVALID PERMISSIONS'});
+            }
+        });
+    }
+    else{
+        res.json({'success':false,'message':'LOGIN'});
+    }
 });
 
 app.post('/addRoom',function(req,res){
@@ -410,9 +507,9 @@ var isValidUser=function(data,callback){
             connection.query("SELECT `id` from "+ruleVal.table+" where "+ruleVal.column+" = '"+value+"'",function(err,result){
                 console.log(err);
                 if(result !== undefined && result.length>1)
-                 errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
-             setTimeout(function(){next(errors);},1);
-         });
+                   errors.push({"element": dataKey, "text": "Your "+dataKey+" must be unique"});
+               setTimeout(function(){next(errors);},1);
+           });
         }
         else if(rule== 'matches'){
             if(value !== data[ruleVal])
@@ -435,14 +532,14 @@ var isValidUser=function(data,callback){
       if(j==0 && currentValidation == rules.length)
         validate(rule,ruleVal,dataKey,value,callback);
     else {
-       if(currentValidation  >= rules.length)
-       {
-         j--;
-         currentValidation=0;
-     }
-     validate(rule,ruleVal,dataKey,value,runNextValidation);
+     if(currentValidation  >= rules.length)
+     {
+       j--;
+       currentValidation=0;
+   }
+   validate(rule,ruleVal,dataKey,value,runNextValidation);
 
- }
+}
 };
 var rules = Object.keys(config.register_validataions);
 for (var i = rules.length - 1; i >= 0; i--) {
@@ -499,7 +596,7 @@ var addRoom = function(data,callback){
 
 var deleteRoom = function(data,callback){
     connection.query('DELETE FROM rooms WHERE id = '+data.id,function(err,result){
-     if(err !== null)
+       if(err !== null)
         console.error("At Add room: %s",err);
     if(callback!== null && callback!== undefined)
         callback();
@@ -508,7 +605,7 @@ var deleteRoom = function(data,callback){
 
 var updateRooms = function(callback){
     var query = connection.query("SELECT * FROM rooms",function(err,result){
-       if(err !== null)
+     if(err !== null)
         console.error("At Update room: %s",err);
     rooms=[];
     for (var i = result.length - 1; i >= 0; i--) {
@@ -520,9 +617,10 @@ var updateRooms = function(callback){
     
 });
 }
+updateRooms();
 
 var getUser = function(username,callback){
- var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
+   var query = connection.query('SELECT * from users where username = "'+username+'"',function(err,result){
     var user =result[0];
     connection.query('SELECT * from groups where id = '+user.group_id,function(err,res){
         if(err != null)
@@ -553,9 +651,9 @@ var login = function(username,password,callback){
         });
     }
     else{
-         if (callback !== undefined)
-                    callback(false);
-    }
+       if (callback !== undefined)
+        callback(false);
+}
 };
 
 var guid = function() {
@@ -606,9 +704,9 @@ var sanitize = function(chat){
         if(match.match(image_regex))
             chat = chat.replace(match,"<img src='"+match+"'></img>");
         else
-             chat = chat.replace(match,"<a target='_blank' href='"+match+"'>"+match+"</a>");
-    };
-    return chat;
+           chat = chat.replace(match,"<a target='_blank' href='"+match+"'>"+match+"</a>");
+   };
+   return chat;
 }
 
 var getGroups = function(){
@@ -618,8 +716,8 @@ getGroups();
 
 var getGroupById=function(id){
     for (var i = groups.length - 1; i >= 0; i--) {
-     var group= groups[i];
-     if(group.id==id)
+       var group= groups[i];
+       if(group.id==id)
         return group;
 };
 };
@@ -688,36 +786,36 @@ var sendEmails = function(){
             var admin_message = '';
             if(result.type=='request'){
                 message += 'Thank you '+ result.name + " for submitting request\n\n" +  result.report +"\n\nWe will be looking into it shortly";
-                 admin_message = 'subject: NEW REQUEST\r\n\r\n';
+                admin_message = 'subject: NEW REQUEST\r\n\r\n';
                 admin_message+=result.name+' submitted request "' + result.report+'"';
                 connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
             }
             else if(result.type='bug'){
-                 message += 'Thank you '+ result.name + " for submitting bug report\n\n" +  result.report +"\n\nWe will be looking into it shortly. Your Ticket Id is "+result.id;
-                admin_message = 'subject: NEW BUG\r\n\r\n';
-                admin_message+=result.name+' submitted bug "' + result.report+'"';
-                 connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
-            }
-            mail('gsmstchat@gmail.com',result.email,message);
-            connection.query('SELECT `email` FROM `chat`.`users` WHERE group_id=4 or group_id=5',function(error,admins){
-                for (var j = admins.length - 1; j >= 0; j--) {
-                    var admin = admins[j];
+               message += 'Thank you '+ result.name + " for submitting bug report\n\n" +  result.report +"\n\nWe will be looking into it shortly. Your Ticket Id is "+result.id;
+               admin_message = 'subject: NEW BUG\r\n\r\n';
+               admin_message+=result.name+' submitted bug "' + result.report+'"';
+               connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
+           }
+           mail('gsmstchat@gmail.com',result.email,message);
+           connection.query('SELECT `email` FROM `chat`.`users` WHERE group_id=4 or group_id=5',function(error,admins){
+            for (var j = admins.length - 1; j >= 0; j--) {
+                var admin = admins[j];
                   //   mail('gsmstchat@gmail.com',admin.email,admin_message);
-                };
-            });
-        };
-    });
-    connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0',function(err,results){
-        for (var i = results.length - 1; i >= 0; i--) {
-            var result = results[i];
-            var message = 'subject: NOREPLY\r\n\r\n';
+              };
+          });
+       };
+   });
+connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0',function(err,results){
+    for (var i = results.length - 1; i >= 0; i--) {
+        var result = results[i];
+        var message = 'subject: NOREPLY\r\n\r\n';
 
-                 message += 'Thank you '+ result.first_name + ' '+ result.last_name + " for registering at GSMSTCHAT.com";
-                 connection.query('UPDATE `chat`.`users` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
+        message += 'Thank you '+ result.first_name + ' '+ result.last_name + " for registering at GSMSTCHAT.com";
+        connection.query('UPDATE `chat`.`users` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
 
-            mail('gsmstchat@gmail.com',result.email,message);
-        };
-    });
+        mail('gsmstchat@gmail.com',result.email,message);
+    };
+});
 };
 
 sendEmails();
