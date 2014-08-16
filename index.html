@@ -60,6 +60,7 @@
 		<ul class="nav navbar-nav " style="width:100%">
 			<li class="navbar-left"><span class='glyphicon glyphicon-circle-arrow-right navbar-text'  style='font-size:x-large;float:left;display:none' id='leaveRoom'></span></li>
 			<li><span class='glyphicon glyphicon-plus-sign navbar-text' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span></li>
+			<li><span class='glyphicon glyphicon-refresh navbar-text' style='font-size:x-large' id='restart' ng-show="state.permissions.restart" ></span></li>
 			<li ng-show="state.permissions.archive"><a href="archive.html">Archive</a></li>
 			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip"  >ProTip!</a></li>
 				<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings" >Change Settings</a></li>
@@ -296,6 +297,9 @@ $(document).ready(function() {
 	}
 	$('#chatbox').keypress(function(event) {
 		startTyping();
+	});
+	$('#restart').click(function(event){
+		socket.emit('restart',{});
 	});
 	$(document).on('click','room-button',function(event) {
 

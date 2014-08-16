@@ -41,7 +41,11 @@ socket.on('chat',function(message){
 	var $text =$('<span></span>');
 	var $small = $('<small></small>');
 	var $time = $('<small></small>');
-	if(message.rank != 'user')
+	var $kick  = $('<a href="#"><span class="glyphicon glyphicon-ban-circle text-danger"></span></a>');
+	$kick.on('click',function(event){
+		socket.emit('kick',{"user_id":message.user_id});
+	});
+	if(message.rank != 'User')
 		$small.append('['+message.rank+'] ');
 	$strong.text(message.user+": ");
 	$small.addClass('chat_rank');
@@ -58,7 +62,6 @@ socket.on('chat',function(message){
 
     if (seconds < 10) 
      seconds = '0' + seconds;
-//var timeString = hours+":"+miuntes+":"+seconds
 	$time.text(hours+":"+minutes+":"+seconds);
 	$time.addClass('chat_time');
 
@@ -81,6 +84,8 @@ socket.on('chat',function(message){
 			$text.css('background-color',color.textBackground);
 		}
 	}
+	if(message.kickable && state.permissions.create)
+		$p.append($kick);
 	$p.append($small);
 	$p.append($strong);
 	$p.append($text);
@@ -111,6 +116,11 @@ socket.on('alert',function(message){
 		text = message.user+' left room';
 	}else if(message.alert=='invalid password'){
 		text = '<span class="alert alert-danger">Invalid Room Password</span>';
+	}else if(message.alert=='danger'){
+		text = '<span class="alert alert-danger">'+message.text+'</span>';
+	}
+	else if(message.alert=='info'){
+		text = '<span class="alert alert-info">'+message.text+'</span>';
 	}
 	$('#chatArea').append($('<footer></footer>').append(text));
 });
