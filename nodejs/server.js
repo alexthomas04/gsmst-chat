@@ -792,7 +792,7 @@ var sendEmails = function(){
                 admin_message+=result.name+' submitted request "' + result.report+'"';
                 connection.query('UPDATE `chat`.`reports` SET ? WHERE id = '+result.id,{informed:1},function(err,result){if(err!=undefined)console.error(err);});
             }
-            else if(result.type='bug'){
+            else if(result.type=='bug'){
                message += 'Thank you '+ result.name + " for submitting bug report\n\n" +  result.report +"\n\nWe will be looking into it shortly. Your Ticket Id is "+result.id;
                admin_message = 'subject: NEW BUG\r\n\r\n';
                admin_message+=result.name+' submitted bug "' + result.report+'"';
@@ -802,7 +802,7 @@ var sendEmails = function(){
            connection.query('SELECT `email` FROM `chat`.`users` WHERE group_id=4 or group_id=5',function(error,admins){
             for (var j = admins.length - 1; j >= 0; j--) {
                 var admin = admins[j];
-                  //   mail('gsmstchat@gmail.com',admin.email,admin_message);
+                     mail('gsmstchat@gmail.com',admin.email,admin_message);
               };
           });
        };
