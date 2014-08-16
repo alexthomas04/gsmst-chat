@@ -231,7 +231,7 @@ io.on('connection', function(socket) {
 				"username": user.username
 			};
 			result.permissions = user.permissions;
-			connection.query("SELECT * FROM private WHERE to_id = "+user.id,function(err,results){
+			connection.query("SELECT * FROM private WHERE to_id = "+user.id+' order by id desc',function(err,results){
 				result.privates = results;
 				result.unread = 0;
 				for(var i =0;i<results.length;i++){
@@ -798,15 +798,13 @@ updateRooms();
 var getUser = function(username, callback) {
 	var query = connection.query('SELECT * from users where username = "' + username + '"', function(err, result) {
 		var user = result[0];
-        if(user) {
-            connection.query('SELECT * from groups where id = ' + user.group_id, function (err, res) {
-                if (err != null)
-                    console.error("At get User group : " + err);
-                user.permissions = JSON.parse(res[0].permissions);
-                callback(user);
-            });
-        }else
-        callback();
+		connection.query('SELECT * from groups where id = ' + user.group_id, function(err, res) {
+			if (err != null)
+				console.error("At get User group : " + err);
+			user.permissions = JSON.parse(res[0].permissions);
+			callback(user);
+		});
+
 	});
 };
 
@@ -920,6 +918,7 @@ var ban = function(user, room, duration) {
 }
 
 var isBanned = function(user, room, callback) {
+	if(user){
 	connection.query("SELECT id,time,duration FROM kicks WHERE user_id = " + user.id + " and room_id = " + room.id, function(err, results) {
 		if (results == undefined || results == null || results.length == 0) {
 			if (callback != undefined) {
@@ -940,6 +939,10 @@ var isBanned = function(user, room, callback) {
 			}
 		}
 	});
+	}
+	else{
+		callback(false);
+	}
 }
 
 setInterval(function() {

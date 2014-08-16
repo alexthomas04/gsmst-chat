@@ -55,11 +55,13 @@
 	</div>
 	<nav class='navbar navbar-default'>
 		<ul class="nav navbar-nav " style="width:100%">
-			<li class="navbar-left"><span class='glyphicon glyphicon-circle-arrow-right navbar-text' style='font-size:x-large;float:left;display:none' id='leaveRoom'></span>
+			<li class=""><a style='font-size:large;display:none' id='leaveRoom'><span class='glyphicon glyphicon-circle-arrow-right ' ></span>
+			</a>
 			</li>
-			<li><span class='glyphicon glyphicon-plus-sign navbar-text' style='font-size:x-large' id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"></span>
+			<li><a id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"><span class='glyphicon glyphicon-plus-sign ' style='font-size:large' ></span>
+			</a>
 			</li>
-			<li><span class='glyphicon glyphicon-refresh navbar-text' style='font-size:x-large' id='restart' ng-show="state.permissions.restart"></span>
+			<li ng-show="state.permissions.restart" id='restart'><a><span class='glyphicon glyphicon-refresh ' style='font-size:large'  ></span></a>
 			</li>
 			<li ng-show="state.permissions.archive"><a href="archive.html">Archive</a>
 			</li>
@@ -99,9 +101,9 @@
 			</li>
 			<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a>
 			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:x-large' class='glyphicon glyphicon-envelope'></span></a>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:large' class='glyphicon glyphicon-envelope'></span></a>
 			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#inbox" onclick='socket.emit("readMessages",{});'><span style='font-size:x-large' class='glyphicon glyphicon-inbox'></span><span class='badge'>{{state.unread}}</span></a>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#inbox" onclick='socket.emit("readMessages",{});'><span style='font-size:large' class='glyphicon glyphicon-inbox'></span><span class='badge'>{{state.unread}}</span></a>
 			</li>
 			<li ng-hide="state.status==='Logged in'" id="loginSection" class="navbar-right"><a class="" id="loginButton">Login</a>
 				<login class='' style=''></login>
@@ -261,21 +263,23 @@
 					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 					</button>
 					<h4 class="modal-title">Inbox</h4>
+
 				</div>
 				<div class="modal-body">
 					<div ng-repeat='message in state.privates'>
 						<div class="panel panel-default">
 							<div class="panel-heading">
 								<h3 class="panel-title">{{message.from_username}}</h3>
+								<small>{{message.time | date : 'medium'}} </small>
 							</div>
 							<div class="panel-body">
 								{{message.message}}
 							</div>
 							<div class="panel-footer">
 								<button class='btn btn-primary' ng-click='replyToPrivate(message.from_username)' data-dismiss="modal" data-toggle="modal" data-target="#sendMessage">Reply</button>
-								<button class='btn btn-danger' ng-click='deletePrivate(message.id)'> Delete</button>
+								<button class='btn btn-danger' ng-click='deletePrivate(message.id)'>Delete</button>
 							</div>
-							
+
 						</div>
 
 					</div>
@@ -290,7 +294,7 @@
 		<!-- /.modal-dialog -->
 	</div>
 	<!-- /.modal -->
-<div class="modal fade" id="sendMessage">
+	<div class="modal fade" id="sendMessage">
 		<div class="modal-dialog">
 			<div class="modal-content" send>
 				<div class="modal-header">
