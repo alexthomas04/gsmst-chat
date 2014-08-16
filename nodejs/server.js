@@ -379,8 +379,9 @@ app.post('/archive',function(req,res){
                         if (body.where.field) {
                             sql += 'WHERE ' + body.where.field + ' ' + body.where.equals + ' ';
                         }
-                        if (body.range.stop != 0) {
-                            sql += ' LIMIT ' + body.range.start + ',' + body.range.stop + ' ';
+                        sql+='ORDER BY '+ body.order.by +' '+body.order.direction +' ';
+                        if (body.range.length != 0) {
+                            sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
                         }
                         connection.query(sql, function (err1, results) {
                             if(!results){ res.json({'success': false, 'message': 'SQL ERROR/NO RESULTS'})}
@@ -417,8 +418,9 @@ app.post('/archive',function(req,res){
                         if (body.where.field) {
                             sql += 'WHERE ' + body.where.field + '  =  "' + body.where.equals + '" ';
                         }
-                        if (body.range.stop != 0) {
-                            sql += ' LIMIT ' + body.range.start + ',' + body.range.stop + ' ';
+                        sql+='ORDER BY ' +body.order.by +' '+body.order.direction +' ';
+                        if (body.range.length != 0) {
+                            sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
                         }
                         connection.query(sql, function (err1, results) {
                              if(!results){ res.json({'success': false, 'message': 'SQL ERROR/NO RESULTS'})}
@@ -439,7 +441,7 @@ app.post('/archive',function(req,res){
                                          for (var i = results.length - 1; i >= 0; i--) {
                                              var result = results[i];
                                              var group = getGroup(result.group_id);
-                                             result.grou_name = group ? group.name : '*DELETED*';
+                                             result['group_name*'] = group ? group.name : '*DELETED*';
                                          }
                                          ;
                                          res.json({success: true, info: results});

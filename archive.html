@@ -40,8 +40,8 @@
         <div class="form-group">
             <label>From</label>
             <input class="form-control" ng-model='archive.range.start' value=0 type="number">
-            <label>To</label>
-            <input class="form-control" ng-model='archive.range.stop' value="100" type="number">
+            <label>Count</label>
+            <input class="form-control" ng-model='archive.range.length' value="100" type="number">
         </div>
         <div class="form-group">
             <label>Where (field)</label>
@@ -49,6 +49,17 @@
             <label>is equal to</label>
             <input class="form-control" ng-model='archive.where.equals' type='text'>
         </div>
+        <div class='form-goup'>
+            <label>Order By</label>
+            <input type="text" class="form-control" ng-model='archive.order.by'>
+            <div class="btn-group" data-toggle='buttons'>
+                <label class="btn btn-info active" ng-click='archive.order.direction="ASC"'>
+                <input type="radio"   >Ascending</label>
+                <label class="btn btn-info " ng-click='archive.order.direction="DESC"'>
+                <input type="radio" class="btn btn-info" >Descending</label>
+            </div>
+        </div>
+        <button class="btn btn-primary" ng-click="archive.select()">Go</button>
     </div>
     <div class='container'>
         	<table class="table table-bordered">
