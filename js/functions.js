@@ -122,7 +122,7 @@ socket.on('alert',function(message){
 	else if(message.alert=='info'){
 		text = '<span class="alert alert-info">'+message.text+'</span>';
 	}
-	$('#chatArea').append($('<footer></footer>').append(text));
+	$('#chatArea').append($('<p></p>').append(text));
 });
 
 socket.on('startTyping',function(message){
