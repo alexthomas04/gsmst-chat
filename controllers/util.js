@@ -54,7 +54,7 @@ app.directive('addroom', [function () {
 				$('isDeleteable').addClass('active');
 				scope.roomPassword='';
 
-			}
+			};
 			scope.toggleDelete=function(){
 				deleteAble = !deleteAble;
 				$('#isDeleteable').toggleClass('btn-danger').toggleClass('btn-success');
@@ -72,7 +72,7 @@ app.directive('roomButton', [function () {
 			$(iElement).data('roomData',scope.room);
 			scope.deleteRoom = function(id){
 				socket.emit('deleteRoom',{"id":id});
-			}
+			};
 			scope.enterRoom=function(){
 				if(canEnterRoom(state,scope.room)){
 				socket.emit('join-room',{roomId:scope.room.id,password:scope.roomPassword});
@@ -85,7 +85,7 @@ app.directive('roomButton', [function () {
 	    			});
 	    			$('#leaveRoom').show();
 	    		}
-			}
+			};
 		}
 	};
 
@@ -104,7 +104,7 @@ app.directive('room', [function () {
 			}
 				
 				
-			}
+			};
 		}
 	};
 }]);
@@ -119,21 +119,21 @@ app.directive('settings', [function () {
 			if(settings.showRank)
 				scope.showRankState='hide';
 			else
-				scope.showRankState='show'
+				scope.showRankState='show';
 			if(settings.showTime)
 				scope.showTimeState='hide';
 			else
-				scope.showTimeState='show'
-		}
+				scope.showTimeState='show';
+		};
 		updateShows();
 		scope.toggleTime=function(){
 			settings.showTime=!settings.showTime;
 			updateShows();
-		}
+		};
 		scope.toggleRank=function(){
 			settings.showRank=!settings.showRank;
 			updateShows();
-		}
+		};
 
 			scope.saveSettings = function(){
 				updateSettings();
@@ -147,7 +147,33 @@ app.directive('report', [function () {
 		link: function (scope, iElement, iAttrs) {
 			scope.report = function(type){
 				socket.emit('report',{name:scope.name,email:scope.email,report:scope.info,'type':type});
-			}
+			};
+		}
+	};
+}]);
+app.directive('send', [function () {
+	return {
+		restrict: 'A',
+		link: function (scope, iElement, iAttrs) {
+			scope.sendPrivate = function(type){
+				socket.emit('private',{to_username:scope.to,message:scope.privateMessage});
+				scope.privateMessage='';
+				scope.to='';
+			};
+		}
+	};
+}]);
+app.directive('inbox', [function () {
+	return {
+		restrict: 'A',
+		link: function (scope, iElement, iAttrs) {
+			scope.deletePrivate = function(id){
+				socket.emit('deletePrivate',{"id":id});
+			};
+			scope.replyToPrivate=function(to){
+				scope.to=to;
+			};
+			
 		}
 	};
 }]);

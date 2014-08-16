@@ -74,7 +74,7 @@ io.on('connection', function(socket) {
 				match.socket.emit('alert', {
 					"alert": "left",
 					'user': user.username
-				})
+				});
 			};
 			user.room = undefined;
 			user.socket = undefined;
@@ -92,12 +92,7 @@ io.on('connection', function(socket) {
 					user = param;
 					user.socket = socket;
 					users.push(user);
-					var result = {
-						"status": "Logged in",
-						"username": user.username
-					};
-					result.permissions = user.permissions;
-					socket.emit('me', result)
+					emitSelf(socket);
 				});
 
 			}
@@ -218,26 +213,58 @@ io.on('connection', function(socket) {
 			response.time = new Date();
 			for (var i = matching.length - 1; i >= 0; i--) {
 				var match = matching[i];
-				match.socket.emit('chat', response)
+				match.socket.emit('chat', response);
 			};
 		}
 	});
-
-	socket.on('me', function(message) {
+	var emitSelf = function(emitSocket){
 		var result = {};
-		if (user === {})
+			if (user === {}){
 			result = {
 				"status": "Not logged in"
 			};
+				emitSocket.emit('me', result);
+			}
 		else {
 			result = {
 				"status": "Logged in",
 				"username": user.username
 			};
 			result.permissions = user.permissions;
+			connection.query("SELECT * FROM private WHERE to_id = "+user.id,function(err,results){
+				result.privates = results;
+				result.unread = 0;
+				for(var i =0;i<results.length;i++){
+					var message = results[i];
+					if(message.read==0){
+						result.unread++;
+						
+					}
+				}
+				emitSocket.emit('me', result);
+			});
 		}
 
-		socket.emit('me', result)
+		
+	};
+	
+	socket.on('readMessages',function(message){
+		if(user)
+			connection.query('UPDATE private SET ? WHERE to_id = '+user.id,{read:1},function(err,nothing){
+			emitSelf(socket);
+		});
+	});
+	socket.on('deletePrivate',function(message){
+		if(user){
+			connection.query('DELETE FROM private WHERE `to_id` = '+user.id+" and `id` = "+message.id,function(err,nothing){
+			emitSelf(socket);
+		});
+		}
+	});
+	
+	socket.on('me', function(message) {
+		emitSelf(socket);
+		
 	});
 
 	socket.on('addRoom', function(message) {
@@ -273,7 +300,7 @@ io.on('connection', function(socket) {
 				match.socket.emit('alert', {
 					"alert": "left",
 					'user': user.username
-				})
+				});
 			};
 			user.room = undefined;
 			emitRooms();
@@ -358,6 +385,22 @@ io.on('connection', function(socket) {
 		if(user != undefined && user.permissions != undefined && user.permissions.restart){
 			io.emit('alert',{'alert':'info',"text":"The server is restarting. Please refresh your page."});
 			setTimeout(function(){process.exit()},100);
+		}
+	})
+	
+	socket.on('private',function(message){
+		if(user != undefined && user.permissions.chat){
+			if(message.message && message.to_username){
+				getUser(message.to_username,function(to){
+					if(to){
+						var insertVars = {to_id:to.id,from_id:user.id,"message":message.message,time:new Date(),from_username:user.username};
+						connection.query('INSERT INTO private SET ?',insertVars,function(err,result){if(err){console.error(err);}});
+						var onlineTo = getUserById(to.id);
+						if(onlineTo)
+							emitSelf(onlineTo.socket);
+					}
+				})
+			}
 		}
 	})
 
@@ -755,13 +798,15 @@ updateRooms();
 var getUser = function(username, callback) {
 	var query = connection.query('SELECT * from users where username = "' + username + '"', function(err, result) {
 		var user = result[0];
-		connection.query('SELECT * from groups where id = ' + user.group_id, function(err, res) {
-			if (err != null)
-				console.error("At get User group : " + err);
-			user.permissions = JSON.parse(res[0].permissions);
-			callback(user);
-		});
-
+        if(user) {
+            connection.query('SELECT * from groups where id = ' + user.group_id, function (err, res) {
+                if (err != null)
+                    console.error("At get User group : " + err);
+                user.permissions = JSON.parse(res[0].permissions);
+                callback(user);
+            });
+        }else
+        callback();
 	});
 };
 
