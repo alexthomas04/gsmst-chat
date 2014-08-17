@@ -98,9 +98,16 @@ app.directive('room', [function () {
 			scope.chat = function(){
 				if(state.status==='Logged in')
 	    		{
+					if(scope.message.indexOf('!word') == 0 && state.permissions.words){
+                        var number = Number(scope.message.match(new RegExp(/\d+/))[0]);
+                        if (number==0)
+                            number=1;
+						socket.emit('words',{count:number});
+					}else{
 				socket.emit('chat',{'chat':scope.message});
 				socket.emit('stopTyping',{});
 				scope.message='';
+					}
 			}
 				
 				
