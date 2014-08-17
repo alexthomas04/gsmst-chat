@@ -115,14 +115,16 @@ socket.on('alert',function(message){
 	else if(message.alert=='left'){
 		text = message.user+' left room';
 	}else if(message.alert=='invalid password'){
-		text = '<span class="alert alert-danger">Invalid Room Password</span>';
+		text = '<div class="alert alert-danger">Invalid Room Password</div>';
 	}else if(message.alert=='danger'){
-		text = '<span class="alert alert-danger">'+message.text+'</span>';
+		text = '<div class="alert alert-danger">'+message.text+'</div>';
 	}
 	else if(message.alert=='info'){
-		text = '<span class="alert alert-info">'+message.text+'</span>';
+		text = '<div class="alert alert-info">'+message.text+'</div>';
+	}else if(message.alert == 'new message'){
+		text = '<div class="alert alert-info">'+message.from+' says: '+message.message+'</div>';
 	}
-	$('#chatArea').append($('<p></p>').append(text));
+	$('#chatArea').append($('<div></div>').append(text));
 });
 
 socket.on('startTyping',function(message){

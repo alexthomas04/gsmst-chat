@@ -396,8 +396,10 @@ io.on('connection', function(socket) {
 						var insertVars = {to_id:to.id,from_id:user.id,"message":message.message,time:new Date(),from_username:user.username};
 						connection.query('INSERT INTO private SET ?',insertVars,function(err,result){if(err){console.error(err);}});
 						var onlineTo = getUserById(to.id);
-						if(onlineTo)
+						if(onlineTo){
 							emitSelf(onlineTo.socket);
+                            onlineTo.socket.emit('alert',{'alert':'new message','message':message.message,'from':user.username});
+                        }
 					}
 				})
 			}
