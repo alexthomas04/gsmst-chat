@@ -19,7 +19,12 @@ app.directive('login', [function () {
 			socket.on('me',function(message){
 				scope.state = state;
 				scope.$apply();
-				console.log(scope);
+				console.log(message);
+				if(scope.rememberMe)
+				$.cookie('hash',message.hash,{
+					path: '/',
+					expires: 1
+				});
 			});
 			
 		}

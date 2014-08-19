@@ -14,7 +14,13 @@
 			<label>Password</label>
 			<input class="form-control" type="password" ng-model='password' id='password'>
 		</div>
+		<div class='form-group'>
+			<label>Remeber Me</label>
+			<input type='checkbox' ng-model='rememberMe'>
+		</div>
+		
 		<button ng-click="login()" class="btn btn-primary">Go</button>
+		
 	</form>
 	<a href="register.html">Register</a><span class='text-primary'> | </span>
 	<a href="forgot">Forgot Password?</a><span class='text-primary'> | </span>

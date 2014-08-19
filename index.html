@@ -101,6 +101,8 @@
 			</li>
 			<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a>
 			</li>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a onClick='$.cookie("hash","");location.reload();' >Logout</a>
+			</li>
 			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:large' class='glyphicon glyphicon-envelope'></span></a>
 			</li>
 			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#inbox" onclick='socket.emit("readMessages",{});'><span style='font-size:large' class='glyphicon glyphicon-inbox'></span><span class='badge'>{{state.unread}}</span></a>
@@ -408,7 +410,7 @@
 	<script type="text/javascript">
 		// setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
 		$(document).ready(function() {
-
+			socket.emit('login',{hash:$.cookie('hash')});
 			$('#styleSelect>li>a').click(function(event) {
 				$('link').attr('href', $(this).attr('rel'));
 				$.cookie('css', $(this).attr('rel'), {
