@@ -28,7 +28,7 @@ var simplesmtp = require('simplesmtp');
 
 var connection = mysql.createConnection(config.mysql);
 connection.connect(function(err) {
-	console.log(err)
+	console.log(err);
 });
 
 
@@ -239,24 +239,30 @@ io.on('connection', function(socket) {
 			};
 		}
 	});
-	socket.on('words', function(message) {
+	socket.on('random', function(message) {
+		var db='words';
+		var field='word';
+		if(message.type=='funny'){
+			db='funny';
+			field='text';
+		}
 		var count = message.count || 1;
 		if (user && user.permissions && user.permissions.words) {
-			connection.query("SELECT COUNT(*) FROM words", function(err, result) {
+			connection.query("SELECT COUNT(*) FROM "+db, function(err, result) {
 				var indexes = [];
 				for (var i = 0; i < count; i++) {
 					indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
 
 				}
-				connection.query('SELECT word FROM words WHERE ' + indexes.join(' or '), function(error, results) {
+				connection.query('SELECT '+field+' FROM '+db+' WHERE ' + indexes.join(' or '), function(error, results) {
 					var words = [];
 					for (var j = 0; j < results.length; j++) {
-						words.push(results[j].word);
+						words.push(results[j][field]);
 					}
 					var matching = getUsersByRoom(user.room);
 					for (var j = 0; j < matching.length; j++) {
 						matching[j].socket.emit('chat', {
-							chat: words.join(','),
+							chat: words.join(',').replace(/\w,/g,", "),
 							user: 'SERVER',
 							'user_id': -1,
 							kickable: false,
@@ -294,7 +300,6 @@ io.on('connection', function(socket) {
 					var message = results[i];
 					if (message.read == 0) {
 						result.unread++;
-
 					}
 				}
 				emitSocket.emit('me', result);
@@ -1114,6 +1119,7 @@ var sendEmails = function() {
 
 			mail('gsmstchat@gmail.com', result.email, message);
 		};
+        
 	});
 };
 

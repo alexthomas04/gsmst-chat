@@ -35,7 +35,7 @@ socket.on('rooms',function(message){
 });
 var height=10;
 socket.on('chat',function(message){
-	height+=100;
+	height+=400;
 	var $p = $('<p></p>');
 	var $strong = $('<strong></strong>');
 	var $text =$('<span></span>');
@@ -89,14 +89,15 @@ socket.on('chat',function(message){
 	$p.append($small);
 	$p.append($strong);
 	$p.append($text);
-	$p.append($time)
+	$p.append($time);
 	$('#chatArea').append($p).scrollTop(height);
 	if(document.body.className=='blurred'){
+		document.title='You have';
 		clearInterval(interval);
 		interval = setInterval(function(){
 			if(document.title=="New Assignment"){
-				document.title='You have'
-			}else if(document.title='You have'){
+				document.title='You have';
+			}else if(document.title=='You have'){
 				document.title='New Assignment';
 			}
 		},1000);
@@ -105,6 +106,7 @@ socket.on('chat',function(message){
 
 socket.on('alert',function(message){
 	var text='';
+	
 	if(message.alert=='entered'){
 		text = message.user +' entered room';
 		if(message.entrance != undefined){
@@ -125,6 +127,8 @@ socket.on('alert',function(message){
 		text = '<div class="alert alert-info">'+message.from+' says: '+message.message+'</div>';
 	}
 	$('#chatArea').append($('<div></div>').append(text));
+	height+=400;
+	$('#chatArea').scrollTop(height);
 });
 
 socket.on('startTyping',function(message){
@@ -140,6 +144,7 @@ socket.on('stopTyping',function(message){
 });
 
 socket.on('file',function(message){
+	
 	var $p = $('<p></p>');
 	var $strong = $('<strong></strong>');
 	var $img = $('<img></img>');
@@ -163,6 +168,7 @@ socket.on('file',function(message){
 	}
 	$p.append($strong);
 	$p.append($img);
+	height+=400;
 	$('#chatArea').append($p).scrollTop(height);
 });
 

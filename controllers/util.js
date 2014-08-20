@@ -107,7 +107,9 @@ app.directive('room', [function () {
                         var number = Number(scope.message.match(new RegExp(/\d+/))[0]);
                         if (number==0)
                             number=1;
-						socket.emit('words',{count:number});
+						socket.emit('random',{count:number,type:'words'});
+					}else if(scope.message.indexOf('!funny') == 0 && state.permissions.words){
+						socket.emit('random',{count:1,type:'funny'});
 					}else{
 				socket.emit('chat',{'chat':scope.message});
 				socket.emit('stopTyping',{});
