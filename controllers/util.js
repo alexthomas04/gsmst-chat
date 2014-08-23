@@ -122,6 +122,9 @@ app.directive('room', [function () {
 					}
 					else if(scope.message.indexOf('!satHelp') == 0 && state.permissions.chat){
 					socket.emit('sat',{type:'help'});
+					}
+					else if(scope.message.indexOf('!satQuestion') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'question'});
 					}else{
 				socket.emit('chat',{'chat':scope.message});
 				socket.emit('stopTyping',{});
