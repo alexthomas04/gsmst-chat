@@ -110,12 +110,25 @@ app.directive('room', [function () {
 						socket.emit('random',{count:number,type:'words'});
 					}else if(scope.message.indexOf('!funny') == 0 && state.permissions.words){
 						socket.emit('random',{count:1,type:'funny'});
+					
+					}else if(scope.message.indexOf('!satWord') == 0 && state.permissions.words){
+						socket.emit('sat',{type:'word'});
+					}
+				else if(scope.message.indexOf('!satDefine') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'define',word:scope.message.substring('!satDefine'.length+1)});
+					}
+					else if(scope.message.indexOf('!satSentence') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'sentence',word:scope.message.substring('!satSentence'.length+1)});
+					}
+					else if(scope.message.indexOf('!satHelp') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'help'});
 					}else{
 				socket.emit('chat',{'chat':scope.message});
 				socket.emit('stopTyping',{});
 				scope.message='';
-					}
+					
 			}
+				}
 				
 				
 			};

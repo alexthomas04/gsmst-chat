@@ -155,252 +155,308 @@ io.on('connection', function(socket) {
 					if (user != undefined && user.room == undefined) {
 						user.room = room;
 						emitRooms();
-						connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
-							var matching = getUsersByRoom(user.room);
-							for (var i = matching.length - 1; i >= 0; i--) {
-								var match = matching[i];
-								var entrance;
-								if (result != undefined && result.length > 0) {
-									entrance = result[Math.floor(Math.random() * result.length)].entrance;
-								}
-								match.socket.emit('alert', {
-									"alert": "entered",
-									'user': user.username,
-									"entrance": entrance
-								});
-							};
+                        if(user.room!= undefined && user.room.id>=0){
+                          connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
+                             var matching = getUsersByRoom(user.room);
+                             for (var i = matching.length - 1; i >= 0; i--) {
+                                var match = matching[i];
+                                var entrance;
+                                if (result != undefined && result.length > 0) {
+                                   entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                               }
+                               match.socket.emit('alert', {
+                                   "alert": "entered",
+                                   'user': user.username,
+                                   "entrance": entrance
+                               });
+                           };
 
-						});
-					} else {
-						user = {};
-						user.room = getRoomById(message.roomId);
-						user.socket = socket;
-						user.group_id = 0;
-						users.push(user);
-						emitRooms();
-						connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
-							var matching = getUsersByRoom(user.room);
-							for (var i = matching.length - 1; i >= 0; i--) {
-								var match = matching[i];
-								var entrance;
-								if (result != undefined && result.length > 0) {
-									entrance = result[Math.floor(Math.random() * result.length)].entrance;
-								}
-								match.socket.emit('alert', {
-									"alert": "entered",
-									'user': user.username,
-									"entrance": entrance
-								});
-							};
+                       });
+                      }
+                  } else {
+                      user = {};
+                      user.room = getRoomById(message.roomId);
+                      user.socket = socket;
+                      user.group_id = 0;
+                      users.push(user);
+                      emitRooms();
+                      if(user.room!= undefined && user.room.id>=0){
+                          connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
+                           var matching = getUsersByRoom(user.room);
+                           for (var i = matching.length - 1; i >= 0; i--) {
+                            var match = matching[i];
+                            var entrance;
+                            if (result != undefined && result.length > 0) {
+                             entrance = result[Math.floor(Math.random() * result.length)].entrance;
+                         }
+                         match.socket.emit('alert', {
+                             "alert": "entered",
+                             'user': user.username,
+                             "entrance": entrance
+                         });
+                     };
 
-						});
-					}
-				} else {
-					socket.emit('alert', {
-						'alert': 'danger',
-						'text': 'You are not allowed in this room!'
-					});
-				}
-			});
+                 });
+                      }
+                  }
+              } else {
+                 socket.emit('alert', {
+                  'alert': 'danger',
+                  'text': 'You are not allowed in this room!'
+              });
+             }
+         });
 
-		}
+}
 
-	});
+});
 
-	socket.on('chat', function(message) {
-		if (user !== undefined && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
+socket.on('chat', function(message) {
+  if (user !== undefined && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
+   var chat = sanitize(message.chat);
+   connection.query('INSERT INTO chat SET ?', {
+    'user_id': user.id,
+    'message': chat,
+    "room_id": user.room.id
+}, function(err, result) {
+    if (err != null) console.log(err);
+});
+   var response = {
+    "chat": chat,
+    'user': user.username,
+    'user_id': user.id
+};
+response.kickable = !user.permissions.unkickable;
+var group = getGroupById(user.group_id);
+if (user.attributes != undefined && user.attributes != '' && JSON.parse(user.attributes).color != undefined) {
+    response.color = JSON.parse(user.attributes).color;
+} else if (group != undefined && group.attributes != undefined && group.attributes != '' && JSON.parse(group.attributes).color != undefined) {
+    response.color = JSON.parse(group.attributes).color;
+}
+response.rank = group.name;
+response.time = new Date();
+chatToRoom(user,response);
+}
+});
+socket.on('random', function(message) {
+  var db='words';
+  var field='word';
+  if(message.type=='funny'){
+   db='funny';
+   field='text';
+}
+var count = message.count || 1;
+if (user && user.permissions && user.permissions.words) {
+   connection.query("SELECT COUNT(*) FROM "+db, function(err, result) {
+    var indexes = [];
+    for (var i = 0; i < count; i++) {
+     indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
 
-			var matching = getUsersByRoom(user.room);
-			var chat = sanitize(message.chat);
-			connection.query('INSERT INTO chat SET ?', {
-				'user_id': user.id,
-				'message': chat,
-				"room_id": user.room.id
-			}, function(err, result) {
-				if (err != null) console.log(err);
-			});
-			var response = {
-				"chat": chat,
-				'user': user.username,
-				'user_id': user.id
-			};
-			response.kickable = !user.permissions.unkickable;
-			var group = getGroupById(user.group_id);
-			if (user.attributes != undefined && user.attributes != '' && JSON.parse(user.attributes).color != undefined) {
-				response.color = JSON.parse(user.attributes).color;
-			} else if (group != undefined && group.attributes != undefined && group.attributes != '' && JSON.parse(group.attributes).color != undefined) {
-				response.color = JSON.parse(group.attributes).color;
-			}
-			response.rank = group.name;
-			response.time = new Date();
-			for (var i = matching.length - 1; i >= 0; i--) {
-				var match = matching[i];
-				match.socket.emit('chat', response);
-			};
-		}
-	});
-	socket.on('random', function(message) {
-		var db='words';
-		var field='word';
-		if(message.type=='funny'){
-			db='funny';
-			field='text';
-		}
-		var count = message.count || 1;
-		if (user && user.permissions && user.permissions.words) {
-			connection.query("SELECT COUNT(*) FROM "+db, function(err, result) {
-				var indexes = [];
-				for (var i = 0; i < count; i++) {
-					indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
-
-				}
-				connection.query('SELECT '+field+' FROM '+db+' WHERE ' + indexes.join(' or '), function(error, results) {
-					var words = [];
-					for (var j = 0; j < results.length; j++) {
-						words.push(results[j][field]);
-					}
-					var matching = getUsersByRoom(user.room);
-					for (var j = 0; j < matching.length; j++) {
-						matching[j].socket.emit('chat', {
-							chat: words.join(',').replace(/\w,/g,", "),
-							user: 'SERVER',
-							'user_id': -1,
-							kickable: false,
-							time: new Date()
-						});
-					}
-				});
-			});
-		}
-	});
-	var emitSelf = function(emitSocket) {
-		var result = {};
-		if (user === {}) {
-			result = {
-				"status": "Not logged in"
-			};
-			emitSocket.emit('me', result);
-		} else {
-			result = {
-				"status": "Logged in",
-				"username": user.username
-			};
-			result.permissions = user.permissions;
-			result.hash = user.hash;
-			connection.query('DELETE FROM user_hash WHERE user_id =' + user.id, function(err1, res) {
+ }
+ connection.query('SELECT '+field+' FROM '+db+' WHERE ' + indexes.join(' or '), function(error, results) {
+     var words = [];
+     for (var j = 0; j < results.length; j++) {
+      words.push(results[j][field]);
+  }
+  chatToRoom(user,{
+    chat: words.join(',').replace(/\w,/g,", "),
+    user: 'SERVER',
+    'user_id': -1,
+    kickable: false,
+    time: new Date()
+});
+});
+});
+}
+});
+socket.on('sat',function(message){
+  if(user && user.permissions && user.permissions.chat){
+   if(message.type=='word'){
+    connection.query("SELECT COUNT(*) FROM sat_words", function(err, result) {
+        var indexes = [];
+        indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
+        connection.query('SELECT word FROM sat_words WHERE ' + indexes.join(' or '), function(error, results) {
+         var words = [];
+         for (var j = 0; j < results.length; j++) {
+          words.push(results[j].word);
+      }
+      chatToRoom(user,{
+        chat: words.join(',').replace(/\w,/g,", "),
+        user: 'SERVER',
+        'user_id': -1,
+        kickable: false,
+        time: new Date()
+    });
+  });
+    });
+}
+else if(message.type=='define'){
+    var word = message.word;
+    console.log(word);
+    connection.query('SELECT definition,part_of_speech FROM sat_words WHERE word ="'+word+'"',function(err,result){
+     response = "Word not yet defined. Check your spelling or request that is it added";
+     if(result && result.length>0){
+      response = word + " "+result[0].part_of_speech+". -"+result[0].definition;
+  }
+  chatToRoom(user,{
+    chat:response,
+    user: 'SERVER',
+    'user_id': -1,
+    kickable: false,
+    time: new Date()
+});
+});
+}
+else if(message.type=='sentence'){
+    var response = 'A sentence for this word does not yet exist.';
+    chatToRoom(user,{
+        chat:response,
+        user: 'SERVER',
+        'user_id': -1,
+        kickable: false,
+        time: new Date()
+    });
+}
+else if(message.type=='help'){
+    var response = '</br>!satWord will return a random SAT word to the room</br>!satDefine {word} will return a definition for the word provdied as {word}</br>!satHelp {word} will return a sentence with the {word} used in it</br>!satHelp will return help for !sat commands';
+    chatToRoom(user, {
+        chat:response,
+        user: 'SERVER',
+        'user_id': -1,
+        kickable: false,
+        time: new Date()
+    });
+}
+}
+});
+var emitSelf = function(emitSocket) {
+  var result = {};
+  if (user === {}) {
+   result = {
+    "status": "Not logged in"
+};
+emitSocket.emit('me', result);
+} else {
+   result = {
+    "status": "Logged in",
+    "username": user.username
+};
+result.permissions = user.permissions;
+result.hash = user.hash;
+			//connection.query('DELETE FROM user_hash WHERE user_id =' + user.id, function(err1, res) {
 				connection.query('INSERT INTO user_hash SET ?', {
 					user_id: user.id,
 					hash: user.hash
 				}, function(err, result) {});
-			});
-			connection.query("SELECT * FROM private WHERE to_id = " + user.id + ' order by id desc', function(err, results) {
-				result.privates = results;
-				result.unread = 0;
-				for (var i = 0; i < results.length; i++) {
-					var message = results[i];
-					if (message.read == 0) {
-						result.unread++;
-					}
-				}
-				emitSocket.emit('me', result);
-			});
-		}
+			//});
+connection.query("SELECT * FROM private WHERE to_id = " + user.id + ' order by id desc', function(err, results) {
+    result.privates = results;
+    result.unread = 0;
+    for (var i = 0; i < results.length; i++) {
+     var message = results[i];
+     if (message.read == 0) {
+      result.unread++;
+  }
+}
+emitSocket.emit('me', result);
+});
+}
 
 
-	};
+};
 
-	socket.on('readMessages', function(message) {
-		if (user)
-			connection.query('UPDATE private SET ? WHERE to_id = ' + user.id, {
-				read: 1
-			}, function(err, nothing) {
-				emitSelf(socket);
-			});
-	});
-	socket.on('deletePrivate', function(message) {
-		if (user) {
-			connection.query('DELETE FROM private WHERE `to_id` = ' + user.id + " and `id` = " + message.id, function(err, nothing) {
-				emitSelf(socket);
-			});
-		}
-	});
+socket.on('readMessages', function(message) {
+  if (user)
+   connection.query('UPDATE private SET ? WHERE to_id = ' + user.id, {
+    read: 1
+}, function(err, nothing) {
+    emitSelf(socket);
+});
+});
+socket.on('deletePrivate', function(message) {
+  if (user) {
+   connection.query('DELETE FROM private WHERE `to_id` = ' + user.id + " and `id` = " + message.id, function(err, nothing) {
+    emitSelf(socket);
+});
+}
+});
 
-	socket.on('me', function(message) {
-		emitSelf(socket);
+socket.on('me', function(message) {
+  emitSelf(socket);
 
-	});
+});
 
-	socket.on('addRoom', function(message) {
-		if (user != undefined && user.permissions.create) {
-			addRoom(message, updateRooms(function() {
-				emitRooms();
-			}));
-		}
-	});
+socket.on('addRoom', function(message) {
+  if (user != undefined && user.permissions.create) {
+   addRoom(message, updateRooms(function() {
+    emitRooms();
+}));
+}
+});
 
-	socket.on('deleteRoom', function(message) {
-		var room = getRoomById(message.id);
-		if (user != undefined && room != undefined && user.permissons != undefined && user.permissions.delete && (room.requirements.isDeleteable == undefined || room.requirements.isDeleteable || user.permissions.god)) {
-			var usersInRoom = getUsersByRoom(room);
-			for (var i = usersInRoom.length - 1; i >= 0; i--) {
-				usersInRoom[i].socket.emit('alert', {
-					"alert": "danger",
-					"text": "The Room has been deleted"
-				});
-				usersInRoom[i].room = undefined;
-			};
-			deleteRoom(message, updateRooms(function() {
-				emitRooms();
-			}));
-		}
-	});
+socket.on('deleteRoom', function(message) {
+  var room = getRoomById(message.id);
+  if (user != undefined && room != undefined && user.permissons != undefined && user.permissions.delete && (room.requirements.isDeleteable == undefined || room.requirements.isDeleteable || user.permissions.god)) {
+   var usersInRoom = getUsersByRoom(room);
+   for (var i = usersInRoom.length - 1; i >= 0; i--) {
+    usersInRoom[i].socket.emit('alert', {
+     "alert": "danger",
+     "text": "The Room has been deleted"
+ });
+    usersInRoom[i].room = undefined;
+};
+deleteRoom(message, updateRooms(function() {
+    emitRooms();
+}));
+}
+});
 
-	socket.on('leave room', function() {
-		if (user !== undefined && user.username != undefined) {
-			var matching = getUsersByRoom(user.room);
-			for (var i = matching.length - 1; i >= 0; i--) {
-				var match = matching[i];
-				match.socket.emit('alert', {
-					"alert": "left",
-					'user': user.username
-				});
-			};
-			user.room = undefined;
-			emitRooms();
-		} else if (user !== undefined) {
-			user.room = undefined;
-			emitRooms();
-		}
-	});
-	socket.on('startTyping', function() {
-		if (user != undefined && user.username != undefined && user.room != undefined) {
-			var matching = getUsersByRoom(user.room);
-			for (var i = matching.length - 1; i >= 0; i--) {
-				var match = matching[i];
-				if (match.socket != undefined)
-					match.socket.emit('startTyping', {
-						'username': user.username
-					});
-			}
-		}
-	});
-	socket.on('stopTyping', function(message) {
-		if (user != undefined && user.username != undefined && user.room != undefined) {
-			var matching = getUsersByRoom(user.room);
-			for (var i = matching.length - 1; i >= 0; i--) {
-				var match = matching[i];
-				if (match.socket != undefined)
-					match.socket.emit('stopTyping', {
-						'username': user.username
-					});
-			};
-		}
-	});
+socket.on('leave room', function() {
+  if (user !== undefined && user.username != undefined && user.room != undefined && user.room.id>=0) {
+   var matching = getUsersByRoom(user.room);
+   for (var i = matching.length - 1; i >= 0; i--) {
+    var match = matching[i];
+    match.socket.emit('alert', {
+     "alert": "left",
+     'user': user.username
+ });
+};
+user.room = undefined;
+emitRooms();
+} else if (user !== undefined) {
+   user.room = undefined;
+   emitRooms();
+}
+});
+socket.on('startTyping', function() {
+  if (user != undefined && user.username != undefined && user.room != undefined && user.room.id>=0) {
+   var matching = getUsersByRoom(user.room);
+   for (var i = matching.length - 1; i >= 0; i--) {
+    var match = matching[i];
+    if (match.socket != undefined)
+     match.socket.emit('startTyping', {
+      'username': user.username
+  });
+}
+}
+});
+socket.on('stopTyping', function(message) {
+  if (user != undefined && user.username != undefined && user.room != undefined && user.room.id>=0) {
+   var matching = getUsersByRoom(user.room);
+   for (var i = matching.length - 1; i >= 0; i--) {
+    var match = matching[i];
+    if (match.socket != undefined)
+     match.socket.emit('stopTyping', {
+      'username': user.username
+  });
+};
+}
+});
 
-	socket.on('sendFile', function(message) {
-		if (user !== undefined && user.room != undefined && user.username != undefined) {
+socket.on('sendFile', function(message) {
+  if (user !== undefined && user.room != undefined && user.username != undefined) {
 
-			var matching = getUsersByRoom(user.room);
+   var matching = getUsersByRoom(user.room);
 			//connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
 			var response = {
 				"file": message,
@@ -419,101 +475,101 @@ io.on('connection', function(socket) {
 		}
 	});
 
-	socket.on('report', function(message) {
-		if (user != undefined && user.id != undefined) {
-			message.user_id = user.id;
-			if (message.email != undefined && message.email.replace(/^\s+/, '').replace(/\s+$/, '') !== '')
-				message.email = user.email;
-		}
-		connection.query('INSERT INTO reports SET ?', message, function(err, result) {
-			if (err != undefined && err != null)
-				console.error(err);
-			sendEmails();
-		});
-	});
+socket.on('report', function(message) {
+  if (user != undefined && user.id != undefined) {
+   message.user_id = user.id;
+   if (message.email != undefined && message.email.replace(/^\s+/, '').replace(/\s+$/, '') !== '')
+    message.email = user.email;
+}
+connection.query('INSERT INTO reports SET ?', message, function(err, result) {
+   if (err != undefined && err != null)
+    console.error(err);
+sendEmails();
+});
+});
 
-	socket.on('kick', function(message) {
-		if (user != undefined && user.permissions != undefined && user.permissions.kick) {
-			ban(message.user_id, user.room.id, 15 * 60 * 1000);
-			var bannedUser = getUserById(message.user_id);
-			if (bannedUser != undefined && bannedUser.socket != undefined) {
-				bannedUser.socket.emit('alert', {
-					'alert': 'danger',
-					'text': 'You have been banned from this room for 15 minutes'
-				});
-				bannedUser.room = undefined;
-			}
+socket.on('kick', function(message) {
+  if (user != undefined && user.permissions != undefined && user.permissions.kick) {
+   ban(message.user_id, user.room.id, 15 * 60 * 1000);
+   var bannedUser = getUserById(message.user_id);
+   if (bannedUser != undefined && bannedUser.socket != undefined) {
+    bannedUser.socket.emit('alert', {
+     'alert': 'danger',
+     'text': 'You have been banned from this room for 15 minutes'
+ });
+    bannedUser.room = undefined;
+}
 
-		}
-	});
+}
+});
 
-	socket.on('restart', function(message) {
-		if (user != undefined && user.permissions != undefined && user.permissions.restart) {
-			io.emit('alert', {
-				'alert': 'info',
-				"text": "The server is restarting. Please refresh your page."
-			});
-			setTimeout(function() {
-				process.exit()
-			}, 100);
-		}
-	})
+socket.on('restart', function(message) {
+  if (user != undefined && user.permissions != undefined && user.permissions.restart) {
+   io.emit('alert', {
+    'alert': 'info',
+    "text": "The server is restarting. Please refresh your page."
+});
+   setTimeout(function() {
+    process.exit()
+}, 100);
+}
+})
 
-	socket.on('private', function(message) {
-		if (user != undefined && user.permissions.chat) {
-			if (message.message && message.to_username) {
-				getUser(message.to_username, function(to) {
-					if (to) {
-						var insertVars = {
-							to_id: to.id,
-							from_id: user.id,
-							"message": message.message,
-							time: new Date(),
-							from_username: user.username
-						};
-						connection.query('INSERT INTO private SET ?', insertVars, function(err, result) {
-							if (err) {
-								console.error(err);
-							}
-						});
-						var onlineTo = getUserById(to.id);
-						if (onlineTo) {
-							emitSelf(onlineTo.socket);
-							onlineTo.socket.emit('alert', {
-								'alert': 'new message',
-								'message': message.message,
-								'from': user.username
-							});
-						}
-					}
-				})
-			}
-		}
-	})
+socket.on('private', function(message) {
+  if (user != undefined && user.permissions.chat) {
+   if (message.message && message.to_username) {
+    getUser(message.to_username, function(to) {
+     if (to) {
+      var insertVars = {
+       to_id: to.id,
+       from_id: user.id,
+       "message": message.message,
+       time: new Date(),
+       from_username: user.username
+   };
+   connection.query('INSERT INTO private SET ?', insertVars, function(err, result) {
+       if (err) {
+        console.error(err);
+    }
+});
+   var onlineTo = getUserById(to.id);
+   if (onlineTo) {
+       emitSelf(onlineTo.socket);
+       onlineTo.socket.emit('alert', {
+        'alert': 'new message',
+        'message': message.message,
+        'from': user.username
+    });
+   }
+}
+})
+}
+}
+})
 
 
 
-	var emitRooms = function() {
+var emitRooms = function() {
 
-		updateRooms(function() {
-			var tempRooms = [];
-			for (var i = rooms.length - 1; i >= 0; i--) {
-				var room = rooms[i];
-				var roomUsers = getUsersByRoom(room);
-				room.guestCount = 0;
-				room.userCount = 0;
-				room.users = [];
-				for (var j = roomUsers.length - 1; j >= 0; j--) {
-					var user = roomUsers[j];
-					if (user != undefined) {
-						if (user.username != undefined) {
-							room.users.push(user.username);
-							room.userCount++;
-						} else {
-							room.guestCount++;
-						}
-					}
-				};
+  updateRooms(function() {
+   var tempRooms = [];
+   for (var i = rooms.length - 1; i >= 0; i--) {
+    var room = rooms[i];
+    var roomUsers = getUsersByRoom(room);
+    room.guestCount = 0;
+    room.userCount = 0;
+    room.users = [];
+    for (var j = roomUsers.length - 1; j >= 0; j--) {
+     var user = roomUsers[j];
+     if (user != undefined) {
+      if (user.username != undefined) {
+       room.users.push(user.username);
+       room.userCount++;
+   } else {
+       room.guestCount++;
+   }
+}
+};
 				//clone
 				var tempRoom = JSON.parse(JSON.stringify(room));
 				if (tempRoom.requirements != undefined && tempRoom.requirements.password != undefined)
@@ -525,10 +581,10 @@ io.on('connection', function(socket) {
 				"rooms": tempRooms
 			});
 		});
-	};
+};
 
-	emitRooms();
-	setInterval(emitRooms, 60000);
+emitRooms();
+setInterval(emitRooms, 60000);
 
 
 });
@@ -636,69 +692,69 @@ app.post('/archive', function(req, res) {
 							}
 						});
 
-					} else if (body.type == 'users') {
-						var sql = 'SELECT id,username,first_name,last_name,email,group_id FROM users ';
-						if (body.where.field) {
-							sql += 'WHERE ' + body.where.field + '  =  "' + body.where.equals + '" ';
-						}
-						sql += 'ORDER BY ' + body.order.by + ' ' + body.order.direction + ' ';
-						if (body.range.length != 0) {
-							sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
-						}
-						connection.query(sql, function(err1, results) {
-							if (!results) {
-								res.json({
-									'success': false,
-									'message': 'SQL ERROR/NO RESULTS'
-								})
-							} else {
-								connection.query('SELECT id,name FROM groups', function(err2, groups) {
-									if (err1 || err2) {
-										res.json({
-											'success': false,
-											'message': 'SQL ERROR'
-										})
-									} else {
-										var getGroup = function(id) {
+} else if (body.type == 'users') {
+  var sql = 'SELECT id,username,first_name,last_name,email,group_id FROM users ';
+  if (body.where.field) {
+   sql += 'WHERE ' + body.where.field + '  =  "' + body.where.equals + '" ';
+}
+sql += 'ORDER BY ' + body.order.by + ' ' + body.order.direction + ' ';
+if (body.range.length != 0) {
+   sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
+}
+connection.query(sql, function(err1, results) {
+   if (!results) {
+    res.json({
+     'success': false,
+     'message': 'SQL ERROR/NO RESULTS'
+ })
+} else {
+    connection.query('SELECT id,name FROM groups', function(err2, groups) {
+     if (err1 || err2) {
+      res.json({
+       'success': false,
+       'message': 'SQL ERROR'
+   })
+  } else {
+      var getGroup = function(id) {
 
-											for (var j = groups.length - 1; j >= 0; j--) {
-												if (groups[j].id == id)
-													return groups[j];
-											};
-										}
-										for (var i = results.length - 1; i >= 0; i--) {
-											var result = results[i];
-											var group = getGroup(result.group_id);
-											result['group_name*'] = group ? group.name : '*DELETED*';
-										};
-										res.json({
-											success: true,
-											info: results
-										});
-									}
-								});
-							}
-						});
-					}
-				} catch (error) {
-					res.json({
-						'success': false,
-						'message': 'SQL ERROR'
-					})
-				}
-			} else {
-				res.json({
-					'success': false,
-					'message': 'INVALID PERMISSIONS'
-				});
-			}
-		});
-	} else {
-		res.json({
-			'success': false,
-			'message': 'LOGIN'
-		});
-	}
+       for (var j = groups.length - 1; j >= 0; j--) {
+        if (groups[j].id == id)
+         return groups[j];
+ };
+}
+for (var i = results.length - 1; i >= 0; i--) {
+   var result = results[i];
+   var group = getGroup(result.group_id);
+   result['group_name*'] = group ? group.name : '*DELETED*';
+};
+res.json({
+   success: true,
+   info: results
+});
+}
+});
+}
+});
+}
+} catch (error) {
+ res.json({
+  'success': false,
+  'message': 'SQL ERROR'
+})
+}
+} else {
+    res.json({
+     'success': false,
+     'message': 'INVALID PERMISSIONS'
+ });
+}
+});
+} else {
+  res.json({
+   'success': false,
+   'message': 'LOGIN'
+});
+}
 });
 
 
@@ -764,47 +820,47 @@ var isValidUser = function(data, callback) {
 				});
 			next(errors);
 		} else
-			next(errors);
-	};
-	var runNextValidation = function(errors) {
-		var dataKey = dataKeys[j];
-		var value = data[dataKey];
+       next(errors);
+   };
+   var runNextValidation = function(errors) {
+      var dataKey = dataKeys[j];
+      var value = data[dataKey];
 
-		var rules = Object.keys(config.register_validataions[dataKey]);
-		var rule = rules[currentValidation];
+      var rules = Object.keys(config.register_validataions[dataKey]);
+      var rule = rules[currentValidation];
 
-		var ruleVal = config.register_validataions[dataKey][rule];
-		currentValidation++;
+      var ruleVal = config.register_validataions[dataKey][rule];
+      currentValidation++;
 
-		if (j == 0 && currentValidation == rules.length)
-			validate(rule, ruleVal, dataKey, value, callback);
-		else {
-			if (currentValidation >= rules.length) {
-				j--;
-				currentValidation = 0;
-			}
-			validate(rule, ruleVal, dataKey, value, runNextValidation);
+      if (j == 0 && currentValidation == rules.length)
+       validate(rule, ruleVal, dataKey, value, callback);
+   else {
+       if (currentValidation >= rules.length) {
+        j--;
+        currentValidation = 0;
+    }
+    validate(rule, ruleVal, dataKey, value, runNextValidation);
 
-		}
-	};
-	var rules = Object.keys(config.register_validataions);
-	for (var i = rules.length - 1; i >= 0; i--) {
-		var ruleKey = rules[i];
-		var datavalue = data[ruleKey];
-		if (config.register_validataions[ruleKey].required == true && (datavalue === undefined || datavalue.trim() === '')) {
-			errors.push({
-				"element": ruleKey,
-				"rule": "required",
-				"text": ruleKey + " is required"
-			});
-			delete data[ruleKey];
-		}
-	};
-	dataKeys = Object.keys(data);
-	if (dataKeys !== undefined && dataKeys.length > 0)
-		runNextValidation(null);
-	else
-		callback(errors);
+}
+};
+var rules = Object.keys(config.register_validataions);
+for (var i = rules.length - 1; i >= 0; i--) {
+  var ruleKey = rules[i];
+  var datavalue = data[ruleKey];
+  if (config.register_validataions[ruleKey].required == true && (datavalue === undefined || datavalue.trim() === '')) {
+   errors.push({
+    "element": ruleKey,
+    "rule": "required",
+    "text": ruleKey + " is required"
+});
+   delete data[ruleKey];
+}
+};
+dataKeys = Object.keys(data);
+if (dataKeys !== undefined && dataKeys.length > 0)
+  runNextValidation(null);
+else
+  callback(errors);
 
 
 };
@@ -910,13 +966,13 @@ var login = function(username, password, callback) {
 var guid = function() {
 	function s4() {
 		return Math.floor((1 + Math.random()) * 0x10000)
-			.toString(16)
-			.substring(1);
-	}
-	return function() {
-		return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-			s4() + '-' + s4() + s4() + s4();
-	};
+       .toString(16)
+       .substring(1);
+   }
+   return function() {
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  };
 };
 
 var getUserBySocket = function(socket) {
@@ -1105,22 +1161,22 @@ var sendEmails = function() {
 			});
 		};
 	});
-	connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0', function(err, results) {
-		for (var i = results.length - 1; i >= 0; i--) {
-			var result = results[i];
-			var message = 'subject: NOREPLY\r\n\r\n';
+connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0', function(err, results) {
+  for (var i = results.length - 1; i >= 0; i--) {
+   var result = results[i];
+   var message = 'subject: NOREPLY\r\n\r\n';
 
-			message += 'Thank you ' + result.first_name + ' ' + result.last_name + " for registering at GSMSTCHAT.com";
-			connection.query('UPDATE `chat`.`users` SET ? WHERE id = ' + result.id, {
-				informed: 1
-			}, function(err, result) {
-				if (err != undefined) console.error(err);
-			});
+   message += 'Thank you ' + result.first_name + ' ' + result.last_name + " for registering at GSMSTCHAT.com";
+   connection.query('UPDATE `chat`.`users` SET ? WHERE id = ' + result.id, {
+    informed: 1
+}, function(err, result) {
+    if (err != undefined) console.error(err);
+});
 
-			mail('gsmstchat@gmail.com', result.email, message);
-		};
-        
-	});
+   mail('gsmstchat@gmail.com', result.email, message);
+};
+
+});
 };
 
 var getUserFromHash = function(hash, callback) {
@@ -1133,6 +1189,18 @@ var getUserFromHash = function(hash, callback) {
 			});
 		}
 	});
+}
+
+var chatToRoom=function(user,message){
+    if(user.room.id>=0){
+        var matching = getUsersByRoom(user.room);
+        for (var i = matching.length - 1; i >= 0; i--) {
+            var match = matching[i];
+            match.socket.emit('chat', message);
+        };
+    }else{
+        user.socket.emit('chat',message);
+    }
 }
 
 sendEmails();
