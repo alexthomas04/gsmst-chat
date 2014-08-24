@@ -35,11 +35,10 @@
 		: : -webkit-scrollbar-corner {
 			background-color: #4e5d6c;
 		}
-		body {} 
-		img {
+		body {} img {
 			height: 100%;
-			max-width:500px;
-			max-height:400px;
+			max-width: 500px;
+			max-height: 400px;
 		}
 		.clickable {
 			cursor: pointer;
@@ -61,7 +60,7 @@
 			</a>
 			</li>
 			<li><a id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"><span class='glyphicon glyphicon-plus-sign ' style='font-size:large' ></span>
-			</a>
+		</a>
 			</li>
 			<li ng-show="state.permissions.restart" id='restart'><a><span class='glyphicon glyphicon-refresh ' style='font-size:large'  ></span></a>
 			</li>
@@ -103,7 +102,7 @@
 			</li>
 			<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a>
 			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a onClick='$.cookie("hash","");location.reload();' >Logout</a>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a onClick='$.cookie("hash","");location.reload();'>Logout</a>
 			</li>
 			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:large' class='glyphicon glyphicon-envelope'></span></a>
 			</li>
@@ -379,6 +378,30 @@
 			</div>
 		</div>
 	</div>
+	<div class='modal fade' id='ban'>
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+					<h4 class="modal-title">Ban User</h4>
+				</div>
+				<div class="modal-body">
+					<div class='btn-group-vertical'>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(5*60*1000)">Ban 5 minutes</button>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(15*60*1000)">Ban 15 minutes</button>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(30*60*1000)">Ban 30 minutes</button>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(60*60*1000)">Ban 60 minutes</button>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(6*60*60*1000)">Ban 6 hours</button>
+					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(7*24*60*60*1000)">Ban 1 week</button>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+		</div>
+	</div>
+	</div>
 	<div room style="display:none;height:60%" id='room'>
 
 
@@ -412,7 +435,9 @@
 	<script type="text/javascript">
 		// setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
 		$(document).ready(function() {
-			socket.emit('login',{hash:$.cookie('hash')});
+			socket.emit('login', {
+				hash: $.cookie('hash')
+			});
 			$('#styleSelect>li>a').click(function(event) {
 				$('link').attr('href', $(this).attr('rel'));
 				$.cookie('css', $(this).attr('rel'), {

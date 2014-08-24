@@ -366,6 +366,7 @@ io.on('connection', function(socket) {
 								
 								chatToRoom(user, {
 									chat:results[0].question+"<br>"+formattedAnswers,
+									correctAnswer:results[0].answer,
 									user: 'SERVER',
 									'user_id': -1,
 									kickable: false,
@@ -548,12 +549,12 @@ io.on('connection', function(socket) {
 
 	socket.on('kick', function(message) {
 		if (user != undefined && user.permissions != undefined && user.permissions.kick) {
-			ban(message.user_id, user.room.id, 15 * 60 * 1000);
+			ban(message.user_id, user.room.id,message.duration);
 			var bannedUser = getUserById(message.user_id);
 			if (bannedUser != undefined && bannedUser.socket != undefined) {
 				bannedUser.socket.emit('alert', {
 					'alert': 'danger',
-					'text': 'You have been banned from this room for 15 minutes'
+					'text': 'You have been banned from this room for '+(message.duration/(60*1000))+' minutes'
 				});
 				bannedUser.room = undefined;
 			}

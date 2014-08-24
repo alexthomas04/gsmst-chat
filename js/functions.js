@@ -2,6 +2,7 @@ var state ={};
 var socket = io();
 var interval;
 var typing = {};
+var bannie_id=-5;
 socket.on('me',function(message){
 	state = message;
 	$('#title').text('Welcome '+state.username);
@@ -41,9 +42,9 @@ socket.on('chat',function(message){
 	var $text =$('<span></span>');
 	var $small = $('<small></small>');
 	var $time = $('<small></small>');
-	var $kick  = $('<a href="#"><span class="glyphicon glyphicon-ban-circle text-danger"></span></a>');
-	$kick.on('click',function(event){
-		socket.emit('kick',{"user_id":message.user_id});
+	var $kick  = $('<a href="#" data-toggle="modal" data-target="#ban" ><span class="glyphicon glyphicon-ban-circle text-danger"></span></a>');
+	$kick.click(function(event) {
+		bannie_id=message.user_id;
 	});
 	if(message.rank != 'User')
 		$small.append('['+message.rank+'] ');
@@ -255,7 +256,9 @@ var updateSettings= function(data){
 		$('.chat_time').show();
 }
 
-
+var ban = function(duration){
+	socket.emit('kick',{user_id:bannie_id,"duration":duration});
+}
 
 
 
