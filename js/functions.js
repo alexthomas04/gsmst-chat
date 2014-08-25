@@ -92,6 +92,9 @@ socket.on('chat',function(message){
 	$p.append($text);
 	$p.append($time);
 	$('#chatArea').append($p).scrollTop(height);
+    if(message.correctAnswer){
+        parseQuestion(message.correctAnswer,message.chat);
+    }
 	if(document.body.className=='blurred'){
 		document.title='You have';
 		clearInterval(interval);

@@ -13,6 +13,7 @@
 	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
 	<script src="js/bootstrap-dropdown.js"></script>
 	<script src="js/bootstrap-tooltip.js"></script>
+    <script src="js/questions.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 	<script src="controllers/util.js"></script>
@@ -20,19 +21,19 @@
 		#chatArea>p {
 			word-wrap: break-word;
 		}
-		: : -webkit-scrollbar {
+		::-webkit-scrollbar {
 			width: 15px;
 		}
-		: : -webkit-scrollbar-track {
+		::-webkit-scrollbar-track {
 			background-color: #4e5d6c;
 		}
-		: : -webkit-scrollbar-thumb {
+		::-webkit-scrollbar-thumb {
 			background-color: #2b3e50;
 		}
-		: : -webkit-scrollbar-button {
+		::-webkit-scrollbar-button {
 			background-color: #4e5d6c;
 		}
-		: : -webkit-scrollbar-corner {
+		::-webkit-scrollbar-corner {
 			background-color: #4e5d6c;
 		}
 		body {} img {
@@ -388,19 +389,19 @@
 				</div>
 				<div class="modal-body">
 					<div class='btn-group-vertical'>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(5*60*1000)">Ban 5 minutes</button>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(15*60*1000)">Ban 15 minutes</button>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(30*60*1000)">Ban 30 minutes</button>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(60*60*1000)">Ban 60 minutes</button>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(6*60*60*1000)">Ban 6 hours</button>
-					<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(7*24*60*60*1000)">Ban 1 week</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(5*60*1000)">Ban 5 minutes</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(15*60*1000)">Ban 15 minutes</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(30*60*1000)">Ban 30 minutes</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(60*60*1000)">Ban 60 minutes</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(6*60*60*1000)">Ban 6 hours</button>
+						<button class="btn btn-danger ban-button" data-dismiss="modal" onclick="ban(7*24*60*60*1000)">Ban 1 week</button>
 					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</div>
+			</div>
 		</div>
-	</div>
 	</div>
 	<div room style="display:none;height:60%" id='room'>
 
