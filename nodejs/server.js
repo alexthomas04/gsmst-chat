@@ -1098,8 +1098,8 @@ var getWordList=function(){
     pattern.push('[Dd]'); replace.push('(d|D)');
     pattern.push('[Ee]'); replace.push('(e|E|3)');
     pattern.push('[Gg]'); replace.push('(g|G|6)');
-    pattern.push('[Hh]'); replace.push('h H]');
-    pattern.push('[IilL]'); replace.push('(i|I|l|!|1)');
+    pattern.push('[Hh]'); replace.push('(h|H)');
+    pattern.push('[IilL]'); replace.push('(i|I|l|L|!|1)');
     pattern.push('[Jj]'); replace.push('(j|J)');
     pattern.push('[Mm]'); replace.push('(m|M)');
     pattern.push('[Nn]'); replace.push('(n|N)');
