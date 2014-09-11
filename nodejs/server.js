@@ -1126,8 +1126,8 @@ var getWordList=function(){
 			}
 			list.push(word);
 		}
-		blacklistRegex = new RegExp("("+list.join(')|(')+')','g');
-
+		blacklistRegex = new RegExp("(\\b("+list.join(')\\b)|(\\b(')+')\\b)','g');
+        console.log(blacklistRegex);
 	});
 };
 
