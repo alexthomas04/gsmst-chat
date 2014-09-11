@@ -35,7 +35,7 @@ connection.connect(function(err) {
 var rooms = [];
 var users = [];
 var groups = [];
-
+var blacklistRegex='';
 //routing
 
 app.use(bodyParser.urlencoded({
@@ -212,8 +212,13 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('chat', function(message) {
-		if (user !== undefined && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
-			var chat = sanitize(message.chat);
+		if (user !== undefined && user.permissions && user.permissions.chat && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
+			var chat = '';
+			if(user.permissions.aboveSanitize)
+				chat = message.chat;
+			else
+				chat = sanitize(message.chat);
+			chat = handleChatLinks(chat);
 			connection.query('INSERT INTO chat SET ?', {
 				'user_id': user.id,
 				'message': chat,
@@ -1086,18 +1091,68 @@ var getUsersByRoom = function(room) {
 	return matching;
 }
 
-var sanitize = function(chat) {
-	chat = validator.escape(chat);
+var getWordList=function(){
+	var pattern = [],replace=[];
+	pattern.push('[Aa]'); replace.push('(a|A|@)');
+    pattern.push('[CcKk]'); replace.push('(?:(c|C|\\(|k|K))');
+    pattern.push('[Dd]'); replace.push('(d|D)');
+    pattern.push('[Ee]'); replace.push('(e|E|3)');
+    pattern.push('[Gg]'); replace.push('(g|G|6)');
+    pattern.push('[Hh]'); replace.push('h H]');
+    pattern.push('[IilL]'); replace.push('(i|I|l|!|1)');
+    pattern.push('[Jj]'); replace.push('(j|J)');
+    pattern.push('[Mm]'); replace.push('(m|M)');
+    pattern.push('[Nn]'); replace.push('(n|N)');
+    pattern.push('[Oo]'); replace.push('(o|O|0)');
+    pattern.push('[Pp]'); replace.push('(p|P)');
+    pattern.push('[Qq]'); replace.push('(q|Q|9)');
+    pattern.push('[Rr]'); replace.push('(r|R)');
+    pattern.push('[Ss]'); replace.push('(s|S|$|5)');
+    pattern.push('[Tt]'); replace.push('(t|T|7)');
+    pattern.push('[Uu]'); replace.push('(u|U|v|V)');
+    pattern.push('[Vv]'); replace.push('(v|V|u|U)');
+    pattern.push('[Xx]'); replace.push('(x|X)');
+    pattern.push('[Yy]'); replace.push('(y|Y)');
+    pattern.push('[Zz]'); replace.push('(z|Z|2)');
+    pattern.push('[Ff]'); replace.push('(?:(f|F|ph|pH|Ph|PH))');
+    pattern.push('[Bb]'); replace.push('(b|B|I3|l3|i3)');
+    pattern.push('[Ww]'); replace.push('(w|W|vv|VV)');
+	var list = [];
+	connection.query('SELECT word from bad_words',function(err,result){
+		for(var i =0;i<result.length;i++){
+			var word = result[i].word;
+			for(var j=0;j<pattern.length;j++){
+				word = word.replace(new RegExp(pattern[j],'g'),replace[j]);
+			}
+			list.push(word);
+		}
+		blacklistRegex = new RegExp("("+list.join(')|(')+')','g');
+
+	});
+};
+
+getWordList();
+var handleChatLinks=function(chat){
 	var reg_exUrl = new RegExp(/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/g);
 	var matches = chat.match(reg_exUrl) || [];
 	for (var i = matches.length - 1; i >= 0; i--) {
 		var match = matches[i];
 		var image_regex = new RegExp(/(png|jpg|jpeg|gif)$/g);
 		if (match.match(image_regex))
-			chat = chat.replace(match, "<img src='" + match + "'></img>");
+			chat = chat.replace.push("<a target='blank' href='"+match+"'<img src='" + match + "'></img></a>");
 		else
 			chat = chat.replace(match, "<a target='_blank' href='" + match + "'>" + match + "</a>");
 	};
+	return chat;
+}
+var sanitize = function(chat) {
+	chat = validator.escape(chat);
+	var matches = chat.match(blacklistRegex) || [];
+	for (var i = matches.length - 1; i >= 0; i--) {
+		var match = matches[i];
+		chat = chat.replace(match, "<span class='text-danger'>[CENSORED]</span>");
+	};
+	
 	return chat;
 }
 
