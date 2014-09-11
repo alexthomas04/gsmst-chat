@@ -377,7 +377,7 @@ io.on('connection', function(socket) {
 					});
 				});
 			} else if (message.type == 'help') {
-				var response = '</br>!satWord will return a random SAT word to the room</br>!satDefine {word} will return a definition for the word provdied as {word}</br>!satHelp {word} will return a sentence with the {word} used in it</br>!satHelp will return help for !sat commands';
+				var response = '</br>!satWord will return a random SAT word to the room</br>!satDefine {word} will return a definition for the word provdied as {word}</br>!satDefine {word} will return a sentence with the {word} used in it</br>!satHelp will return help for !sat commands</br>!satQuestion or !satQ will return a SAT Question</br>!answer or !satA {answer|answer choice} will check your answer for the most recent question';
 				chatToRoom(user, {
 					chat: response,
 					user: 'SERVER',
@@ -388,6 +388,25 @@ io.on('connection', function(socket) {
 			}
 		}
 	});
+	
+	socket.on('spanish',function(message){
+		var forms = ['yo','tú','el','nosotros','ellos'];
+		var form = forms[Math.floor(Math.random()*forms.length)];
+		connection.query('SELECT COUNT(*) FROM spanish_verbs',function(err,result){
+			var id = Math.floor(Math.random() * result[0]['COUNT(*)'] + 1);
+			connection.query('SELECT '+form+',tense,infinitive FROM spanish_verbs WHERE id='+id,function(error,results){
+				chatToRoom(user,{
+					chat:"Conjugate "+results[0].infinitive+" in the "+form+" "+results[0].tense+" tense",
+					user:'SERVER',
+					"user_id":-1,
+					kickable:false,
+					time:new Date(),
+					correctAnswer:results[0][form]
+				});
+			});
+		});
+	});
+	
 	var emitSelf = function(emitSocket) {
 		var result = {};
 		if (user === {}) {

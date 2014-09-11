@@ -125,9 +125,22 @@ app.directive('room', [function () {
 					}
 					else if(scope.message.indexOf('!satQuestion') == 0 && state.permissions.chat){
 					socket.emit('sat',{type:'question'});
+					scope.message = "!answer ";
+					}
+					else if(scope.message.indexOf('!satQ') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'question'});
+					scope.message = '!satA ';
+					}
+					else if((scope.message.indexOf('!spanishConjugations')==0 || scope.message.indexOf('!sc') == 0) && state.permissions.chat){
+					socket.emit('spanish');
+					scope.message = '!answer ';
 					}
                     else if(scope.message.indexOf('!answer') == 0 && state.permissions.chat){
 					    checkAnswer(scope.message.substr('!answer'.length+1));
+					    
+					}
+					else if(scope.message.indexOf('!satA') == 0 && state.permissions.chat){
+					    checkAnswer(scope.message.substr('!satA'.length+1));
 					}
                     else{
 				socket.emit('chat',{'chat':scope.message});
