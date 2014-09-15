@@ -1107,7 +1107,7 @@ var getWordList=function(){
     pattern.push('[Pp]'); replace.push('(p|P)');
     pattern.push('[Qq]'); replace.push('(q|Q|9)');
     pattern.push('[Rr]'); replace.push('(r|R)');
-    pattern.push('[Ss]'); replace.push('(s|S|$|5)');
+    pattern.push('[Ss]'); replace.push('(s|S|\\$|5)');
     pattern.push('[Tt]'); replace.push('(t|T|7)');
     pattern.push('[Uu]'); replace.push('(u|U|v|V)');
     pattern.push('[Vv]'); replace.push('(v|V|u|U)');
