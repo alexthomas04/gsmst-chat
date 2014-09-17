@@ -1099,7 +1099,7 @@ var getWordList=function(){
     pattern.push('[Ee]'); replace.push('(e|E|3)');
     pattern.push('[Gg]'); replace.push('(g|G|6)');
     pattern.push('[Hh]'); replace.push('(h|H)');
-    pattern.push('[IilL]'); replace.push('(i|I|l|L|!|1)');
+    pattern.push('[IilL]'); replace.push('(i|I|l|L|!|1|\\|)');
     pattern.push('[Jj]'); replace.push('(j|J)');
     pattern.push('[Mm]'); replace.push('(m|M)');
     pattern.push('[Nn]'); replace.push('(n|N)');
@@ -1117,6 +1117,7 @@ var getWordList=function(){
     pattern.push('[Ff]'); replace.push('(?:(f|F|ph|pH|Ph|PH))');
     pattern.push('[Bb]'); replace.push('(b|B|I3|l3|i3)');
     pattern.push('[Ww]'); replace.push('(w|W|vv|VV)');
+    var wordCharNotMatch = '(?:[^a-zA-Z\\d]*)';
 	var list = [];
 	connection.query('SELECT word from bad_words',function(err,result){
 		for(var i =0;i<result.length;i++){
@@ -1124,9 +1125,10 @@ var getWordList=function(){
 			for(var j=0;j<pattern.length;j++){
 				word = word.replace(new RegExp(pattern[j],'g'),replace[j]);
 			}
-			list.push(word);
+			list.push(new RegExp(wordCharNotMatch+word+wordCharNotMatch,'g'));
 		}
-		blacklistRegex = new RegExp("(\\b("+list.join(')\\b)|(\\b(')+')\\b)','g');
+        blacklistRegex=list;
+
         console.log(blacklistRegex);
 	});
 };
@@ -1147,11 +1149,15 @@ var handleChatLinks=function(chat){
 }
 var sanitize = function(chat) {
 	chat = validator.escape(chat);
-	var matches = chat.match(blacklistRegex) || [];
+    for(var j =0;j<blacklistRegex.length;j++){
+        var regex = blacklistRegex[j];
+        var matches = chat.match(regex) || [];
 	for (var i = matches.length - 1; i >= 0; i--) {
 		var match = matches[i];
 		chat = chat.replace(match, "<span class='text-danger'>[CENSORED]</span>");
 	};
+    }
+
 	
 	return chat;
 }
