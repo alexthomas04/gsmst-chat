@@ -152,8 +152,12 @@ socket.on('file',function(message){
 	var $p = $('<p></p>');
 	var $strong = $('<strong></strong>');
 	var $img = $('<img></img>');
+	var $link = $('<a></a>');
 	$img.attr('src',message.file);
 	$img.addClass('drag_image');
+	$link.attr('href',message.file);
+	$link.attr('target','blank');
+	$link.append($img);
 	$strong.text(message.user+" : ");
 	if(message.color!=undefined){
 		var color = message.color;
@@ -171,7 +175,7 @@ socket.on('file',function(message){
 		}
 	}
 	$p.append($strong);
-	$p.append($img);
+	$p.append($link);
 	height+=400;
 	$('#chatArea').append($p).scrollTop(height);
 });

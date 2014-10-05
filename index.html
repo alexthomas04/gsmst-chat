@@ -37,7 +37,6 @@
 			background-color: #4e5d6c;
 		}
 		body {} img {
-			height: 100%;
 			max-width: 500px;
 			max-height: 400px;
 		}
@@ -53,7 +52,7 @@
 
 <body ng-app="util" style="height:100%">
 	<div class="page-header">
-		<h1 id='title'>WELCOME USER! Please Login</h1>
+		<h1 id='title'>WELCOME USER! Please Log-in</h1>
 	</div>
 	<nav class='navbar navbar-default'>
 		<ul class="nav navbar-nav " style="width:100%">
@@ -507,19 +506,33 @@
 			$('#room').on('drop', function(event) {
 				event.preventDefault();
 				var files = event.originalEvent.dataTransfer.files;
+				sendFiles(files);
+			});
+			$('#room').bind('paste',function(e,b,c){
+				var items = e.originalEvent.clipboardData.items;
+				var files = [];
+				for(var i =0;i<items.length;i++){
+						files.push(items[i].getAsFile());
+				}
+				sendFiles(files);
+			});
+			var sendFiles = function(files){
 				var reader = new FileReader();
 				reader.onloadend = function() {
+					
 					socket.emit('sendFile', reader.result);
 					console.log(reader.result);
 				}
 				for (var i = 0; i < files.length; i++) {
+					if(files[i]!=null){
 					if (files[i].size < 1024 * 1024 * 5)
 						reader.readAsDataURL(files[i]);
 					else
 						$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
+						}
 				}
 				console.log(files[0]);
-			});
+			}
 			$(document).on('drop', function(e) {
 				e.stopPropagation();
 				e.preventDefault();

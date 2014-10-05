@@ -1117,7 +1117,7 @@ var getWordList=function(){
     pattern.push('[Ff]'); replace.push('(?:(f|F|ph|pH|Ph|PH))');
     pattern.push('[Bb]'); replace.push('(b|B|I3|l3|i3)');
     pattern.push('[Ww]'); replace.push('(w|W|vv|VV)');
-    var wordCharNotMatch = '(?:[^a-zA-Z\\d]*)';
+    var wordCharNotMatch = '(?:[^a-zA-Z\\d]+)';
 	var list = [];
 	connection.query('SELECT word from bad_words',function(err,result){
 		for(var i =0;i<result.length;i++){
@@ -1125,11 +1125,10 @@ var getWordList=function(){
 			for(var j=0;j<pattern.length;j++){
 				word = word.replace(new RegExp(pattern[j],'g'),replace[j]);
 			}
-			list.push(new RegExp(wordCharNotMatch+word+wordCharNotMatch,'g'));
+			list.push(new RegExp('(?:(^|[ ]))'+word+'(?![^ ])','g'));
 		}
         blacklistRegex=list;
 
-        console.log(blacklistRegex);
 	});
 };
 
@@ -1141,7 +1140,7 @@ var handleChatLinks=function(chat){
 		var match = matches[i];
 		var image_regex = new RegExp(/(png|jpg|jpeg|gif)$/g);
 		if (match.match(image_regex))
-			chat = chat.replace.push("<a target='blank' href='"+match+"'<img src='" + match + "'></img></a>");
+			chat = chat.replace(match,"<a target='blank' href='"+match+"'><img src='" + match + "'></img></a>");
 		else
 			chat = chat.replace(match, "<a target='_blank' href='" + match + "'>" + match + "</a>");
 	};
