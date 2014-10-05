@@ -1,6 +1,6 @@
 <div class=' col-md-3 container ' rel='tooltip' title='{{room.users.join(",")}}' data-toggle='tooltip' data-placement='bottom'>
 	<div class="well">
-		<p class='text-center'>{{room.name}}</p>
+		<p class='text-center'><strong>{{room.name}}</strong></p>
 		<p>Users: {{room.userCount}}</p>
 		<p ng-show="room.requirements && room.requirements.rank" class="text-danger" style="position:absolute">{{room.requirements.rank}} only*</p><br>
 		<button ng-click='deleteRoom(room.id)' class="btn btn-danger" ng-show="state.permissions.delete && (room.requirements.isDeleteable||state.permissions.god)"><span class='glyphicon glyphicon-remove'></span> Delete</button>
