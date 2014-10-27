@@ -23,8 +23,10 @@ app.directive('login', [function () {
 				if(scope.rememberMe)
 				$.cookie('hash',message.hash,{
 					path: '/',
-					expires: 1
+					expires: 60
 				});
+				else
+					$.cookie('hash',message.hash);
 			});
 			
 		}
@@ -162,6 +164,9 @@ app.directive('settings', [function () {
 		link: function (scope, iElement, iAttrs) {
 			scope.showRankState='hide';
 			scope.showTimeState='hide';
+			scope.showNotificationsState = 'yes';
+			scope.notificationDuration=settings.notificationDuration || 2000;
+			var notification ;
 			var updateShows=function(){
 			if(settings.showRank)
 				scope.showRankState='hide';
@@ -171,6 +176,11 @@ app.directive('settings', [function () {
 				scope.showTimeState='hide';
 			else
 				scope.showTimeState='show';
+			if(settings.showNotifications)
+				scope.showNotificationsState  ='yes';
+			else
+				scope.showNotificationsState='no';
+			
 		};
 		updateShows();
 		scope.toggleTime=function(){
@@ -181,8 +191,22 @@ app.directive('settings', [function () {
 			settings.showRank=!settings.showRank;
 			updateShows();
 		};
+			
+		scope.toggleNotifications=function(){
+			settings.showNotifications = !settings.showNotifications;
+			updateShows();
+		};
+		scope.updateDuration = function(){
+			if(notification)
+				notification.close();
+			notification = new Notification("Sample", {
+    		body: "Sample duration of "+scope.notificationDuration+"ms"
+ 			});
+			notification.onShow=setTimeout(function(){notification.close();},scope.notificationDuration);
+		};
 
 			scope.saveSettings = function(){
+				settings.notifcationDuration = scope.notificationDuration;
 				updateSettings();
 			};
 		}	

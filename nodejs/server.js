@@ -69,6 +69,7 @@ io.emit('alert', {
 });
 io.on('connection', function(socket) {
 	var user;
+	socket.emit('connected',{});
 	socket.on('disconnect', function() {
 		if (user !== undefined) {
 			var matching = getUsersByRoom(user.room);
@@ -217,7 +218,7 @@ io.on('connection', function(socket) {
 			if(user.permissions.aboveSanitize)
 				chat = message.chat;
 			else
-				chat = sanitize(message.chat);
+				chat = sanitize(message.chat,user);
 			chat = handleChatLinks(chat);
 			connection.query('INSERT INTO chat SET ?', {
 				'user_id': user.id,
@@ -264,7 +265,7 @@ io.on('connection', function(socket) {
 						words.push(results[j][field]);
 					}
 					chatToRoom(user, {
-						chat: words.join(',').replace(/\w,/g, ", "),
+						chat: words.join(','),
 						user: 'SERVER',
 						'user_id': -1,
 						kickable: false,
@@ -573,8 +574,11 @@ io.on('connection', function(socket) {
 
 	socket.on('kick', function(message) {
 		if (user != undefined && user.permissions != undefined && user.permissions.kick) {
-			ban(message.user_id, user.room.id,message.duration);
 			var bannedUser = getUserById(message.user_id);
+			if(!bannedUser.permissions.unkickable)
+				{
+			ban(message.user_id, user.room.id,message.duration);
+			
 			if (bannedUser != undefined && bannedUser.socket != undefined) {
 				bannedUser.socket.emit('alert', {
 					'alert': 'danger',
@@ -582,6 +586,14 @@ io.on('connection', function(socket) {
 				});
 				bannedUser.room = undefined;
 			}
+				}
+			else if(bannedUser.id == user.id){
+				user.socket.emit('alert',{'alert':'info',"text":"Did you really just try to ban yourself. What is wrong with you?"})
+			}
+			else{
+					bannedUser.socket.emit('alert',{'alert':"info",'text':user.username+" tried to ban you, just though you would want to know."});
+					user.socket.emit('alert',{'alert':"info",'text':'You can\'t ban '+bannedUser.username+", you silly"});
+				}
 
 		}
 	});
@@ -706,7 +718,9 @@ app.post('/me', function(req, res) {
 
 app.post('/login', function(req, res) {
 	var body = req.body;
-	login(body.username, body.password, function(sucessful) {
+	getUserFromHash(body.hash,function(callbackUser){
+		if(!callbackUser){
+			login(body.username, body.password, function(sucessful) {
 		if (sucessful) {
 			req.session.username = body.username;
 			res.json({
@@ -718,6 +732,14 @@ app.post('/login', function(req, res) {
 			})
 		}
 	});
+		}else{
+			req.session.username = callbackUser.username;
+			res.json({
+				"status": "OK"
+			});
+		}
+	})
+	
 });
 
 app.post('/archive', function(req, res) {
@@ -1146,7 +1168,7 @@ var handleChatLinks=function(chat){
 	};
 	return chat;
 }
-var sanitize = function(chat) {
+var sanitize = function(chat,user) {
 	chat = validator.escape(chat);
     for(var j =0;j<blacklistRegex.length;j++){
         var regex = blacklistRegex[j];
@@ -1154,6 +1176,7 @@ var sanitize = function(chat) {
 	for (var i = matches.length - 1; i >= 0; i--) {
 		var match = matches[i];
 		chat = chat.replace(match, "<span class='text-danger'>[CENSORED]</span>");
+		connection.query('UPDATE users SET infractions =infractions+1 WHERE id = '+user.id,function(err,result){if(err)console.error(err);});
 	};
     }
 

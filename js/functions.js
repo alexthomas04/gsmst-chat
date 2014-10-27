@@ -3,15 +3,21 @@ var socket = io();
 var interval;
 var typing = {};
 var bannie_id=-5;
+var rooms =[];
+
+if (Notification && Notification.permission !== "granted")
+    Notification.requestPermission();
 socket.on('me',function(message){
 	state = message;
-	$('#title').text('Welcome '+state.username);
+	if($('#room').css('display')=='none')
+		$('#title').text('Welcome '+state.username);
 });
 
 socket.on('rooms',function(message){
 	$(document).ready(function(){
 		var scope = angular.element('#rooms').scope();
 		scope.rooms=$.extend(true, scope.rooms, message.rooms);
+		rooms = message.rooms;
 			scope.$apply();
 			for (var i = scope.rooms.length - 1; i >= 0; i--) {
 				if(message.roooms.indexof(scope.rooms[i])==-1)
@@ -96,6 +102,13 @@ socket.on('chat',function(message){
         parseQuestion(message.correctAnswer,message.chat);
     }
 	if(document.body.className=='blurred'){
+		if(Notification && settings.showNotifications){
+			var notification = new Notification(message.user, {
+    		body: message.chat
+ 			});
+			notification.onShow=setTimeout(function(){notification.close();},settings.notifcationDuration || 2000);
+			notification.onClick=function(x) { window.focus(); this.cancel(); };
+		}
 		document.title='You have';
 		clearInterval(interval);
 		interval = setInterval(function(){
@@ -128,6 +141,7 @@ socket.on('alert',function(message){
 	else if(message.alert=='info'){
 		text = '<div class="alert alert-info">'+message.text+'</div>';
 	}else if(message.alert == 'new message'){
+		socket.emit('me',{});
 		text = '<div class="alert alert-info">'+message.from+' says: '+message.message+'</div>';
 	}
 	$('#chatArea').append($('<div></div>').append(text));
@@ -263,6 +277,48 @@ var updateSettings= function(data){
 		$('.chat_time').show();
 }
 
+socket.on('connected',function(message){
+	socket.emit('login', {
+				hash: $.cookie('hash')
+			});
+	retroEnterRoom();
+	
+	
+});
+var retroEnterRoom = function(){
+	if(rooms.length==0){
+		setTimeout(retroEnterRoom,50);
+		return;
+	}
+	var roomName = getParameterByName('room');
+	if(roomName){
+		var room = {};
+		for(var i=0;i<rooms.length;i++){
+			if(rooms[i].name ==roomName)
+				room= rooms[i];
+		}
+		console.log(roomName);
+		if (room && canEnterRoom(state, room)) {
+						if (!(room.requirements != undefined && room.requirements.hasPassword)) {
+							socket.emit('join-room', {
+								roomId: room.id
+							});	
+							$('#loginSection,#registerButton,#addRoomButton').slideUp();
+
+							$('#rooms').animate({
+								left: "-100%"
+							}, 500, function() {
+								$('#title').text(room.name);
+								$('#room,#clearChat').slideDown();
+								angular.element('#room').scope().room = room;
+								angular.element('#room').scope().$apply();
+							});
+							$('#leaveRoom').show();
+						} 
+					}
+	}
+	
+};
 var ban = function(duration){
 	socket.emit('kick',{user_id:bannie_id,"duration":duration});
 }
@@ -275,8 +331,38 @@ var ban = function(duration){
 
 var settings = {};
 if(!$.cookie('settings')){
-	updateSettings({showRank:true,showTime:true});
+	updateSettings({showRank:true,showTime:true,showNotifications:true});
 }
 else {
 settings = $.parseJSON($.cookie('settings'));
+}
+
+function insertParam(key, value)
+{
+    key = encodeURI(key); value = encodeURI(value);
+
+    var kvp = document.location.search.substr(1).split('&');
+
+    var i=kvp.length; var x; while(i--) 
+    {
+        x = kvp[i].split('=');
+
+        if (x[0]==key)
+        {
+            x[1] = value;
+            kvp[i] = x.join('=');
+            break;
+        }
+    }
+
+    if(i<0) {kvp[kvp.length] = [key,value].join('=');}
+
+    //this will reload the page, it's likely better to store this until finished
+    document.location.search = kvp.join('&'); 
+}
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }

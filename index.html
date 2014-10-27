@@ -349,6 +349,14 @@
 							<label>Show Time</label>
 							<button class='btn btn-primary' ng-model='showTime' ng-click="toggleTime()">{{showTimeState}}</button>
 						</div>
+						<div class='form-group'>
+							<label>Show Desktop Notifications</label>
+							<button class='btn btn-primary' ng-model='showNotification' ng-click='toggleNotifications()'>{{showNotificationsState}}</button>
+						</div>
+						<div class='form-group'>
+							<label>Desktop Notification Duration(ms)</label>
+							<input type='number' ng-model='notificationDuration' ng-change='updateDuration()'>
+						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -441,9 +449,7 @@
 	<script type="text/javascript">
 		// setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
 		$(document).ready(function() {
-			socket.emit('login', {
-				hash: $.cookie('hash')
-			});
+			
 			$('#styleSelect>li>a').click(function(event) {
 				$('link').attr('href', $(this).attr('rel'));
 				$.cookie('css', $(this).attr('rel'), {
@@ -472,6 +478,7 @@
 							socket.emit('join-room', {
 								roomId: $(this).data('roomData').id
 							});
+							window.history.pushState("", "", '?room='+$(this).data('roomData').name);
 							$('#loginSection,#registerButton,#addRoomButton').slideUp();
 
 							$('#rooms').animate({
@@ -492,6 +499,7 @@
 			});
 			$('#leaveRoom').click(function(event) {
 				$('#leaveRoom').hide();
+				window.history.pushState("", "","/");
 				if (state.username != undefined)
 					$('#title').text('Welcome ' + state.username + "!");
 				else
