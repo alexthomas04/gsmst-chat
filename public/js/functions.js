@@ -44,6 +44,7 @@ var height=10;
 socket.on('chat',function(message){
 	height+=400;
 	var $p = $('<p></p>');
+    var $a = $('<a href="/u/'+message.user_id+'" target="_blank"></a>');
 	var $strong = $('<strong></strong>');
 	var $text =$('<span></span>');
 	var $small = $('<small></small>');
@@ -94,7 +95,8 @@ socket.on('chat',function(message){
 	if(message.kickable && state.permissions.create)
 		$p.append($kick);
 	$p.append($small);
-	$p.append($strong);
+	$a.append($strong);
+    $p.append($a);
 	$p.append($text);
 	$p.append($time);
 	$('#chatArea').append($p).scrollTop(height);

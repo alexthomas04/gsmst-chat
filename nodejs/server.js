@@ -22,6 +22,7 @@ var session = require('express-session');
 var validator = require('validator');
 var io = require('socket.io')(server);
 var simplesmtp = require('simplesmtp');
+var userData = require('./userPage');
 
 
 
@@ -49,6 +50,9 @@ app.use(session({
 	secret: 'gsmstchat',
 	store: sessionStore
 }));
+app.set('view engine','jade');
+
+
 var loc = __dirname;
 loc = loc.split('\\');
 loc.pop(loc.length - 1);
@@ -69,9 +73,13 @@ io.emit('alert', {
 });
 io.on('connection', function(socket) {
 	var user;
+	
 	socket.emit('connected',{});
 	socket.on('disconnect', function() {
+
 		if (user !== undefined) {
+            var sessionLength = (new Date())-user.sessionStart;
+		connection.query('INSERT INTO sessions SET ?',{user_id:user.id,duration:sessionLength});
 			var matching = getUsersByRoom(user.room);
 			for (var i = matching.length - 1; i >= 0; i--) {
 				var match = matching[i];
@@ -96,6 +104,7 @@ io.on('connection', function(socket) {
 						}
 						getUser(message.username, function(param) {
 							user = param;
+							user.sessionStart = new Date();
 							user.socket = socket;
 							user.hash = crypto.randomBytes(50).toString('base64');
 							users.push(user);
@@ -109,7 +118,8 @@ io.on('connection', function(socket) {
 				if (user !== undefined) {
 					user.socket = undefined;
 				}
-				user = callbackUser;
+				user = callbackUser
+				user.sessionStart = new Date();
 				user.socket = socket;
 				user.hash = crypto.randomBytes(50).toString('base64');
 				users.push(user);
@@ -215,7 +225,7 @@ io.on('connection', function(socket) {
 	socket.on('chat', function(message) {
 		if (user !== undefined && user.permissions && user.permissions.chat && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
 			var chat = '';
-			if(user.permissions.aboveSanitize)
+			if(user.permissions.aboveSanitize || user.permissions.god)
 				chat = message.chat;
 			else
 				chat = sanitize(message.chat,user);
@@ -575,7 +585,7 @@ io.on('connection', function(socket) {
 	socket.on('kick', function(message) {
 		if (user != undefined && user.permissions != undefined && user.permissions.kick) {
 			var bannedUser = getUserById(message.user_id);
-			if(!bannedUser.permissions.unkickable)
+			if(!bannedUser.permissions.unkickable|| user.permissions.god)
 				{
 			ban(message.user_id, user.room.id,message.duration);
 			
@@ -862,8 +872,17 @@ app.post('/archive', function(req, res) {
 	}
 });
 
+app.get('/metrics.json',function(req,res){
+	connection.query('SELECT metrics FROM metrics ORDER BY time DESC LIMIT 1',function(err,result){
+		res.send(200,result[0].metrics);
+	});
+});
 
-
+app.get('/u/:id',function(req,res){
+    userData.getUserData(connection,req.params.id,function(data){
+       res.render('user',data);
+    });
+});
 
 
 app.get('/forgot', function(req, res) {

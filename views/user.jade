@@ -1,0 +1,15 @@
+doctype !!!5
+html
+    head
+        title #{username} - Page
+        link(rel='stylesheet',href='css/bootsrap.css')
+    body
+        h1 #{username} - Page
+        .well
+            p Real Name : #{name}
+            p Most Common Word : #{word} (#{wordUses} times)
+            p Most Common Letter : #{letter} (#{letterUses} times)
+            p Number of Bans : #{bans}
+            p Time Online : #{onlineTime}
+            p Number of chats : #{chatCount}
+            p Lurk Factor : #{lurk}

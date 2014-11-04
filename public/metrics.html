@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Metrics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Archive</title>
+	<script src="js/jquery-2.1.1.min.js"></script>
+	<script src="js/jquery.cookie.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/angular/angular.min.js"></script>
+	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
+	<script src="js/bootstrap-dropdown.js"></script>
+	<script src="js/bootstrap-tooltip.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	
+	<script src='controllers/metrics.js'></script>
+	<style type="text/css">
+	.dataTable{
+		max-height: 500px;
+		overflow: auto;
+		word-wrap:break-word;
+
+	}
+	</style>
+</head>
+<body ng-app="metrics">
+	<div ng-controller="metricsCtrl">
+		<div class="container dataTable">
+			<h2>User Activity</h2>
+			<table class="table table-bordered" >
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>User</th>
+						<th>Count</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.userActivity | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td>{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+						<td>{{pair.value/userCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<br>
+		
+		<div class="container dataTable">
+			<h2>Room Usage</h2>
+			<table class="table table-bordered" >
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Room ID</th>
+						<th>Count</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.rooms | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td>{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+						<td>{{pair.value/roomCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+        <br>
+
+		<div class="container dataTable">
+			<h2>Character Frequency</h2>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Character</th>
+						<th>Count</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.letters | orderBy:'value':true">
+		<td>{{$index+1}}</td>
+						
+						<td>{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+						<td>{{pair.value/letterCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+        <br>
+
+		<div class="container dataTable">
+			<h2>Word Frequency</h2>
+			<table class="table table-bordered" >
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Word</th>
+						<th>Count</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.words | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td>{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+						<td>{{pair.value/wordCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+        <br>
+
+        <div class="container dataTable">
+			<h2>Time Frequency(GMT)</h2>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Hour</th>
+						<th>Count</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.time | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td >{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+						<td>{{pair.value/timeCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<br>
+
+		<div class="container dataTable">
+			<h2>User Sessions</h2>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Username</th>
+						<th>Amount of time online</th>
+						<th>Percent</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.sessions | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td >{{pair.key}}</td>
+						<td>{{pair.value|millSecondsToTimeString}}</td>
+						<td>{{pair.value/sessionCount*100 |number}}%</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="container dataTable">
+			<h2>Lurk Factor</h2>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Username</th>
+						<th>Lurk Factor</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="pair in metrics.lurkFactor | orderBy:'value':true">
+						<td>{{$index+1}}</td>
+						<td >{{pair.key}}</td>
+						<td>{{pair.value}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		
+	</div>
+	
+
+
+ <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        if($.cookie('css')){
+                $('link').attr('href', $.cookie('css'));
+            }
+		$.post('/login',{hash: $.cookie('hash')} , function(data, textStatus, xhr) {
+			if(data.status=='OK'){
+				$('#login').hide();
+				$('#error').hide();
+			}
+		});
+    });
+    </script>
+     <script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-53769917-1', 'auto'); ga('send', 'pageview'); </script>
+</body>
+</html>
