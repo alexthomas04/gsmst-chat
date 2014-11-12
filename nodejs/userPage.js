@@ -54,8 +54,15 @@ var getData = function(connection,user_id,callback){
                     }
                     data.lurk = Math.floor(onlineTime / data.chatCount);
                     data.word = getHighest(words);
+					data.wordUses = words[data.word];
+					delete words[data.word];
+					data.wordnd = getHighest(words);
+					data.wordUsesnd = words[data.wordnd];
+					delete  words[data.wordnd];
+					data.wordrd = getHighest(words);
+					data.wordUsesrd = words[data.wordrd];
                     data.letter = getHighest(letters);
-                    data.wordUses = words[data.word];
+                    
                     data.letterUses = letters[data.letter];
                     connection.query('SELECT * from kicks WHERE user_id = ' + user_id, function (err, res) {
                         data.bans = res.length;
@@ -85,6 +92,10 @@ var getHighest = function(object){
     }
     return highestIndex;
 };
+
+var remove = function(array,value){
+	
+}
 
 module.exports={
 	getUserData:getData

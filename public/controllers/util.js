@@ -102,58 +102,7 @@ app.directive('room', [function () {
 	return {
 		restrict: 'A',
 		link: function (scope, iElement, iAttrs) {
-			scope.chat = function(){
-				if(state.status==='Logged in')
-	    		{
-					if(scope.message.indexOf('!word') == 0 && state.permissions.words){
-                        var number = Number(scope.message.match(new RegExp(/\d+/))[0]);
-                        if (number==0)
-                            number=1;
-						socket.emit('random',{count:number,type:'words'});
-					}else if(scope.message.indexOf('!funny') == 0 && state.permissions.words){
-						socket.emit('random',{count:1,type:'funny'});
-					
-					}else if(scope.message.indexOf('!satWord') == 0 && state.permissions.words){
-						socket.emit('sat',{type:'word'});
-					}
-				else if(scope.message.indexOf('!satDefine') == 0 && state.permissions.chat){
-					socket.emit('sat',{type:'define',word:scope.message.substring('!satDefine'.length+1)});
-					}
-					else if(scope.message.indexOf('!satSentence') == 0 && state.permissions.chat){
-					socket.emit('sat',{type:'sentence',word:scope.message.substring('!satSentence'.length+1)});
-					}
-					else if(scope.message.indexOf('!satHelp') == 0 && state.permissions.chat){
-					socket.emit('sat',{type:'help'});
-					}
-					else if(scope.message.indexOf('!satQuestion') == 0 && state.permissions.chat){
-					socket.emit('sat',{type:'question'});
-					scope.message = "!answer ";
-					}
-					else if(scope.message.indexOf('!satQ') == 0 && state.permissions.chat){
-					socket.emit('sat',{type:'question'});
-					scope.message = '!satA ';
-					}
-					else if((scope.message.indexOf('!spanishConjugations')==0 || scope.message.indexOf('!sc') == 0) && state.permissions.chat){
-					socket.emit('spanish');
-					scope.message = '!answer ';
-					}
-                    else if(scope.message.indexOf('!answer') == 0 && state.permissions.chat){
-					    checkAnswer(scope.message.substr('!answer'.length+1));
-					    
-					}
-					else if(scope.message.indexOf('!satA') == 0 && state.permissions.chat){
-					    checkAnswer(scope.message.substr('!satA'.length+1));
-					}
-                    else{
-				socket.emit('chat',{'chat':scope.message});
-				socket.emit('stopTyping',{});
-				scope.message='';
-					
-			}
-				}
-				
-				
-			};
+
 		}
 	};
 }]);

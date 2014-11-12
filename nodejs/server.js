@@ -1030,7 +1030,9 @@ var addRoom = function(data, callback) {
 var deleteRoom = function(data, callback) {
 	connection.query('DELETE FROM rooms WHERE id = ' + data.id, function(err, result) {
 		if (err !== null)
-			console.error("At Add room: %s", err);
+			console.error("At delete room: %s", err);
+		else
+			console.log(result)
 		if (callback !== null && callback !== undefined)
 			callback();
 	});
@@ -1241,9 +1243,7 @@ var isBanned = function(user, room, callback) {
 				var time = new Date(results[0].time);
 				var duration = results[0].duration;
 				if ((new Date()) - time >= duration) {
-					connection.query('DELETE FROM kicks WHERE id = ' + results[0].id, function(err, result) {
-						if (err) console.error(err);
-					});
+					
 					if (callback != undefined) {
 						callback(false);
 					}

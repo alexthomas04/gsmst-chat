@@ -4,9 +4,14 @@ var interval;
 var typing = {};
 var bannie_id=-5;
 var rooms =[];
+var sent = [];
+var lastSendId=-1;
+var storage = $.localStorage;
 
 if (Notification && Notification.permission !== "granted")
     Notification.requestPermission();
+
+
 socket.on('me',function(message){
 	state = message;
 	if($('#room').css('display')=='none')
@@ -323,7 +328,212 @@ var retroEnterRoom = function(){
 };
 var ban = function(duration){
 	socket.emit('kick',{user_id:bannie_id,"duration":duration});
-}
+};
+
+$(document).ready(function() {
+
+	$('#styleSelect>li>a').click(function(event) {
+				$('link').attr('href', $(this).attr('rel'));
+				$.cookie('css', $(this).attr('rel'), {
+					path: '/',
+					expires: 1000
+				});
+			});
+	if ($.cookie('css')) {
+				$('link').attr('href', $.cookie('css'));
+			}
+	$('#chatBox').keypress(function(event) {
+				startTyping();
+			});
+	$('#restart').click(function(event) {
+				socket.emit('restart', {});
+			});
+	$(document).on('click', 'room-button', function(event) {
+
+
+				var target = $(event.target);
+				if (!target.hasClass('btn')) {
+					var data = $(this).data('roomData');
+					console.log(data);
+					if (canEnterRoom(state, data)) {
+						if (!(data.requirements != undefined && data.requirements.hasPassword)) {
+							socket.emit('join-room', {
+								roomId: $(this).data('roomData').id
+							});
+							window.history.pushState("", "", '?room='+$(this).data('roomData').name);
+							$('#loginSection,#registerButton,#addRoomButton').slideUp();
+
+							$('#rooms').animate({
+								left: "-100%"
+							}, 500, function() {
+								$('#title').text(data.name);
+								$('#room,#clearChat').slideDown();
+								angular.element('#room').scope().room = data;
+								angular.element('#room').scope().$apply();
+							});
+							$('#leaveRoom').show();
+						} else {
+							angular.element(this).scope().showPasswordInput = true;
+							angular.element(this).scope().$apply();
+						}
+					}
+				}
+			});
+	$('#leaveRoom').click(function(event) {
+				$('#leaveRoom').hide();
+				window.history.pushState("", "","/");
+				if (state.username != undefined)
+					$('#title').text('Welcome ' + state.username + "!");
+				else
+					$('#title').text('Welcome user! Please Login');
+				socket.emit('leave room', {})
+				$('#loginSection,#registerButton,#addRoomButton').slideDown();
+				$('#room,#clearChat').slideUp('400', function() {
+					$('#chatArea').children().not('#typing').remove();
+				});
+				$('#rooms').animate({
+					left: "0%"
+				}, 500, function() {});
+
+			});
+	$('#clearChat').click(function(event) {
+				$('#chatArea').children().not('#typing').remove();
+			});
+	$('#room').on('drop', function(event) {
+				event.preventDefault();
+				var files = event.originalEvent.dataTransfer.files;
+				sendFiles(files);
+			});
+	$('#room').bind('paste',function(e,b,c){
+				var items = e.originalEvent.clipboardData.items;
+				var files = [];
+				for(var i =0;i<items.length;i++){
+						files.push(items[i].getAsFile());
+				}
+				sendFiles(files);
+			});
+	var sendFiles = function(files){
+				var reader = new FileReader();
+				reader.onloadend = function() {
+
+					socket.emit('sendFile', reader.result);
+					console.log(reader.result);
+				}
+				for (var i = 0; i < files.length; i++) {
+					if(files[i]!=null){
+					if (files[i].size < 1024 * 1024 * 5)
+						reader.readAsDataURL(files[i]);
+					else
+						$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
+						}
+				}
+				console.log(files[0]);
+			}
+	$(document).on('drop', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+    $(document).on('dragenter', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+	$(document).on('dragover', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+     $(document).keydown(function(e){
+       switch (e.which){
+           case 38: //up
+               if(lastSendId==-1){
+                   lastSendId=sent.length-1;
+               }else if(lastSendId!=0){
+                   lastSendId--;
+               }
+               $('#chatBox').val(sent[lastSendId]);
+               break;
+           case 40: //down
+                  if(lastSendId==-1){
+                   lastSendId=sent.length-1;
+               }else if(lastSendId+1!=sent.length){
+                   lastSendId++;
+               }
+               $('#chatBox').val(sent[lastSendId]);
+               break;
+           default:
+           return;
+       }
+        e.preventDefault();
+    });
+     $(document).on('click','.historyItem', function (e) {
+        console.log(e);
+       $('#chatBox').val(e.currentTarget.text);
+    });
+	var handleHistory = function(message){
+		sent.push(message);
+		var historyItems = $('.historyItem');
+		if(historyItems.length>=10){
+			for(var i =0;i<=historyItems.length-10;i++)
+			 $('#sentHistory').children().first().remove();
+		}
+                    $('#sentHistory').append("<li><a class='historyItem'>" +
+                        message +
+                        "</a></li>"); 
+	};
+    $('#chatButton').on('click','',function(e){
+        var message = $('#chatBox').val();
+        lastSendId=-1;
+       if(state.status==='Logged in')
+	    		{
+                     handleHistory(message);
+					if(message.indexOf('!word') == 0 && state.permissions.words){
+                        var number = Number(message.match(new RegExp(/\d+/))[0]);
+                        if (number==0)
+                            number=1;
+						socket.emit('random',{count:number,type:'words'});
+					}else if(message.indexOf('!funny') == 0 && state.permissions.words){
+						socket.emit('random',{count:1,type:'funny'});
+					
+					}else if(message.indexOf('!satWord') == 0 && state.permissions.words){
+						socket.emit('sat',{type:'word'});
+					}
+				else if(message.indexOf('!satDefine') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'define',word:message.substring('!satDefine'.length+1)});
+					}
+					else if(message.indexOf('!satSentence') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'sentence',word:message.substring('!satSentence'.length+1)});
+					}
+					else if(message.indexOf('!satHelp') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'help'});
+					}
+					else if(message.indexOf('!satQuestion') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'question'});
+					message = "!answer ";
+					}
+					else if(message.indexOf('!satQ') == 0 && state.permissions.chat){
+					socket.emit('sat',{type:'question'});
+					message = '!satA ';
+					}
+					else if((message.indexOf('!spanishConjugations')==0 || message.indexOf('!sc') == 0) && state.permissions.chat){
+					socket.emit('spanish');
+					message = '!answer ';
+					}
+                    else if(message.indexOf('!answer') == 0 && state.permissions.chat){
+					    checkAnswer(message.substr('!answer'.length+1));
+					    
+					}
+					else if(message.indexOf('!satA') == 0 && state.permissions.chat){
+					    checkAnswer(message.substr('!satA'.length+1));
+					}
+                    else{
+				socket.emit('chat',{'chat':message});
+				socket.emit('stopTyping',{});
+				$('#chatBox').val('');
+					
+			}
+				} 
+    });
+
+});
 
 
 
