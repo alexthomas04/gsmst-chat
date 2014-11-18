@@ -12,6 +12,7 @@
 	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
 	<script src="js/bootstrap-dropdown.js"></script>
 	<script src="js/bootstrap-tooltip.js"></script>
+	<script src="js/jquery.ajax-progress.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 	
 	<script src='controllers/metrics.js'></script>
@@ -25,6 +26,21 @@
 	</style>
 </head>
 <body ng-app="metrics">
+	<div class="progress">
+  <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" id='downloadProgress'>
+    <span></span>
+  </div>
+</div>
+	<div class="progress">
+  <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id='loadProgress'>
+    <span></span>
+  </div>
+</div>
+	<div>
+		<p>
+			Leaving the page will prevent the processing from continuing. Once the processing is complete the bar may not be filled and your computer will apear to freeze, this is a known behavor. In extreme cases your computer screen will apear to go blank or the color of the background. Please just hold on, the computer is working. At this point you can leave the tab without interupting the processing.
+		</p>
+	</div>
 	<div ng-controller="metricsCtrl">
 		<div class="container dataTable">
 			<h2>User Activity</h2>
@@ -111,7 +127,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="pair in metrics.words | orderBy:'value':true">
+					<tr ng-repeat="pair in metrics.words">
 						<td>{{$index+1}}</td>
 						<td>{{pair.key}}</td>
 						<td>{{pair.value}}</td>

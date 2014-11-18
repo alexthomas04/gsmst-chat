@@ -14,6 +14,7 @@
 	<script src="js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
 	<script src="js/bootstrap-dropdown.js"></script>
 	<script src="js/bootstrap-tooltip.js"></script>
+    <script src="js/bootstrap-tab.js"></script>
     <script src="js/questions.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
@@ -65,7 +66,7 @@
 			</li>
 			<li ng-show="state.permissions.restart" id='restart'><a><span class='glyphicon glyphicon-refresh ' style='font-size:large'  ></span></a>
 			</li>
-			<li ng-show="state.permissions.archive"><a href="archive.html">Archive</a>
+			<li ng-show="state.permissions.archive"><a href="archive.html" target='_blank'>Archive</a>
 			</li>
 			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip">ProTip!</a>
 			</li>
@@ -276,10 +277,17 @@
 
 				</div>
 				<div class="modal-body">
-					<div ng-repeat='message in state.privates'>
+                    <div role="tabpanel">
+                        <ul class="nav nav-tabs" role="tablist" id="messageTabs">
+                            <li role="presentation" class="active"><a aria-controls="received" data-target="#received" role="tab" data-toggle="tab">Received</a> </li>
+                            <li role="presentation" ><a aria-controls="sent" role="tab" data-toggle="tab" data-target="#sent">Sent</a> </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="received"><div ng-repeat='message in state.privates.receive'>
 						<div class="panel panel-default">
 							<div class="panel-heading">
-								<h3 class="panel-title">{{message.from_username}}</h3>
+								<h3 class="panel-title">{{message.username}}</h3>
 								<small>{{message.time | date : 'medium'}} </small>
 							</div>
 							<div class="panel-body">
@@ -287,12 +295,31 @@
 							</div>
 							<div class="panel-footer">
 								<button class='btn btn-primary' ng-click='replyToPrivate(message.from_username)' data-dismiss="modal" data-toggle="modal" data-target="#sendMessage">Reply</button>
-								<button class='btn btn-danger' ng-click='deletePrivate(message.id)'>Delete</button>
+								<button class='btn btn-danger' ng-click='deletePrivate(message.id,true)'>Delete</button>
 							</div>
 
 						</div>
 
-					</div>
+					</div></div>
+                             <div role="tabpanel" class="tab-pane " id="sent"><div ng-repeat='message in state.privates.sent'>
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3 class="panel-title">{{message.username}}</h3>
+								<small>{{message.time | date : 'medium'}} </small>
+							</div>
+							<div class="panel-body">
+								{{message.message}}
+							</div>
+							<div class="panel-footer">
+								<button class='btn btn-danger' ng-click='deletePrivate(message.id,false)'>Delete</button>
+							</div>
+
+						</div>
+
+					</div></div>
+                        </div>
+                    </div>
+
 
 				</div>
 				<div class="modal-footer">

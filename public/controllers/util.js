@@ -19,7 +19,6 @@ app.directive('login', [function () {
 			socket.on('me',function(message){
 				scope.state = state;
 				scope.$apply();
-				console.log(message);
 				if(scope.rememberMe)
 				$.cookie('hash',message.hash,{
 					path: '/',
@@ -187,8 +186,8 @@ app.directive('inbox', [function () {
 	return {
 		restrict: 'A',
 		link: function (scope, iElement, iAttrs) {
-			scope.deletePrivate = function(id){
-				socket.emit('deletePrivate',{"id":id});
+			scope.deletePrivate = function(id,receiver){
+				socket.emit('deletePrivate',{"id":id,"receiver":receiver});
 			};
 			scope.replyToPrivate=function(to){
 				scope.to=to;

@@ -304,7 +304,6 @@ var retroEnterRoom = function(){
 			if(rooms[i].name ==roomName)
 				room= rooms[i];
 		}
-		console.log(roomName);
 		if (room && canEnterRoom(state, room)) {
 						if (!(room.requirements != undefined && room.requirements.hasPassword)) {
 							socket.emit('join-room', {
@@ -332,6 +331,11 @@ var ban = function(duration){
 
 $(document).ready(function() {
 
+    $('#messageTabs a').click(function(e){
+       $(this).tab('show');
+    });
+    $('#messageTabs a:first').tab('show');
+
 	$('#styleSelect>li>a').click(function(event) {
 				$('link').attr('href', $(this).attr('rel'));
 				$.cookie('css', $(this).attr('rel'), {
@@ -354,7 +358,6 @@ $(document).ready(function() {
 				var target = $(event.target);
 				if (!target.hasClass('btn')) {
 					var data = $(this).data('roomData');
-					console.log(data);
 					if (canEnterRoom(state, data)) {
 						if (!(data.requirements != undefined && data.requirements.hasPassword)) {
 							socket.emit('join-room', {
@@ -417,7 +420,6 @@ $(document).ready(function() {
 				reader.onloadend = function() {
 
 					socket.emit('sendFile', reader.result);
-					console.log(reader.result);
 				}
 				for (var i = 0; i < files.length; i++) {
 					if(files[i]!=null){
@@ -427,7 +429,6 @@ $(document).ready(function() {
 						$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
 						}
 				}
-				console.log(files[0]);
 			}
 	$(document).on('drop', function(e) {
 				e.stopPropagation();
@@ -465,7 +466,6 @@ $(document).ready(function() {
         e.preventDefault();
     });
      $(document).on('click','.historyItem', function (e) {
-        console.log(e);
        $('#chatBox').val(e.currentTarget.text);
     });
 	var handleHistory = function(message){

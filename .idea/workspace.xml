@@ -13,7 +13,7 @@
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/chat$parser.coverage" NAME="parser Coverage Results" MODIFIED="1413160833856" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python/Flask-0.10.1" />
-    <SUITE FILE_PATH="coverage/chat$metrics.coverage" NAME="metrics Coverage Results" MODIFIED="1415439112775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python" />
+    <SUITE FILE_PATH="coverage/chat$metrics.coverage" NAME="metrics Coverage Results" MODIFIED="1415859348410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python" />
     <SUITE FILE_PATH="coverage/chat$Project_Euler.coverage" NAME="Project Euler Coverage Results" MODIFIED="1415439106495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -31,8 +31,8 @@
       <file leaf-file-name="metrics.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python/metrics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="858" max-vertical-offset="1666">
-              <caret line="73" column="56" selection-start-line="73" selection-start-column="56" selection-end-line="73" selection-end-column="56" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="872" max-vertical-offset="1904">
+              <caret line="83" column="56" selection-start-line="83" selection-start-column="56" selection-end-line="83" selection-end-column="56" />
               <folding />
             </state>
           </provider>
@@ -41,8 +41,8 @@
       <file leaf-file-name="user.jade" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views/user.jade">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="289" max-vertical-offset="391">
-              <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="408">
+              <caret line="14" column="38" selection-start-line="14" selection-start-column="38" selection-end-line="14" selection-end-column="38" />
               <folding />
             </state>
           </provider>
@@ -51,19 +51,39 @@
       <file leaf-file-name="server.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nodejs2/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="171" max-vertical-offset="23579">
-              <caret line="19" column="14" selection-start-line="19" selection-start-column="14" selection-end-line="19" selection-end-column="14" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3621" max-vertical-offset="23647">
+              <caret line="227" column="46" selection-start-line="227" selection-start-column="46" selection-end-line="227" selection-end-column="46" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="server.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="server.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nodejs/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="17166" max-vertical-offset="23647">
-              <caret line="1045" column="27" selection-start-line="1045" selection-start-column="27" selection-end-line="1045" selection-end-column="27" />
-              <folding />
+            <state vertical-scroll-proportion="1.3283783" vertical-offset="2043" max-vertical-offset="15453">
+              <caret line="508" column="33" selection-start-line="508" selection-start-column="33" selection-end-line="508" selection-end-column="33" />
+              <folding>
+                <element signature="e#1955#2431#0" expanded="false" />
+                <element signature="e#2473#3285#0" expanded="false" />
+                <element signature="e#3331#5877#0" expanded="false" />
+                <element signature="e#5917#6971#0" expanded="false" />
+                <element signature="e#7012#7831#0" expanded="false" />
+                <element signature="e#7869#12155#0" expanded="false" />
+                <element signature="e#12196#12813#0" expanded="false" />
+                <element signature="e#16015#16038#0" expanded="false" />
+                <element signature="e#16253#16828#0" expanded="false" />
+                <element signature="e#16867#17305#0" expanded="false" />
+                <element signature="e#17344#17692#0" expanded="false" />
+                <element signature="e#17737#18085#0" expanded="false" />
+                <element signature="e#18129#19049#0" expanded="false" />
+                <element signature="e#19091#19468#0" expanded="false" />
+                <element signature="e#19508#20462#0" expanded="false" />
+                <element signature="e#20505#20765#0" expanded="false" />
+                <element signature="e#20807#21550#0" expanded="false" />
+                <element signature="e#21582#22379#0" expanded="false" />
+                <element signature="e#22474#22861#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -71,8 +91,18 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="7000" max-vertical-offset="8228">
-              <caret line="435" column="18" selection-start-line="435" selection-start-column="18" selection-end-line="435" selection-end-column="18" />
+            <state vertical-scroll-proportion="-3.9230769" vertical-offset="4811" max-vertical-offset="8687">
+              <caret line="289" column="74" selection-start-line="289" selection-start-column="74" selection-end-line="289" selection-end-column="74" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="userPage.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/nodejs/userPage.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1836">
+              <caret line="23" column="30" selection-start-line="23" selection-start-column="30" selection-end-line="23" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -81,24 +111,19 @@
       <file leaf-file-name="config.json" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nodejs/config.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="416" max-vertical-offset="1156">
-              <caret line="40" column="21" selection-start-line="40" selection-start-column="21" selection-end-line="40" selection-end-column="21" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="1156">
+              <caret line="12" column="10" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="functions.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="functions.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/js/functions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.4789326" vertical-offset="8314" max-vertical-offset="9656">
-              <caret line="486" column="38" selection-start-line="486" selection-start-column="38" selection-end-line="486" selection-end-column="38" />
-              <folding>
-                <element signature="e#10798#10910#0" expanded="false" />
-                <element signature="e#10953#11138#0" expanded="false" />
-                <element signature="e#11676#11731#0" expanded="false" />
-                <element signature="e#11876#11931#0" expanded="false" />
-              </folding>
+            <state vertical-scroll-proportion="0.0" vertical-offset="5304" max-vertical-offset="10030">
+              <caret line="335" column="27" selection-start-line="335" selection-start-column="27" selection-end-line="335" selection-end-column="27" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -106,8 +131,8 @@
       <file leaf-file-name="util.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/controllers/util.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-8.464286" vertical-offset="1650" max-vertical-offset="3502">
-              <caret line="111" column="12" selection-start-line="111" selection-start-column="10" selection-end-line="111" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2779" max-vertical-offset="3519">
+              <caret line="191" column="62" selection-start-line="191" selection-start-column="54" selection-end-line="191" selection-end-column="62" />
               <folding />
             </state>
           </provider>
@@ -136,18 +161,19 @@
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/metrics.html" />
         <option value="$PROJECT_DIR$/user.jade" />
-        <option value="$PROJECT_DIR$/nodejs/server.js" />
-        <option value="$PROJECT_DIR$/views/user.jade" />
-        <option value="$PROJECT_DIR$/nodejs2/server.js" />
         <option value="$PROJECT_DIR$/js/functions.js" />
-        <option value="$PROJECT_DIR$/nodejs/userPage.js" />
         <option value="$PROJECT_DIR$/nodejs2/config.json" />
         <option value="$PROJECT_DIR$/python/pEuler.py" />
-        <option value="$PROJECT_DIR$/python/metrics.py" />
+        <option value="$PROJECT_DIR$/nodejs2/server.js" />
+        <option value="$PROJECT_DIR$/public/js/jquery.ajax-progress.js" />
         <option value="$PROJECT_DIR$/nodejs/config.json" />
-        <option value="$PROJECT_DIR$/public/controllers/util.js" />
-        <option value="$PROJECT_DIR$/public/index.html" />
+        <option value="$PROJECT_DIR$/python/metrics.py" />
         <option value="$PROJECT_DIR$/public/js/functions.js" />
+        <option value="$PROJECT_DIR$/public/controllers/util.js" />
+        <option value="$PROJECT_DIR$/nodejs/server.js" />
+        <option value="$PROJECT_DIR$/public/index.html" />
+        <option value="$PROJECT_DIR$/views/user.jade" />
+        <option value="$PROJECT_DIR$/nodejs/userPage.js" />
       </list>
     </option>
   </component>
@@ -386,7 +412,27 @@
       <option name="PARAMETERS" value="" />
       <method />
     </configuration>
-    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="chat" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
@@ -412,27 +458,7 @@
       <option name="USE_PARAM" value="false" />
       <method />
     </configuration>
-    <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="chat" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
       <method />
     </configuration>
     <configuration default="true" type="NodeJSConfigurationType" factoryName="Node.js" working-dir="">
@@ -590,7 +616,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -606,11 +632,11 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32985386" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
     <layout-to-restore>
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -628,9 +654,9 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30480167" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30480167" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -651,10 +677,26 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="169" />
+      <option name="time" value="177" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/public/js/functions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="8347" max-vertical-offset="9945">
+          <caret line="491" column="74" selection-start-line="491" selection-start-column="24" selection-end-line="491" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/controllers/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1650" max-vertical-offset="3502">
+          <caret line="111" column="12" selection-start-line="111" selection-start-column="10" selection-end-line="111" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1666">
@@ -683,7 +725,27 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="17166" max-vertical-offset="23647">
           <caret line="1045" column="27" selection-start-line="1045" selection-start-column="27" selection-end-line="1045" selection-end-column="27" />
-          <folding />
+          <folding>
+            <element signature="e#1955#2431#0" expanded="false" />
+            <element signature="e#2473#3285#0" expanded="false" />
+            <element signature="e#3331#5877#0" expanded="false" />
+            <element signature="e#5917#6971#0" expanded="false" />
+            <element signature="e#7012#7831#0" expanded="false" />
+            <element signature="e#7869#12155#0" expanded="false" />
+            <element signature="e#12196#12813#0" expanded="false" />
+            <element signature="e#16015#16038#0" expanded="false" />
+            <element signature="e#16253#16828#0" expanded="false" />
+            <element signature="e#16867#17305#0" expanded="false" />
+            <element signature="e#17344#17692#0" expanded="false" />
+            <element signature="e#17737#18085#0" expanded="false" />
+            <element signature="e#18129#19049#0" expanded="false" />
+            <element signature="e#19091#19468#0" expanded="false" />
+            <element signature="e#19508#20462#0" expanded="false" />
+            <element signature="e#20505#20765#0" expanded="false" />
+            <element signature="e#20807#21550#0" expanded="false" />
+            <element signature="e#21582#22379#0" expanded="false" />
+            <element signature="e#22474#22861#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -707,12 +769,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="7406" max-vertical-offset="9758">
           <caret line="451" column="14" selection-start-line="451" selection-start-column="14" selection-end-line="451" selection-end-column="14" />
-          <folding>
-            <element signature="e#10798#10910#0" expanded="false" />
-            <element signature="e#10953#11138#0" expanded="false" />
-            <element signature="e#11676#11731#0" expanded="false" />
-            <element signature="e#11876#11931#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -759,7 +816,27 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="17489" max-vertical-offset="23647">
           <caret line="1043" column="27" selection-start-line="1043" selection-start-column="27" selection-end-line="1043" selection-end-column="27" />
-          <folding />
+          <folding>
+            <element signature="e#1955#2431#0" expanded="false" />
+            <element signature="e#2473#3285#0" expanded="false" />
+            <element signature="e#3331#5877#0" expanded="false" />
+            <element signature="e#5917#6971#0" expanded="false" />
+            <element signature="e#7012#7831#0" expanded="false" />
+            <element signature="e#7869#12155#0" expanded="false" />
+            <element signature="e#12196#12813#0" expanded="false" />
+            <element signature="e#16015#16038#0" expanded="false" />
+            <element signature="e#16253#16828#0" expanded="false" />
+            <element signature="e#16867#17305#0" expanded="false" />
+            <element signature="e#17344#17692#0" expanded="false" />
+            <element signature="e#17737#18085#0" expanded="false" />
+            <element signature="e#18129#19049#0" expanded="false" />
+            <element signature="e#19091#19468#0" expanded="false" />
+            <element signature="e#19508#20462#0" expanded="false" />
+            <element signature="e#20505#20765#0" expanded="false" />
+            <element signature="e#20807#21550#0" expanded="false" />
+            <element signature="e#21582#22379#0" expanded="false" />
+            <element signature="e#22474#22861#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -884,23 +961,23 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python/rawhtml.txt">
-      <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
-        <state />
-      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-2.4880953" vertical-offset="29" max-vertical-offset="92191">
           <caret line="14" column="65" selection-start-line="14" selection-start-column="65" selection-end-line="14" selection-end-column="65" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/insert.sql">
       <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
         <state />
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python/insert.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.68882173" vertical-offset="27458" max-vertical-offset="85340">
           <caret line="1642" column="49" selection-start-line="1642" selection-start-column="49" selection-end-line="1642" selection-end-column="49" />
         </state>
+      </provider>
+      <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
+        <state />
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/.PyCharm30/system/extLibs/nodejs-v0.10.29-src/core-modules-sources/lib/net.js">
@@ -938,41 +1015,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/views/user.jade">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="289" max-vertical-offset="391">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nodejs/userPage.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1632">
-          <caret line="72" column="7" selection-start-line="70" selection-start-column="22" selection-end-line="72" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nodejs2/server.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="171" max-vertical-offset="23579">
-          <caret line="19" column="14" selection-start-line="19" selection-start-column="14" selection-end-line="19" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/nodejs2/config.json">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1037" max-vertical-offset="1173">
           <caret line="61" column="37" selection-start-line="61" selection-start-column="37" selection-end-line="61" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python/metrics.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="858" max-vertical-offset="1666">
-          <caret line="73" column="56" selection-start-line="73" selection-start-column="56" selection-end-line="73" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -983,47 +1029,102 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nodejs/server.js">
+    <entry file="file://$PROJECT_DIR$/nodejs2/server.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="17523" max-vertical-offset="23647">
-          <caret line="1045" column="27" selection-start-line="1045" selection-start-column="27" selection-end-line="1045" selection-end-column="27" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="3621" max-vertical-offset="23647">
+          <caret line="227" column="46" selection-start-line="227" selection-start-column="46" selection-end-line="227" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/js/jquery.ajax-progress.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="493">
+          <caret line="23" column="19" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nodejs/config.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="416" max-vertical-offset="1156">
-          <caret line="40" column="21" selection-start-line="40" selection-start-column="21" selection-end-line="40" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="1156">
+          <caret line="12" column="10" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/index.html">
+    <entry file="file://$PROJECT_DIR$/python/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="7000" max-vertical-offset="8228">
-          <caret line="435" column="18" selection-start-line="435" selection-start-column="18" selection-end-line="435" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/controllers/util.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.464286" vertical-offset="1650" max-vertical-offset="3502">
-          <caret line="111" column="12" selection-start-line="111" selection-start-column="10" selection-end-line="111" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="872" max-vertical-offset="1904">
+          <caret line="83" column="56" selection-start-line="83" selection-start-column="56" selection-end-line="83" selection-end-column="56" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/js/functions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.4789326" vertical-offset="8314" max-vertical-offset="9656">
-          <caret line="486" column="38" selection-start-line="486" selection-start-column="38" selection-end-line="486" selection-end-column="38" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="5304" max-vertical-offset="10030">
+          <caret line="335" column="27" selection-start-line="335" selection-start-column="27" selection-end-line="335" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.9230769" vertical-offset="4811" max-vertical-offset="8687">
+          <caret line="289" column="74" selection-start-line="289" selection-start-column="74" selection-end-line="289" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/user.jade">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="408">
+          <caret line="14" column="38" selection-start-line="14" selection-start-column="38" selection-end-line="14" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/controllers/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3247" max-vertical-offset="3519">
+          <caret line="191" column="62" selection-start-line="191" selection-start-column="54" selection-end-line="191" selection-end-column="62" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nodejs/userPage.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1836">
+          <caret line="23" column="30" selection-start-line="23" selection-start-column="30" selection-end-line="23" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nodejs/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.3283783" vertical-offset="2043" max-vertical-offset="15453">
+          <caret line="508" column="33" selection-start-line="508" selection-start-column="33" selection-end-line="508" selection-end-column="33" />
           <folding>
-            <element signature="e#10798#10910#0" expanded="false" />
-            <element signature="e#10953#11138#0" expanded="false" />
-            <element signature="e#11676#11731#0" expanded="false" />
-            <element signature="e#11876#11931#0" expanded="false" />
+            <element signature="e#1955#2431#0" expanded="false" />
+            <element signature="e#2473#3285#0" expanded="false" />
+            <element signature="e#3331#5877#0" expanded="false" />
+            <element signature="e#5917#6971#0" expanded="false" />
+            <element signature="e#7012#7831#0" expanded="false" />
+            <element signature="e#7869#12155#0" expanded="false" />
+            <element signature="e#12196#12813#0" expanded="false" />
+            <element signature="e#16015#16038#0" expanded="false" />
+            <element signature="e#16253#16828#0" expanded="false" />
+            <element signature="e#16867#17305#0" expanded="false" />
+            <element signature="e#17344#17692#0" expanded="false" />
+            <element signature="e#17737#18085#0" expanded="false" />
+            <element signature="e#18129#19049#0" expanded="false" />
+            <element signature="e#19091#19468#0" expanded="false" />
+            <element signature="e#19508#20462#0" expanded="false" />
+            <element signature="e#20505#20765#0" expanded="false" />
+            <element signature="e#20807#21550#0" expanded="false" />
+            <element signature="e#21582#22379#0" expanded="false" />
+            <element signature="e#22474#22861#0" expanded="false" />
           </folding>
         </state>
       </provider>

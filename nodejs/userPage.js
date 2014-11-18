@@ -11,6 +11,7 @@ var getData = function(connection,user_id,callback){
             var data = {};
             data.name = user.first_name + ' ' + user.last_name;
             data.username = user.username;
+            data.infractions = user.infractions;
             connection.query('SELECT * FROM sessions WHERE user_id = ' + user_id, function (err1, result1) {
                 var onlineTime = 0;
                 for (var i = 0; i < result1.length; i++) {
