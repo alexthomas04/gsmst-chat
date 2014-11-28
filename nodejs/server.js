@@ -268,10 +268,10 @@ socket.on('random', function(message) {
 			connectionRead.query('SELECT ' + field + ' FROM ' + db + ' WHERE ' + indexes.join(' or '), function(error, results) {
 				var words = [];
 				for (var j = 0; j < results.length; j++) {
-					words.push(results[j][field]);
+					words.push(results[j][field].trim());
 				}
 				chatToRoom(user, {
-					chat: words.join(','),
+					chat: words.join(', '),
 					user: 'SERVER',
 					'user_id': -1,
 					kickable: false,
@@ -1238,7 +1238,7 @@ var getWordList=function(){
 			var matches = chat.match(regex) || [];
 			for (var i = matches.length - 1; i >= 0; i--) {
 				var match = matches[i];
-				chat = chat.replace(match, "<span class='text-danger'>[CENSORED]</span>");
+				chat = chat.replace(match, "<span class='text-danger'>&nbsp;[CENSORED]</span>");
 				connection.query('UPDATE users SET infractions =infractions+1 WHERE id = '+user.id,function(err,result){if(err)console.error(err);});
 			};
 		}
