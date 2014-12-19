@@ -43,7 +43,7 @@ app.controller('metricsCtrl', ['$scope',
 	function($scope) {
 		var handleJSON = function(json) {
 			$scope.metrics = json;
-			var increment = 100;
+			var increment = 500;
 			var userCount = 0,
 				wordCount = 0,
 				letterCount = 0,
@@ -60,7 +60,7 @@ app.controller('metricsCtrl', ['$scope',
 			total_count += json.lurkFactor.length * json.users.length;
 			total_count += json.userActivity.length * json.users.length;
 			total_count += json.sessions.length * json.users.length;
-			total_count += json.words.length * 2;
+			total_count += json.words.length * 3;
 			var counter = 0;
 			var incrementAndUpdate = function(text) {
 				text = text || '';
@@ -68,7 +68,7 @@ app.controller('metricsCtrl', ['$scope',
 				setProgress('loadProgress', counter * 100 / total_count, text);
 			};
 			var performSection = function(start, stop, func, callback) {
-				for (var i = start; i < stop; i++) {
+				for (var i = start-1; i >stop ; i--) {
 					func(i);
 				}
 				callback(stop, func);
@@ -77,14 +77,14 @@ app.controller('metricsCtrl', ['$scope',
 				var timeoutFunc = function(one, two) {
 					setTimeout(function() {
 						performWordSection(one, two, next);
-					}, 50);
+					}, 20);
 				};
 				var length = json.words.length;
-				if (current < length) {
-					if (current + increment < length)
-						performSection(current, current + increment, func, timeoutFunc);
+				if (current > 0) {
+					if (current - increment > 0)
+						performSection(current, current - increment, func, timeoutFunc);
 					else
-						performSection(current, length, func, timeoutFunc);
+						performSection(current, 0, func, timeoutFunc);
 				} else
 					next();
 			};
@@ -177,24 +177,37 @@ app.controller('metricsCtrl', ['$scope',
 			});
 			async(function() {
 				wait(function() {
-					performWordSection(0, function(i) {
+					performWordSection($scope.metrics.words.length, function(i) {
 						var val = json.words[i];
 						wordCount += val.value;
 						$scope.wordCount = wordCount;
 						incrementAndUpdate("Word Counting");
 					}, function() {
-						performWordSection(0, function(i) {
+						performWordSection($scope.metrics.words.length, function(i) {
 							var word = $scope.metrics.words[i];
 							if (word.key.length > 30) {
 								word.tooltip = word.key;
 								word.key = word.key.substring(0, 30);
 							}
 							$scope.metrics.words[i] = word;
-							incrementAndUpdate("word Shortening");
+							incrementAndUpdate("Word Shortening");
 						}, function() {
-							$scope.$apply();
+							performWordSection($scope.metrics.words.length,function(i){
+								var word = $scope.metrics.words[i];
+								if(word.value/$scope.wordCount*100<.001){
+									$scope.metrics.words.splice(i,1);
+									
+								}
+								incrementAndUpdate("Removing Uncommon Words");
+							},function(){$scope.$apply();setProgress('loadProgress',100,'Complete');});
+							
 						});
 					});
+				});
+			});
+			async(function(){
+				wait(function(){
+					
 				});
 			});
 		};

@@ -915,7 +915,7 @@ app.post('/archive', function(req, res) {
 });
 
 app.get('/metrics.json',function(req,res){
-	connection.query('SELECT metrics FROM metrics ORDER BY time DESC LIMIT 1',function(err,result){
+	connection.query('SELECT metrics,id FROM metrics ORDER BY time DESC LIMIT 1',function(err,result){
 		res.send(200,result[0].metrics);
 	});
 });

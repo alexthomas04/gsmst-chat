@@ -8,7 +8,7 @@ var sent = [];
 var lastSendId=-1;
 var storage = $.localStorage;
 
-if (Notification && Notification.permission !== "granted")
+if ('Notification' in window && Notification.permission !== "granted")
     Notification.requestPermission();
 
 
@@ -88,7 +88,7 @@ socket.on('chat',function(message){
 			$strong.css('color', color.nameColor);
 		}
 		if(color.backgroundName!=undefined){
-			$strong.css('background-color',color.backgroundName);
+			$strong.css('background',color.backgroundName);
 		}
 		if(color.textColor!=undefined){
 			$text.css('color', color.textColor);

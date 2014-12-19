@@ -127,7 +127,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="pair in metrics.words">
+					<tr ng-repeat="pair in metrics.words | orderBy:'value':true">
 						<td>{{$index+1}}</td>
 						<td>{{pair.key}}</td>
 						<td>{{pair.value}}</td>
