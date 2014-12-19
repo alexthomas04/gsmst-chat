@@ -1,0 +1,58 @@
+{
+
+    "mysql":{
+		"host":"",
+		"user":"",
+		"password":"",
+		"database":""
+		},
+	"register_validataions":{
+		"email":{
+			"min":3,
+			"max":50,
+			"regex":"INSERTREGEX"
+		},
+		"firstname":{
+			"min":3,
+			"max":50,
+			"required":true
+		},
+		"lastname":{
+			"min":3,
+			"max":50,
+			"required":true
+		},
+		"username":{
+			"min":3,
+			"max":50,
+			"unique":{
+				"column":"username",
+				"table":"users"
+			},
+			"required":true
+		},
+		"password":{
+			"min":3,
+			"max":64,
+			"required":true
+		},
+		"repassword":{
+			"matches":"password",
+			"required":true
+		}
+
+
+	},
+	"hash":{
+		"length":256,
+		"salt":128,
+		"itterations":10000
+	},
+	"mail":{
+		"username":"",
+		"password":""
+		},
+    "port":80,
+    "useDirName":false,
+    "dir":""
+}
