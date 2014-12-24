@@ -1219,7 +1219,7 @@ var getWordList=function(){
 
 	getWordList();
 	var handleChatLinks=function(chat){
-		var reg_exUrl = new RegExp(/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/g);
+		var reg_exUrl = new RegExp(/(((http|https|ftp|ftps)\:\/\/|www\.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)|(\d{1,3}\.){3}\d{1,3}(\/\S*)?/g);
 		var matches = chat.match(reg_exUrl) || [];
 		for (var i = matches.length - 1; i >= 0; i--) {
 			var match = matches[i];
