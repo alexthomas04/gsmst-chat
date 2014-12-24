@@ -1350,7 +1350,7 @@ var getWordList=function(){
 	}
 
 	var sendEmails = function() {
-		connection.query('SELECT `id`,`name`,`email`,`type`,`report` FROM `chat`.`reports` WHERE informed = 0', function(err, results) {
+		connection.query('SELECT `id`,`name`,`email`,`type`,`report` FROM `reports` WHERE informed = 0', function(err, results) {
 			for (var i = results.length - 1; i >= 0; i--) {
 				var result = results[i];
 				var message = 'subject: NOREPLY\r\n\r\n';
@@ -1359,7 +1359,7 @@ var getWordList=function(){
 					message += 'Thank you ' + result.name + " for submitting request\n\n" + result.report + "\n\nWe will be looking into it shortly";
 					admin_message = 'subject: NEW REQUEST\r\n\r\n';
 					admin_message += result.name + ' submitted request "' + result.report + '"';
-					connection.query('UPDATE `chat`.`reports` SET ? WHERE id = ' + result.id, {
+					connection.query('UPDATE `reports` SET ? WHERE id = ' + result.id, {
 						informed: 1
 					}, function(err, result) {
 						if (err != undefined) console.error(err);
@@ -1368,14 +1368,14 @@ var getWordList=function(){
 					message += 'Thank you ' + result.name + " for submitting bug report\n\n" + result.report + "\n\nWe will be looking into it shortly. Your Ticket Id is " + result.id;
 					admin_message = 'subject: NEW BUG\r\n\r\n';
 					admin_message += result.name + ' submitted bug "' + result.report + '"';
-					connection.query('UPDATE `chat`.`reports` SET ? WHERE id = ' + result.id, {
+					connection.query('UPDATE `reports` SET ? WHERE id = ' + result.id, {
 						informed: 1
 					}, function(err, result) {
 						if (err != undefined) console.error(err);
 					});
 				}
 				mail('gsmstchat@gmail.com', result.email, message);
-				connection.query('SELECT `email` FROM `chat`.`users` WHERE group_id=4 or group_id=5', function(error, admins) {
+				connection.query('SELECT `email` FROM `users` WHERE group_id=4 or group_id=5', function(error, admins) {
 					for (var j = admins.length - 1; j >= 0; j--) {
 						var admin = admins[j];
 						mail('gsmstchat@gmail.com', admin.email, admin_message);
@@ -1383,13 +1383,13 @@ var getWordList=function(){
 				});
 			};
 		});
-connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `chat`.`users` WHERE informed = 0', function(err, results) {
+connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `users` WHERE informed = 0', function(err, results) {
 	for (var i = results.length - 1; i >= 0; i--) {
 		var result = results[i];
 		var message = 'subject: NOREPLY\r\n\r\n';
 
 		message += 'Thank you ' + result.first_name + ' ' + result.last_name + " for registering at GSMSTCHAT.com";
-		connection.query('UPDATE `chat`.`users` SET ? WHERE id = ' + result.id, {
+		connection.query('UPDATE `users` SET ? WHERE id = ' + result.id, {
 			informed: 1
 		}, function(err, result) {
 			if (err != undefined) console.error(err);
