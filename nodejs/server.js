@@ -740,8 +740,13 @@ socket.on('change_rank', function(message){
                                }
                            });
                        }
+                       else
+                        user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});
                    } 
                 });
+            }
+            else{
+                user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});
             }
         }
     }
