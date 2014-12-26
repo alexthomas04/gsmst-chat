@@ -58,7 +58,7 @@ app.directive('addroom', [function () {
 				scope.roomName = "";
 				deleteAble = true;
 				$('isDeleteable').addClass('active');
-				scope.roomPassword='';
+				scope.roomPassword=''; 
 
 			};
 			scope.toggleDelete=function(){
@@ -68,6 +68,7 @@ app.directive('addroom', [function () {
 		}
 	};
 }]);
+
 
 app.directive('roomButton', [function () {
 	return {
@@ -94,8 +95,7 @@ app.directive('roomButton', [function () {
 			};
 		}
 	};
-
-}]);
+	}]);
 
 app.directive('room', [function () {
 	return {

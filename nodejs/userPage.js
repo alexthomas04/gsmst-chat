@@ -66,8 +66,18 @@ var getData = function(connection,user_id,callback){
                     
                     data.letterUses = letters[data.letter];
                     connection.query('SELECT * from kicks WHERE user_id = ' + user_id, function (err, res) {
+                        if(res)
                         data.bans = res.length;
-                        callback(data);
+                        else
+                        data.bans=0;
+                        connection.query('SELECT amount from awarded_points where user_id = '+user_id,function(err3,res3){
+                            data.points=0;
+                            for(var m=0;m<res3.length;m++){
+                                data.points+=res3[m].amount;
+                            }
+                            callback(data);
+                        })
+                        
                     });
 
 

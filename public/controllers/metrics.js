@@ -183,6 +183,7 @@ app.controller('metricsCtrl', ['$scope',
 						$scope.wordCount = wordCount;
 						incrementAndUpdate("Word Counting");
 					}, function() {
+                        console.log(wordCount);
 						performWordSection($scope.metrics.words.length, function(i) {
 							var word = $scope.metrics.words[i];
 							if (word.key.length > 30) {
@@ -205,6 +206,7 @@ app.controller('metricsCtrl', ['$scope',
 					});
 				});
 			});
+
 			async(function(){
 				wait(function(){
 					

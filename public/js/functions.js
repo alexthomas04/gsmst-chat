@@ -21,13 +21,21 @@ socket.on('me',function(message){
 socket.on('rooms',function(message){
 	$(document).ready(function(){
 		var scope = angular.element('#rooms').scope();
+        var hasRoom = function(room){
+            for(var i=0;i<rooms.length;i++){
+                if(rooms[i].id == room.id)
+                    return true;
+            }
+            return false;
+
+        };
 		scope.rooms=$.extend(true, scope.rooms, message.rooms);
 		rooms = message.rooms;
-			scope.$apply();
 			for (var i = scope.rooms.length - 1; i >= 0; i--) {
-				if(message.roooms.indexof(scope.rooms[i])==-1)
+				if(!hasRoom(scope.rooms[i]))
 					scope.rooms.splice(i,1);
-			};
+			}
+			scope.$apply();
 
 		// if in room update current room
 		scope = angular.element('#room').scope();
@@ -54,9 +62,13 @@ socket.on('chat',function(message){
 	var $text =$('<span></span>');
 	var $small = $('<small></small>');
 	var $time = $('<small></small>');
-	var $kick  = $('<a href="#" data-toggle="modal" data-target="#ban" ><span class="glyphicon glyphicon-ban-circle text-danger"></span></a>');
+	var $kick  = $('<a href="#" data-toggle="modal" data-target="#ban" ><span class="glyphicon glyphicon-ban-circle text-danger"></span>&nbsp;</a>');
+	var $admin = $('<a href="#" data-toggle="modal" data-target="#admin"><span class="glyphicon glyphicon-cog"></span>&nbsp;</a>');
 	$kick.click(function(event) {
 		bannie_id=message.user_id;
+	});
+	$admin.click(function(event){
+	   bannie_id=message.user_id; 
 	});
 	if(message.rank != 'User')
 		$small.append('['+message.rank+'] ');
@@ -97,8 +109,10 @@ socket.on('chat',function(message){
 			$text.css('background-color',color.textBackground);
 		}
 	}
-	if(message.kickable && state.permissions.create)
+	if(message.kickable && state.permissions.kick)
 		$p.append($kick);
+	if(state.permissions.Admin)
+	    $p.append($admin);
 	$p.append($small);
 	$a.append($strong);
     $p.append($a);
@@ -147,13 +161,17 @@ socket.on('alert',function(message){
 	}
 	else if(message.alert=='info'){
 		text = '<div class="alert alert-info">'+message.text+'</div>';
+	}
+	else if(message.alert=='success'){
+		text = '<div class="alert alert-success">'+message.text+'</div>';
 	}else if(message.alert == 'new message'){
-		socket.emit('me',{});
+		
 		text = '<div class="alert alert-info">'+message.from+' says: '+message.message+'</div>';
 	}
 	$('#chatArea').append($('<div></div>').append(text));
 	height+=400;
 	$('#chatArea').scrollTop(height);
+	socket.emit('me',{});
 });
 
 socket.on('startTyping',function(message){
@@ -325,12 +343,18 @@ var retroEnterRoom = function(){
 	}
 	
 };
+
 var ban = function(duration){
 	socket.emit('kick',{user_id:bannie_id,"duration":duration});
 };
 
 $(document).ready(function() {
-
+	$('#submit_points').click(function(event) {
+		socket.emit('points',{user_id:bannie_id,amount:Number($('#give_points').val())});
+	});
+	$('.rank-button').click(function(event) {
+		socket.emit('change_rank',{user_id:bannie_id,group:Number($(this).data('group'))});
+	});
     $('#messageTabs a').click(function(e){
        $(this).tab('show');
     });

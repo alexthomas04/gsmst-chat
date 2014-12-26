@@ -694,6 +694,73 @@ socket.on('private', function(message) {
 	}
 })
 
+socket.on('change_rank', function(message){
+    if(user != undefined && user.permissions && user.permissions.Admin){
+        var other_user = getUserById(message.user_id);
+        if(other_user){
+            var prev_rank = other_user.permissions.rank;
+            if(user.permissions.god){
+                connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){
+                  if(err)
+                    console.error(err);
+                      connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){
+                           if(result && result[0]) {
+                               var group = result[0];
+                               group.permissions = JSON.parse(group.permissions);
+                               other_user.permissions = group.permissions;
+                               other_user.group_id=message.group;
+                               if(group.permissions.rank>prev_rank){
+                                   other_user.socket.emit('alert',{alert:'success',text:"You have been promoted to "+result[0].name});
+                               }
+                               else{
+                                   other_user.socket.emit('alert',{alert:'danger',text:"You have been demoted to "+result[0].name});
+                               }
+                           }
+                      });
+                });
+            }
+            else if(user.permissions.rank>other_user.permissions.rank){
+                connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){
+                    if(error)
+                        console.error(error);
+                   if(result && result[0]){
+                       var group = result[0];
+                       group.permissions = JSON.parse(group.permissions);
+                       if(group.permissions.rank<user.permissions.rank){
+                           connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){
+                              if(err)
+                                console.error(err);
+                               other_user.permissions = group.permissions;
+                               other_user.group_id=message.group;
+                               if(group.permissions.rank>prev_rank){
+                                   other_user.socket.emit('alert',{alert:'success',text:"You have been promoted to "+result[0].name});
+                               }
+                               else{
+                                   other_user.socket.emit('alert',{alert:'danger',text:"You have been demoted to "+result[0].name});
+                               }
+                           });
+                       }
+                   } 
+                });
+            }
+        }
+    }
+});
+
+socket.on('points',function(message){
+   if(user.permissions.points_master){
+       var insertObj = {user_id:message.user_id,amount:message.amount};
+       connection.query('Insert into awarded_points SET ?',insertObj,function(err,res){
+           var other_user = getUserById(message.user_id);
+           if(other_user){
+               other_user.socket.emit('alert',{alert:"success",text:"You have been awarded "+message.amount+" Points"})
+           }
+           if(err)
+               console.error(err);
+        
+       })
+   } 
+});
 
 
 var emitRooms = function() {

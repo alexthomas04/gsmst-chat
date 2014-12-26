@@ -219,14 +219,22 @@ CREATE TABLE IF NOT EXISTS `words` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+CREATE TABLE `awarded_points` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`user_id` INT(11) NULL DEFAULT NULL,
+	`amount` BIGINT(20) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+)
+
 -- Data exporting was unselected.
 
-INSERT INTO `groups` (`id`, `name`, `permissions`, `attributes`) VALUES
-	(0, 'Guest', '{}', ''),
-	(1, 'User', '{"chat":true,"User":true}', ''),
-	(3, 'Moderator', '{"chat":true,"kick":true,"User":true,"Mod":true,"unkickable":true}', ''),
-	(4, 'Admin', '{"chat":true,"kick":true,"create":true,"delete":true,"User":true,"Mod":true,"Admin":true,"archive":true,"unkickable":true,"words":true}', ''),
-	(5, 'Creator', '{"chat":true,"kick":true,"create":true,"delete":true,"god":true,"User":true,"Mod":true,"Admin":true,"archive":true,"unkickable":true,"restart":true,"words":true}', '{"color":{"nameColor":"cyan"}}');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('Guest', '{}', '');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('User', '{"chat":true,"User":true,"rank":1}', '');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('Moderator', '{"chat":true,"kick":true,"User":true,"Mod":true,"unkickable":true,"rank":10}', '');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('Admin', '{"chat":true,"kick":true,"create":true,"delete":true,"User":true,"Mod":true,"Admin":true,"archive":true,"unkickable":true,"words":true,"rank":100}', '');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('Creator', '{"chat":true,"kick":true,"create":true,"delete":true,"god":true,"User":true,"Mod":true,"Admin":true,"archive":true,"unkickable":true,"restart":true,"words":true,"rank":1.7976931348623157e+308,"points_master":true}', '{"color":{"nameColor":"cyan"}}');
+INSERT INTO `groups` (`name`, `permissions`, `attributes`) VALUES ('Helper', '{"chat":true,"kick":true,"rank":5}', NULL);
+
 /*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
