@@ -94,19 +94,26 @@ socket.on('chat',function(message){
 		$time.hide();
 	if(!settings.showRank)
 		$small.hide();
-	if(message.color!=undefined){
-		var color = message.color;
-		if(color.nameColor!=undefined){
-			$strong.css('color', color.nameColor);
-		}
-		if(color.backgroundName!=undefined){
-			$strong.css('background',color.backgroundName);
-		}
-		if(color.textColor!=undefined){
-			$text.css('color', color.textColor);
-		}
-		if(color.textBackground!=undefined){
-			$text.css('background-color',color.textBackground);
+	if(message.chat.toLowerCase().indexOf(state.username.toLowerCase())>-1){
+		$p.css('background-color','red');
+		$strong.css('color', '#ebebeb');
+		$text.css('color','#ebebeb');
+	}
+	else{
+		if(message.color!=undefined){
+			var color = message.color;
+			if(color.nameColor!=undefined){
+				$strong.css('color', color.nameColor);
+			}
+			if(color.backgroundName!=undefined){
+				$strong.css('background',color.backgroundName);
+			}
+			if(color.textColor!=undefined){
+				$text.css('color', color.textColor);
+			}
+			if(color.textBackground!=undefined){
+				$text.css('background-color',color.textBackground);
+			}
 		}
 	}
 	if(message.kickable && state.permissions.kick)
@@ -118,6 +125,8 @@ socket.on('chat',function(message){
     $p.append($a);
 	$p.append($text);
 	$p.append($time);
+
+
 	$('#chatArea').append($p).scrollTop(height);
     if(message.correctAnswer){
         parseQuestion(message.correctAnswer,message.chat);
@@ -558,8 +567,6 @@ $(document).ready(function() {
     });
 
 });
-
-
 
 
 

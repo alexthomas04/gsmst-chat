@@ -23,10 +23,13 @@ var validator = require('validator');
 var io = require('socket.io')(server);
 var simplesmtp = require('simplesmtp');
 var userData = require('./userPage');
+var net = require('net');
+var dgram = require('dgram');
 
 
 
-
+//set-up various mySQL connections
+// the mutipule connections allows for the other operations not to be blocked by the chat inserting
 var connection = mysql.createConnection(config.mysql);
 var connectionRead = mysql.createConnection(config.mysql);
 var connectionChat = mysql.createConnection(config.mysql);
@@ -39,6 +42,24 @@ var rooms = [];
 var users = [];
 var groups = [];
 var blacklistRegex='';
+var botsend = dgram.createSocket('udp4');
+var bot_port = 8888;
+botsend.bind(bot_port);
+
+
+//handle when a bot recives a message
+botsend.on('message',function(data,remote){
+    data = JSON.parse(data);
+    data.kickable = false;
+    data.time = new Date();
+    data.user_id = -2;
+    var room = getRoomById(data.room_id)
+    matching = getUsersByRoom(room);
+    for (var i = matching.length - 1; i >= 0; i--) {
+        var match = matching[i];
+        match.socket.emit('chat', data);
+    }
+});
 //routing
 
 app.use(bodyParser.urlencoded({
@@ -80,8 +101,11 @@ io.on('connection', function(socket) {
 	socket.on('disconnect', function() {
 
 		if (user !== undefined) {
+			//calculate and insert the user session length
 			var sessionLength = (new Date())-user.sessionStart;
 			connection.query('INSERT INTO sessions SET ?',{user_id:user.id,duration:sessionLength});
+
+			//let the other users in the room know that the user left
 			var matching = getUsersByRoom(user.room);
 			for (var i = matching.length - 1; i >= 0; i--) {
 				var match = matching[i];
@@ -97,8 +121,10 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('login', function(message) {
+		//check to see if the user has a registered hash
 		getUserFromHash(message.hash, function(callbackUser) {
 			if (callbackUser == undefined) {
+				//if they do not check to see if they have a valid username and password
 				login(message.username, message.password, function(success) {
 					if (success) {
 						if (user !== undefined) {
@@ -117,6 +143,7 @@ io.on('connection', function(socket) {
 					}
 				});
 			} else {
+				//if the user has a valid hash
 				if (user !== undefined) {
 					user.socket = undefined;
 				}
@@ -132,6 +159,7 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('join-room', function(message) {
+		//check to see if the user can enter the room
 		var canEnterRoom = function(user, room, callback) {
 			if (user != undefined && user.permissions != undefined && user.permissions.god)
 				callback(true);
@@ -168,7 +196,8 @@ io.on('connection', function(socket) {
 					if (user != undefined && user.room == undefined) {
 						user.room = room;
 						emitRooms();
-						if (user.room != undefined && user.room.id >= 0) {
+						if (user.room != undefined && user.room.id >= 0) { // the user can enter the room
+							//get an appropreate entrance message for the class of user
 							connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
 								var matching = getUsersByRoom(user.room);
 								for (var i = matching.length - 1; i >= 0; i--) {
@@ -186,7 +215,7 @@ io.on('connection', function(socket) {
 
 							});
 						}
-					} else {
+					} else {//enter as a guest
 						user = {};
 						user.room = getRoomById(message.roomId);
 						user.socket = socket;
@@ -212,7 +241,7 @@ io.on('connection', function(socket) {
 							});
 						}
 					}
-				} else {
+				} else {//the user is banned from this room or does not have the required permissons
 					socket.emit('alert', {
 						'alert': 'danger',
 						'text': 'You are not allowed in this room!'
@@ -225,8 +254,10 @@ io.on('connection', function(socket) {
 });
 
 socket.on('chat', function(message) {
+	//the user is allowed to chat and has a valid message
 	if (user !== undefined && user.permissions && user.permissions.chat && user.room != undefined && user.username != undefined && message.chat != undefined && message.chat.replace(/^\s+/, '').replace(/\s+$/, '') !== '') {
 		var chat = '';
+		//if the user does not need their chat to be sanitiesed 
 		if(user.permissions.aboveSanitize || user.permissions.god)
 			chat = message.chat;
 		else
@@ -250,7 +281,7 @@ socket.on('chat', function(message) {
 		chatToRoom(user, response);
 	}
 });
-socket.on('random', function(message) {
+socket.on('random', function(message) { // get a random word or funny
 	var db = 'words';
 	var field = 'word';
 	if (message.type == 'funny') {
@@ -259,12 +290,14 @@ socket.on('random', function(message) {
 	}
 	var count = message.count || 1;
 	if (user && user.permissions && user.permissions.words) {
+		//get the number of rows in the appropreate db
 		connectionRead.query("SELECT COUNT(*) FROM " + db, function(err, result) {
 			var indexes = [];
-			for (var i = 0; i < count; i++) {
+			for (var i = 0; i < count; i++) { // get the proper number of random indicies 
 				indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
 
 			}
+			//select the indices 
 			connectionRead.query('SELECT ' + field + ' FROM ' + db + ' WHERE ' + indexes.join(' or '), function(error, results) {
 				var words = [];
 				for (var j = 0; j < results.length; j++) {
@@ -284,10 +317,11 @@ socket.on('random', function(message) {
 socket.on('sat', function(message) {
 	if (user && user.permissions && user.permissions.chat) {
 		if (message.type == 'word') {
-			connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result) {
+			connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result) {//get the number of rows in the db
 				var indexes = [];
+				//select random and insert into array
 				indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
-				connectionRead.query('SELECT word FROM sat_words WHERE ' + indexes.join(' or '), function(error, results) {
+				connectionRead.query('SELECT word FROM sat_words WHERE ' + indexes.join(' or '), function(error, results) {//select rows
 					var words = [];
 					for (var j = 0; j < results.length; j++) {
 						words.push(results[j].word);
@@ -327,19 +361,19 @@ socket.on('sat', function(message) {
 			});
 		} else if (message.type == 'question') {
 			var numberOfAnswers = 4;
-			connectionRead.query("SELECT COUNT(*) FROM sat_questions", function(err, result) {
+			connectionRead.query("SELECT COUNT(*) FROM sat_questions", function(err, result) {//get number of rows in table
 				var indexes = [];
 				indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
-				connectionRead.query('SELECT question,answer,number_of_answers FROM sat_questions WHERE ' + indexes.join(' or '), function(error, results) {
+				connectionRead.query('SELECT question,answer,number_of_answers FROM sat_questions WHERE ' + indexes.join(' or '), function(error, results) {//get random row from table
 					var answers = [];
 					answers.push(results[0].answer);
-					connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result1) {
+					connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result1) {//get number of rows in the table
 						var indexes = [];
-						for (var i = 0; i < numberOfAnswers * results[0].number_of_answers; i++) {
+						for (var i = 0; i < numberOfAnswers * results[0].number_of_answers; i++) {//choose random words
 							indexes.push(' id=' + (Math.floor(Math.random() * result1[0]['COUNT(*)'] + 1)));
 
 						}
-						connectionRead.query('SELECT word FROM sat_words WHERE ' + indexes.join(' or '), function(error, results1) {
+						connectionRead.query('SELECT word FROM sat_words WHERE ' + indexes.join(' or '), function(error, results1) {//select random words
 
 							for (var j = 0; j < results1.length; j += results[0].number_of_answers) {
 								var choices = results1.slice(j, j + results[0].number_of_answers);
@@ -421,7 +455,7 @@ socket.on('spanish',function(message){
 
 var emitSelf = function(emitSocket) {
 	var result = {};
-	if (user === {}) {
+	if (user == undefined || user === {}) {
 		result = {
 			"status": "Not logged in"
 		};
@@ -444,47 +478,53 @@ var emitSelf = function(emitSocket) {
 				console.error(err);
 			result.privates.receive = results;
 			result.unread = 0;
-			for (var i = 0; i < results.length; i++) {
+            if(results) {
+                for (var i = 0; i < results.length; i++) {
                     //count unread messages
                     var message = results[i];
                     if (message.read == 0) {
-                    	result.unread++;
+                        result.unread++;
                     }
                 }
-                connection.query("SELECT * FROM private WHERE from_id = " + user.id + ' and send_delete=0 order by id desc',function(err1,result1){
-                	result.privates.sent = result1;
-                	var ids = [];
-                	for(var i=0;i<result.privates.receive.length;i++){
-                		ids.push(result.privates.receive[i].from_id);
-                	}
-                	for(var i=0;i<result.privates.sent.length;i++){
-                		ids.push(result.privates.sent[i].to_id);
-                	}
-                	ids=ids.reduce(function(p, c) {
-                		if (p.indexOf(c) < 0) p.push(c);
-                		return p;
-                	}, []);
-                	connection.query('SELECT id,username FROM users WHERE id = '+ids.join(' or '),function(err2,results2){
-                		function getUsername(id){
-                			for (var i = results2.length - 1; i >= 0; i--) {
-                				if(results2[i].id == id)
-                					return results2[i].username;
-                			};
-                			return '';
-                		};
-                		for(var i=0;i<result.privates.receive.length;i++){
-                		var message = result.privates.receive[i];
-                		message.username = getUsername(message.from_id);
-                	}
-                	for(var i=0;i<result.privates.sent.length;i++){
-                		var message = result.privates.sent[i];
-                		message.username = getUsername(message.to_id);
+            }
+                connection.query("SELECT * FROM private WHERE from_id = " + user.id + ' and send_delete=0 order by id desc',function(err1,result1) {
+                    if(result1){
+                    result.privates.sent = result1;
+                    var ids = [];
+                    for (var i = 0; i < result.privates.receive.length; i++) {
+                        ids.push(result.privates.receive[i].from_id);
+                    }
+                    for (var i = 0; i < result.privates.sent.length; i++) {
+                        ids.push(result.privates.sent[i].to_id);
+                    }
+                    ids = ids.reduce(function (p, c) {
+                        if (p.indexOf(c) < 0) p.push(c);
+                        return p;
+                    }, []);
+                    connection.query('SELECT id,username FROM users WHERE id = ' + ids.join(' or '), function (err2, results2) {
+                        function getUsername(id) {
+                            for (var i = results2.length - 1; i >= 0; i--) {
+                                if (results2[i].id == id)
+                                    return results2[i].username;
+                            }
+                            ;
+                            return '';
+                        };
+                        for (var i = 0; i < result.privates.receive.length; i++) {
+                            var message = result.privates.receive[i];
+                            message.username = getUsername(message.from_id);
+                        }
+                        for (var i = 0; i < result.privates.sent.length; i++) {
+                            var message = result.privates.sent[i];
+                            message.username = getUsername(message.to_id);
 
-                	}
-                	emitSocket.emit('me', result);
-                	});
+                        }
+                        emitSocket.emit('me', result);
+                    });
 
-                	
+                }else{
+                         emitSocket.emit('me', result);
+                    }
                 });
 
             });
@@ -790,10 +830,18 @@ var emitRooms = function() {
 				}
 			};
 				//clone
-				var tempRoom = JSON.parse(JSON.stringify(room));
-				if (tempRoom.requirements != undefined && tempRoom.requirements.password != undefined)
-					delete tempRoom.requirements.password;
-				tempRooms.push(tempRoom);
+			var tempRoom = {};
+            tempRoom.guestCount = room.guestCount;
+            tempRoom.id = room.id;
+            tempRoom.name = room.name;
+            tempRoom.requirements = room.requirements;
+            tempRoom.userCount = room.userCount;
+            tempRoom.users = room.users;
+
+			if (tempRoom.requirements != undefined && tempRoom.requirements.password != undefined)
+				delete tempRoom.requirements.password;
+            delete tempRoom.bots;
+			tempRooms.push(tempRoom);
 
 			};
 			io.emit('rooms', {
@@ -1132,7 +1180,8 @@ var addRoom = function(data, callback) {
 		requirements.rank = data.rank;
 	var query = connection.query('INSERT INTO rooms SET ?', {
 		"name": data.name,
-		'requirements': JSON.stringify(requirements)
+		'requirements': JSON.stringify(requirements),
+		'bots':[]
 	}, function(err, result) {
 		if (err !== null)
 			console.error("At Add room: %s", err);
@@ -1159,14 +1208,41 @@ var updateRooms = function(callback) {
 		rooms = [];
 		for (var i = result.length - 1; i >= 0; i--) {
 			result[i].requirements = JSON.parse(result[i].requirements);
+            result[i].bots = JSON.parse(result[i].bots);
+            if(result[i].bots)
+                connect_bots(result[i]);
 			rooms.push(result[i]);
-		};
+		}
 		if (callback !== null && callback !== undefined)
 			callback();
 
 	});
-}
+};
 updateRooms();
+
+
+
+var connect_bots=function(room){
+    for(var i =0;i<room.bots.length;i++){
+        var bot = room.bots[i];
+
+
+
+        bot.send = function(data){
+        	if(data.length>1000){
+        		data.slice(0,1000);
+        	}
+            data = new Buffer(JSON.stringify(data));
+            console.log(data.length);
+           botsend.send(data,0,data.length,this.port,this.host,function(err,bytes){
+                if (err) {
+                    console.error(err);
+                }
+            });
+        }
+
+    }
+}
 
 var getUser = function(username, callback) {
 	var query = connection.query('SELECT * from users where username = "' + username + '"', function(err, result) {
@@ -1493,6 +1569,13 @@ var chatToRoom = function(user, message) {
 	}, function(err, result) {
 		if (err != null) console.log(err);
 	});
+    var room =user.room;
+    message.room_id = room.id;
+    for(var i=0;i<room.bots.length;i++){
+        var bot = room.bots[i];
+        bot.send(message);
+    }
+
 	if (user.room.id >= 0) {
 		var matching = getUsersByRoom(user.room);
 		for (var i = matching.length - 1; i >= 0; i--) {
@@ -1502,6 +1585,9 @@ var chatToRoom = function(user, message) {
 	} else {
 		user.socket.emit('chat', message);
 	}
-}
+};
+
+
+
 
 sendEmails();

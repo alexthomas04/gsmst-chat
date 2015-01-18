@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS `rooms` (
   `name` varchar(30) NOT NULL,
   `requirements` text,
   `creation_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `bots` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
