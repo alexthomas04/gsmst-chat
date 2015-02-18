@@ -109,10 +109,15 @@ def processchat(data):
                             commands += row[0]+', '
                         commands = commands[:len(commands)-2]
                         response['chat'] = commands
-                elif action == 'var1':
+                elif action == 'var1' and len(parts)>=2:
                     response['chat'] = get_response(userinput['id']).format(parts[1])
                 dump = json.dumps(response)
                 return dump
+            else:
+                if 'sonicbot' in chat.lower():
+                    response['chat'] = '{0} -> Are you talking to me?'.format(user)
+                    dump = json.dumps(response)
+                    return dump
 
 
 def check_for_words(data):
@@ -122,6 +127,7 @@ def check_for_words(data):
         chat = data['chat']
         response = {}
         response['user'] = 'SONICBOT'
+        response['rank'] = 'Bot'
         response['room_id'] = data['room_id']
         count = chat.count("<span class='text-danger'>&nbsp;[CENSORED]</span>")
         if count > 0:
@@ -133,7 +139,6 @@ def check_for_words(data):
             return dump
 
 
-
 #now keep talking with the client
 while 1:
     #wait to accept a connection - blocking call
@@ -142,6 +147,8 @@ while 1:
     except:
         print('chat too long')
     else:
+        con.close()
+        con = mdb.connect(config['host'], config['user'], config['password'], config['database'])
         response = processchat(data)
         if response:
             addr = (addr[0],8888)
