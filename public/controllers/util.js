@@ -14,6 +14,10 @@ app.directive('login', [function () {
 		link: function (scope, iElement, iAttrs) {
 			scope.login = function(){
 				socket.emit('login',{'username':scope.username,'password':scope.password});
+				if(inRoom){
+				socket.emit('leave room');
+				setTimeout(function(){retroEnterRoom();},100);
+				}
 			};
 
 			socket.on('me',function(message){
@@ -70,6 +74,8 @@ app.directive('addroom', [function () {
 }]);
 
 
+
+
 app.directive('roomButton', [function () {
 	return {
 		restrict: 'E',
@@ -80,19 +86,7 @@ app.directive('roomButton', [function () {
 			scope.deleteRoom = function(id){
 				socket.emit('deleteRoom',{"id":id});
 			};
-			scope.enterRoom=function(){
-				if(canEnterRoom(state,scope.room)){
-				socket.emit('join-room',{roomId:scope.room.id,password:scope.roomPassword});
-	    			$('login,#addRoomButton').slideUp();
-	    			$('#rooms').animate({left:"-100%"}, 500,function(){
-	    				$('#title').text(scope.room.name);
-	    				$('#room').slideDown();
-	    				angular.element('#room').scope().room =scope.room;
-	    				angular.element('#room').scope().$apply();
-	    			});
-	    			$('#leaveRoom').show();
-	    		}
-			};
+			
 		}
 	};
 	}]);

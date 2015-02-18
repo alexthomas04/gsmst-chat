@@ -7,6 +7,7 @@ var rooms =[];
 var sent = [];
 var lastSendId=-1;
 var storage = $.localStorage;
+var inRoom=false;
 
 if ('Notification' in window && Notification.permission !== "granted")
     Notification.requestPermission();
@@ -55,6 +56,7 @@ socket.on('rooms',function(message){
 });
 var height=10;
 socket.on('chat',function(message){
+	message.chat = emoticons(message.chat);
 	height+=400;
 	var $p = $('<p></p>');
     var $a = $('<a href="/u/'+message.user_id+'" target="_blank"></a>');
@@ -134,7 +136,7 @@ socket.on('chat',function(message){
 	if(document.body.className=='blurred'){
 		if(Notification && settings.showNotifications){
 			var notification = new Notification(message.user, {
-    		body: message.chat
+    		body: strip(message.chat)
  			});
 			notification.onShow=setTimeout(function(){notification.close();},settings.notifcationDuration || 2000);
 			notification.onClick=function(x) { window.focus(); this.cancel(); };
@@ -155,7 +157,7 @@ socket.on('alert',function(message){
 	var text='';
 	
 	if(message.alert=='entered'){
-		text = message.user +' entered room';
+		text = message.user +' entered the room';
 		if(message.entrance != undefined){
 		$('#chatArea').append($('<strong></strong>').text(message.entrance));	
 		text='';
@@ -333,10 +335,11 @@ var retroEnterRoom = function(){
 		}
 		if (room && canEnterRoom(state, room)) {
 						if (!(room.requirements != undefined && room.requirements.hasPassword)) {
+							inRoom=true;
 							socket.emit('join-room', {
 								roomId: room.id
 							});	
-							$('#loginSection,#registerButton,#addRoomButton').slideUp();
+							$('#registerButton,#addRoomButton').slideUp();
 
 							$('#rooms').animate({
 								left: "-100%"
@@ -393,11 +396,12 @@ $(document).ready(function() {
 					var data = $(this).data('roomData');
 					if (canEnterRoom(state, data)) {
 						if (!(data.requirements != undefined && data.requirements.hasPassword)) {
+							inRoom=true;
 							socket.emit('join-room', {
 								roomId: $(this).data('roomData').id
 							});
 							window.history.pushState("", "", '?room='+$(this).data('roomData').name);
-							$('#loginSection,#registerButton,#addRoomButton').slideUp();
+							$('#addRoomButton').slideUp();
 
 							$('#rooms').animate({
 								left: "-100%"
@@ -416,14 +420,15 @@ $(document).ready(function() {
 				}
 			});
 	$('#leaveRoom').click(function(event) {
+		inRoom=false;
 				$('#leaveRoom').hide();
 				window.history.pushState("", "","/");
 				if (state.username != undefined)
 					$('#title').text('Welcome ' + state.username + "!");
 				else
 					$('#title').text('Welcome user! Please Login');
-				socket.emit('leave room', {})
-				$('#loginSection,#registerButton,#addRoomButton').slideDown();
+				socket.emit('leave room', {});
+				$('#registerButton,#addRoomButton').slideDown();
 				$('#room,#clearChat').slideUp('400', function() {
 					$('#chatArea').children().not('#typing').remove();
 				});
@@ -608,4 +613,10 @@ function getParameterByName(name) {
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+function strip(html)
+{
+   var tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
 }
