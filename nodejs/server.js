@@ -6,6 +6,7 @@
 
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('nodejs/config.json', 'utf8'));
+var credentials = {key: privateKey, cert: certificate};
 var port = config.port || 3000;
 
 var express = require('express');
@@ -88,7 +89,7 @@ else
 //io.use( socketSessions({store: sessionStore, key:'sid', secret:'gsmstchat', parser:cookieParser()}));
 
 server.listen(port, function() {
-	console.log("Server listening at port %d", port);
+console.log("Server listening at port %d", port);
 });
 io.emit('alert', {
 	'alert': 'info',
@@ -455,7 +456,7 @@ socket.on('spanish',function(message){
 
 var emitSelf = function(emitSocket) {
 	var result = {};
-	if (user == undefined || user === {}) {
+	if (user == undefined || user === {} || user.hash==undefined) {
 		result = {
 			"status": "Not logged in"
 		};
