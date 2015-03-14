@@ -635,15 +635,19 @@ socket.on('sendFile', function(message) {
 		var matching = getUsersByRoom(user.room);
 			//connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
 			var response = {
-				"file": message,
-				'user': user.username
+				"file_data": message,
+				'user': user.username,
+			    'user_id': user.id
 			};
+            response.kickable = !user.permissions.unkickable;
 			var group = getGroupById(user.group_id);
 			if (user.attributes != undefined && user.attributes != '' && JSON.parse(user.attributes).color != undefined) {
 				response.color = JSON.parse(user.attributes).color;
 			} else if (group != undefined && group.attributes != undefined && group.attributes != '' && JSON.parse(group.attributes).color != undefined) {
 				response.color = JSON.parse(group.attributes).color;
 			}
+            response.rank = group.name;
+		    response.time = new Date();
 			for (var i = matching.length - 1; i >= 0; i--) {
 				var match = matching[i];
 				match.socket.emit('file', response);

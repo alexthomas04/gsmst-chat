@@ -200,31 +200,60 @@ socket.on('stopTyping',function(message){
 socket.on('file',function(message){
 	
 	var $p = $('<p></p>');
+	var $a = $('<a href="/u/'+message.user_id+'" target="_blank"></a>');
 	var $strong = $('<strong></strong>');
 	var $img = $('<img></img>');
 	var $link = $('<a></a>');
-	$img.attr('src',message.file);
+	var image_regex = new RegExp(/(png|jpg|jpeg|gif)$/g);
+	if (message.file.name.match(image_regex)){
+	$img.attr('src',message.file.file_data);
 	$img.addClass('drag_image');
-	$link.attr('href',message.file);
+	$link.attr('href',message.file.file_data);
 	$link.attr('target','blank');
 	$link.append($img);
-	$strong.text(message.user+" : ");
-	if(message.color!=undefined){
-		var color = message.color;
-		if(color.nameColor!=undefined){
-			$strong.css('color', color.nameColor);
-		}
-		if(color.backgroundName!=undefined){
-			$strong.css('background-color',color.backgroundName);
-		}
-		if(color.textColor!=undefined){
-			$text.css('color', color.textColor);
-		}
-		if(color.textBackground!=undefined){
-			$text.css('background-color',color.textBackground);
-		}
+	}else{
+
+	$link.attr('href','data:Application/octet-stream,' +encodeURIComponent(message.file.file_data));
+	$link.attr('download',message.file.name);
+	$link.text( message.file.name);
 	}
-	$p.append($strong);
+	var $small = $('<small></small>');
+	var $time = $('<small></small>');
+	var $kick  = $('<a href="#" data-toggle="modal" data-target="#ban" ><span class="glyphicon glyphicon-ban-circle text-danger"></span>&nbsp;</a>');
+	var $admin = $('<a href="#" data-toggle="modal" data-target="#admin"><span class="glyphicon glyphicon-cog"></span>&nbsp;</a>');
+	$kick.click(function(event) {
+		bannie_id=message.user_id;
+	});
+	$admin.click(function(event){
+	   bannie_id=message.user_id; 
+	});
+	if(message.rank != 'User')
+		$small.append('['+message.rank+'] ');
+	$strong.text(message.user+": ");
+	$small.addClass('chat_rank');
+	var dt = new Date(message.time);
+	var hours = dt.getHours();
+    var minutes = dt.getMinutes();
+    var seconds = dt.getSeconds();
+    if (hours < 10) 
+     hours = '0' + hours;
+
+    if (minutes < 10) 
+     minutes = '0' + minutes;
+
+    if (seconds < 10) 
+     seconds = '0' + seconds;
+	$time.text(hours+":"+minutes+":"+seconds);
+	$time.addClass('chat_time');
+
+	if(message.kickable && state.permissions.kick)
+		$p.append($kick);
+	if(state.permissions.Admin)
+	    $p.append($admin);
+	$p.append($small);
+	$a.append($strong);
+    $p.append($a);
+	$p.append($time);
 	$p.append($link);
 	height+=400;
 	$('#chatArea').append($p).scrollTop(height);
@@ -455,14 +484,22 @@ $(document).ready(function() {
 			});
 	var sendFiles = function(files){
 				var reader = new FileReader();
+				var name;
+
 				reader.onloadend = function() {
 
-					socket.emit('sendFile', reader.result);
+					socket.emit('sendFile', {file_data:reader.result,name:name});
 				}
 				for (var i = 0; i < files.length; i++) {
 					if(files[i]!=null){
-					if (files[i].size < 1024 * 1024 * 5)
-						reader.readAsDataURL(files[i]);
+					if (files[i].size < 1024 * 1024 * 5){
+						name = files[i].name.toLowerCase();
+						var image_regex = new RegExp(/(png|jpg|jpeg|gif)$/g);
+						if (name.match(image_regex))
+							reader.readAsDataURL(files[i]);
+						else
+							reader.readAsText(files[i]);
+					}
 					else
 						$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
 						}
