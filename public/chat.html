@@ -129,7 +129,7 @@
 
 		</ul>
 
-		</div>
+		
 	</nav>
 	<div id='rooms' style="width:100%;position:absolute">
 		<room-button class='clickable' ng-repeat='room in rooms'></room-button>
@@ -151,7 +151,7 @@
 						<label for="roomPassword">Room Password</label>
 						<input ng-model='roomPassword' class="form-control" id='roomPassword' placeholder='Leave Blank for no Password'>
 					</div>
-					<label>*Green means it is deletable red means that it is not</label>
+					<label>*Green means the room is deletable. Red means that it is not.</label>
 					</br>
 					<button type="button" class="btn btn-success active" data-toggle='button' ng-click="toggleDelete()" id='isDeleteable'>Is Deleteable</button>
 					</br>
@@ -463,13 +463,13 @@
 					        <label>Award Points</label>
 					        <input type='number' id='give_points'>
 					    </div>
-					    <button type'submit' class='btn btn-primary' id='submit_points'>SUBMIT</button>
+					    <button type='submit' class='btn btn-primary' id='submit_points'>SUBMIT</button>
 					</form>
 					<h4>Change Rank</h4>
 					<div class='btn-group-vertical'>
 					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='1'>User</button>
 					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='6'>Helper</button>
-					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='3'>Moderator</button>
+					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='2'>Moderator</button>
 					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='4'>Admin</button>
 					    <button class='btn btn-default rank-button' data-dismiss='modal' data-group='5'>Creator</button>
 					</div>

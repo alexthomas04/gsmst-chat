@@ -36,18 +36,113 @@
     </head>
     <body>
         <div class='page-header'>
-            <h1>Welcome To GSMST-Chat <small>What do we put here?</small></h1> 
-            <p>Ths objective of this project is to provide a solution for students to require assistance with various subjects.</p>
+            <h1>Welcome To GSMST-Chat <small>A new way to do the thing. WHERE IS ZHU LI!?!?!?!?!?</small></h1> 
+            <p>Ths objective of this project is to provide a solution for students who require assistance with various subjects.</p>
         </div>
+        
         <div class="container">
             <a href='/chat.html'><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
+        </div>
+        <div class="container">
+            <div class="page-header">
+                <h1>Navigation <span class="text-primary"> OR NAVBAR IDK</span></h1>
+            </div>
+            <div>
+                <nav class='navbar navbar-default'>
+		<ul class="nav navbar-nav " style="width:100%">
+			<li class=""><a style='font-size:large;display:none' id='leaveRoom'><span class='glyphicon glyphicon-circle-arrow-right ' ></span>
+			</a>
+			</li>
+			<li><a id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"><span class='glyphicon glyphicon-plus-sign ' style='font-size:large' ></span>
+		</a>
+			</li>
+			<li ng-show="state.permissions.restart" id='restart'><a><span class='glyphicon glyphicon-refresh ' style='font-size:large'  ></span></a>
+			</li>
+			<li ng-show="state.permissions.archive"><a href="#" target='_blank'>Archive</a>
+			</li>
+			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip">ProTip!</a>
+			</li>
+			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings">Change Settings</a>
+			</li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle='dropdown'>Contact <span class='caret'></span></a>
+				<ul class="dropdown-menu" role='menu'>
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#about">About</a>
+					</li>
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#requestTicket">Request Feature</a>
+					</li>
+					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#reportBug">Report Bug</a>
+					</li>
+				</ul>
+			</li>
+			<li class="dropdown " style="z-index:2">
+				<a class="dropdown-toggle " data-toggle='dropdown'>Change Style <span class='caret'></span></a>
+				<ul class="dropdown-menu" role='menu' id="styleSelect">
+					<li><a href="#" rel='css/bootstrap.min.css'>Bootstrap</a>
+					</li>
+					<li><a href="#" rel='css/superhero.css'>Superhero</a>
+					</li>
+					<li><a href="#" rel='css/slate.css'>Slate</a>
+					</li>
+					<li><a href="#" rel='css/darkly.css'>Darkly</a>
+					</li>
+					<li><a href="#" rel='css/cyborg.css'>Cyborg</a>
+					</li>
+					<li><a href="#" rel='css/readable.css'>Readable</a>
+					</li>
+					<li><a href="#" rel='css/spacelab.css'>Spacelab</a>
+					</li>
+					<li><a href="#" rel='css/sandstone.css'>Sandstone</a>
+					</li>
+					<li><a href="#" rel='css/lumen.css'>Lumen</a>
+					</li>
+					<li><a href="#" rel='css/flatly.css'>Flatly</a>
+					</li>
+				</ul>
+			</li>
+			<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a>
+			</li>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a onClick='$.cookie("hash","");location.reload();'>Logout</a>
+			</li>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:large' class='glyphicon glyphicon-envelope'></span></a>
+			</li>
+			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#inbox" onclick='socket.emit("readMessages",{});'><span style='font-size:large' class='glyphicon glyphicon-inbox'></span><span class='badge'>0</span></a>
+			</li>
+			<li ng-hide="state.status==='Logged in'" id="loginSection" class="navbar-right"><a class="" id="loginButton">Login</a>
+				<login class='' style=''></login>
+			</li>
+			<li ng-hide="state.status==='Logged in'" id="registerButton" class="navbar-right"><a class="" >Register</a>
+			</li>
+
+		</ul>
+
+		
+	</nav>
+            </div>
+            <div>
+                <ul>
+                    <li><span class=' text-info glyphicon glyphicon-plus-sign' style=''></span> - This is a button that is only seen by users with permissions to create rooms, and is used to open the dialog to create a room. </li>
+                    <li><span class="text-info glyphicon glyphicon-refresh"></span> - This is a button that is only seen by users with permissions to restart the server and is used to do so.</li>
+                    <li><span class='text-info'>Archive</span> -  This is only viewable by users with permission to access the archive page, and will redirect them to the page.</li>
+                    <li><span class="text-info">ProTip!</span> - This is a button that when clicked, will display a dialog with a few quick tips on how to use the site.</li>
+                    <li><span class="text-info">Change Settings</span> - This is a button that when clicked, will display a dialog where the user can change their settings.</li>
+                    <li><span class="text-info">Contact</span> - When clicked, this button will dispaly a dialog where the user can get more information about how to contact the developers.</li>
+                    <li><span class="text-info">Change Style</span> - When clicked, a drop down will appear where the user can change the theme of their page.</li>
+                    <li><span class="text-info">Register</span> - When clicked, the user will be redirected to the registration page, and is only viewable if the user is not logged in.</li>
+                    <li><span class="text-info">Login</span> - When clicked, the login dialog will be displayed. This button is only viewble when the user is not logged in.</li>
+                    <li><span class="text-info"><span class="glyphicon glyphicon-inbox"></span></span> - When clicked, the private message inbox/outbox dialog is displayed. Beside the icon is a badge with the number of unread messages.</li>
+                    <li><span class="text-info glyphicon glyphicon-envelope"></span> - When clicked, the priavate message composition dialog is displayed.</li>
+                    <li><span class="text-info">Logout</span> - When clicked, the user will be logged out. This button is only viewable when the user is logged in.</li>
+                </ul>
+            </div>
+        
         </div>
         <div class='container'>
             <div class="page-header">
                 <h1>Rooms</h1>
             </div>
-            <p>Rooms are where the chating happens. Each room is titled with the topic that is being discussed in that room.</p>
-            <p>The Number of users is displayed on the room icon</p>
+            <p>Rooms are where the chatting happens. Each room is titled with the topic that is being discussed in that room.</p>
+            <p>The number of users is displayed on the room icon</p>
             <div class="col-md-12"><div class='col-centered col-md-3 container ' rel='tooltip' title='' data-toggle='tooltip' data-placement='bottom'>
 	<div class="well">
 		<p class='text-center'>Room Name</p>
@@ -109,7 +204,7 @@
 						<label for="roomPassword">Room Password</label>
 						<input ng-model='roomPassword' class="form-control" id='roomPassword' placeholder='Leave Blank for no Password'>
 					</div>
-					<label>*Green means it is deletable red means that it is not</label>
+					<label>*Green means the room is deletable. Red means that it is not</label>
 					</br>
 					<button type="button" class="btn btn-success active" data-toggle='button' ng-click="toggleDelete()" id='isDeleteable'>Is Deleteable</button>
 					</br>
@@ -145,11 +240,11 @@
         <h1>Chat Room</h1>
     </div>
     <div>
-        <p>When a user enters the room an entrance message is posted to the room to indicate to the current users in the room that a new user has entered.Specific entrance messages can be created for specific ranks</p>
+        <p>When a user enters the room, an entrance message is posted to the room to indicate to the current users in the room that a new user has entered. Specific entrance messages can be created for specific ranks.</p>
         <div class="container well">
             <p>CMilsted has entered the room</p>
         </div>
-        <p>When a user sends a message their chat is displayed precided by their username and rank and followed by the time that it was sent.The username is also a link to that user's user-page where more information about the user can be found. If a user chats a link then the link will be converted to become clickable and will open in a new page. If the link to an image is posted then the image will be posted. The posted image is clickable and will be enlarged in a new tab. In the exmaple below the user typed <i>"http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"</i> and the image below was posted to the room</p>
+       <p>When a user sends a message, their chat is displayed preceded by their username and rank and followed by the time that it was sent.The username is also a link to that user's user-page where more information about the user can be found. If a user chats a link then the link will be converted to become clickable, and will open in a new page. If the link to an image is posted then the image will be posted, the posted image is clickable and will be enlarged in a new tab. In the exmaple below the user typed <i>"http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"</i> and the image below was posted to the room.</p> 
         <div class="well container">
         <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span>Simple message</span><small class="chat_time">14:45:01</small></p>
             <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a href="https://google.com" target="_blank">www.google.com</a></span><small class="chat_time">14:45:01</small></p>
