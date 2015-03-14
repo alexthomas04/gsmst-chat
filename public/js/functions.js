@@ -422,7 +422,7 @@ $(document).ready(function() {
 	$('#leaveRoom').click(function(event) {
 		inRoom=false;
 				$('#leaveRoom').hide();
-				window.history.pushState("", "","/");
+				window.history.pushState("", "","/chat.html");
 				if (state.username != undefined)
 					$('#title').text('Welcome ' + state.username + "!");
 				else
