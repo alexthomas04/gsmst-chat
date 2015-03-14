@@ -1,6 +1,8 @@
 var replaces = [  //{regex:image url}
 	{"text":"Kappa","url":"http://res.cloudinary.com/urbandictionary/image/upload/a_exif,c_fit,h_200,w_200/v1395991705/gjn81wvxqsq6yzcwubok.png"},
-	{"text":"<3","url":"http://fc05.deviantart.net/fs24/f/2007/328/3/c/Black_Heart_Emote__by_XoCh3rryXo.gif"}
+	{"text":"<3","url":"http://fc05.deviantart.net/fs24/f/2007/328/3/c/Black_Heart_Emote__by_XoCh3rryXo.gif"},
+	{"text":"xD","url":"http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/256/Emotes-face-smile-big-icon.png"},
+	{"text":"&lt;3","url":"http://fc05.deviantart.net/fs24/f/2007/328/3/c/Black_Heart_Emote__by_XoCh3rryXo.gif"}
 ];
 
 function emoticons(text){

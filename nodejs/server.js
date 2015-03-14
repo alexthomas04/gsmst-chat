@@ -6,7 +6,6 @@
 
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('nodejs/config.json', 'utf8'));
-var credentials = {key: privateKey, cert: certificate};
 var port = config.port || 3000;
 
 var express = require('express');

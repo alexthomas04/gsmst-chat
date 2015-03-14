@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html style="height:100%">
-
-<head lang="en">
-	<meta charset="UTF-8">
+<html>
+    <head>
+        <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Homework</title>
 	<script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
@@ -21,120 +19,80 @@
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 	<script src="controllers/util.js"></script>
-	<style type="text/css">
-		#chatArea>p {
-			word-wrap: break-word;
+        
+        <style type="text/css">
+            .col-centered{
+                margin:0 auto;
+                float:none;
+            }
+            .chat_time {
+			float: right;
 		}
-		::-webkit-scrollbar {
-			width: 15px;
-		}
-		::-webkit-scrollbar-track {
-			background-color: #4e5d6c;
-		}
-		::-webkit-scrollbar-thumb {
-			background-color: #2b3e50;
-		}
-		::-webkit-scrollbar-button {
-			background-color: #4e5d6c;
-		}
-		::-webkit-scrollbar-corner {
-			background-color: #4e5d6c;
-		}
-		body {} img {
+            img {
 			max-width: 500px;
 			max-height: 400px;
 		}
-		.clickable {
-			cursor: pointer;
-		}
-		.chat_time {
-			float: right;
-		}
-		.emote{
-			max-height: 50px
-		}
-	</style>
-	<script src='js/functions.js'></script>
-</head>
-
-<body ng-app="util" style="height:100%">
-	<div class="page-header">
-		<h1 id='title'>WELCOME USER! Please Log-in</h1>
+        </style>
+    </head>
+    <body>
+        <div class='page-header'>
+            <h1>Welcome To GSMST-Chat <small>What do we put here?</small></h1> 
+            <p>Ths objective of this project is to provide a solution for students to require assistance with various subjects.</p>
+        </div>
+        <div class="container">
+            <a href='/chat.html'><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
+        </div>
+        <div class='container'>
+            <div class="page-header">
+                <h1>Rooms</h1>
+            </div>
+            <p>Rooms are where the chating happens. Each room is titled with the topic that is being discussed in that room.</p>
+            <p>The Number of users is displayed on the room icon</p>
+            <div class="col-md-12"><div class='col-centered col-md-3 container ' rel='tooltip' title='' data-toggle='tooltip' data-placement='bottom'>
+	<div class="well">
+		<p class='text-center'>Room Name</p>
+		<p>Users: 3</p>
+		<p ng-show="room.requirements && room.requirements.rank" class="text-danger" style="position:absolute"> </p><br>
+		
 	</div>
-	<nav class='navbar navbar-default'>
-		<ul class="nav navbar-nav " style="width:100%">
-			<li class=""><a style='font-size:large;display:none' id='leaveRoom'><span class='glyphicon glyphicon-circle-arrow-right ' ></span>
-			</a>
-			</li>
-			<li><a id='addRoomButton' ng-show="state.permissions.create" data-toggle="modal" data-target="#addRoom"><span class='glyphicon glyphicon-plus-sign ' style='font-size:large' ></span>
-		</a>
-			</li>
-			<li ng-show="state.permissions.restart" id='restart'><a><span class='glyphicon glyphicon-refresh ' style='font-size:large'  ></span></a>
-			</li>
-			<li ng-show="state.permissions.archive"><a href="archive.html" target='_blank'>Archive</a>
-			</li>
-			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#just_the_tip">ProTip!</a>
-			</li>
-			<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#Change_Settings">Change Settings</a>
-			</li>
-			<li class="dropdown">
-				<a href="#" class="dropdown-toggle" data-toggle='dropdown'>Contact <span class='caret'></span></a>
-				<ul class="dropdown-menu" role='menu'>
-					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#about">About</a>
-					</li>
-					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#requestTicket">Request Feature</a>
-					</li>
-					<li class="" style=""><a href="#" class="" data-toggle="modal" data-target="#reportBug">Report Bug</a>
-					</li>
-				</ul>
-			</li>
-			<li class="dropdown " style="z-index:2">
-				<a class="dropdown-toggle " data-toggle='dropdown'>Change Style <span class='caret'></span></a>
-				<ul class="dropdown-menu" role='menu' id="styleSelect">
-					<li><a href="#" rel='css/bootstrap.min.css'>Bootstrap</a>
-					</li>
-					<li><a href="#" rel='css/superhero.css'>Superhero</a>
-					</li>
-					<li><a href="#" rel='css/slate.css'>Slate</a>
-					</li>
-					<li><a href="#" rel='css/darkly.css'>Darkly</a>
-					</li>
-					<li><a href="#" rel='css/cyborg.css'>Cyborg</a>
-					</li>
-					<li><a href="#" rel='css/readable.css'>Readable</a>
-					</li>
-					<li><a href="#" rel='css/spacelab.css'>Spacelab</a>
-					</li>
-					<li><a href="#" rel='css/sandstone.css'>Sandstone</a>
-					</li>
-					<li><a href="#" rel='css/lumen.css'>Lumen</a>
-					</li>
-					<li><a href="#" rel='css/flatly.css'>Flatly</a>
-					</li>
-				</ul>
-			</li>
-			<li class=""><a href="#" class="" id='clearChat' style="display:none">Clear Chat</a>
-			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a onClick='$.cookie("hash","");location.reload();'>Logout</a>
-			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#sendMessage"><span style='font-size:large' class='glyphicon glyphicon-envelope'></span></a>
-			</li>
-			<li ng-show="state.status==='Logged in'" class="navbar-right"><a class="" data-toggle="modal" data-target="#inbox" onclick='socket.emit("readMessages",{});'><span style='font-size:large' class='glyphicon glyphicon-inbox'></span><span class='badge'>{{state.unread}}</span></a>
-			</li>
-			<li ng-hide="state.status==='Logged in'" id="loginSection" class="navbar-right"><a class="" id="loginButton">Login</a>
-				<login class='' style=''></login>
-			</li>
-			<li ng-hide="state.status==='Logged in'" id="registerButton" class="navbar-right"><a class="" onclick="window.location='/register.html'">Register</a>
-			</li>
+                
+	
+</div></div>
+            <p>Some rooms require specifc permissions in order for the user to enter</p>
+            <div class="col-md-12"><div class='col-centered col-md-3 container ' rel='tooltip' title='' data-toggle='tooltip' data-placement='bottom'>
+	<div class="well">
+		<p class='text-center'>Room Name</p>
+		<p>Users: 3</p>
+		<p ng-show="room.requirements && room.requirements.rank" class="text-danger" style="position:absolute">Admin only*</p><br>
 
-		</ul>
-
+	</div>
+	
+</div></div>
+            <p>Some rooms require a password for the user to enter the room</p>
+             <div class="col-md-12"><div class='col-centered col-md-3 container ' rel='tooltip' title='' data-toggle='tooltip' data-placement='bottom'>
+	<div class="well">
+		<p class='text-center'>Room Name</p>
+		<p>Users: 3</p>
+		<div ng-show="showPasswordInput">
+			<label>Password</label>
+			<input ng-model='roomPassword' type="password" class="form-control">
+			<button class="btn btn-success" ng-click='enterRoom()'>Go</button>
 		</div>
-	</nav>
-	<div id='rooms' style="width:100%;position:absolute">
-		<room-button class='clickable' ng-repeat='room in rooms'></room-button>
 	</div>
-	<div class="modal fade" id="addRoom">
+	
+                 </div></div>
+            <p>Admins can create and delete rooms from the room page.</p>
+            <div class="col-md-12"><div class='col-centered col-md-3 container ' rel='tooltip' title='' data-toggle='tooltip' data-placement='bottom'>
+	<div class="well">
+		<p class='text-center'>Room Name</p>
+		<p>Users: 3</p>
+		<p ng-show="room.requirements && room.requirements.rank" class="text-danger" style="position:absolute"> </p><br>
+		<button ng-click='' class="btn btn-danger"><span class='glyphicon glyphicon-remove'></span> Delete</button>
+	</div>
+                
+	
+                </div></div>
+            <div class="col-md-12" id="addRoom">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -157,7 +115,7 @@
 					</br>
 					<label style="font-size:large">Permissons</label>
 					<div class="btn-group" style="float:right">
-						<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>{{reqRank}}<span class='caret'></span>
+						<button type="button" class="btn btn-info dropdown-toggle" data-toggle='dropdown'>Guest<span class='caret'></span>
 						</button>
 						<ul class="dropdown-menu" role='menu' id="">
 							<li><a href="#" ng-click="reqRank = 'Guest'">Guest</a>
@@ -173,259 +131,36 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='addRoom()' class="btn btn-primary" data-dismiss="modal">Submit</button>
+					<button type="button" ng-click='' class="btn btn-primary" data-dismiss="modal">Submit</button>
 				</div>
 			</div>
 			<!-- /.modal-content -->
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="reportBug">
-		<div class="modal-dialog">
-			<div class="modal-content" report>
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Report Bug</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label for="roomName">Name</label>
-						<input ng-model='name' class="form-control">
-					</div>
-					<div class="form-group">
-						<label for="roomPassword">Email</label>
-						<input ng-model='email' class="form-control">
-					</div>
-					<div class="form-group">
-						<label>Bug</label>
-						<textarea class="form-control" ng-model='info'></textarea>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='report("bug")' class="btn btn-primary" data-dismiss="modal">Submit</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="requestTicket">
-		<div class="modal-dialog">
-			<div class="modal-content" report>
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Request Ticket</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label for="roomName">Name</label>
-						<input ng-model='name' class="form-control">
-					</div>
-					<div class="form-group">
-						<label for="roomPassword">Email</label>
-						<input ng-model='email' class="form-control">
-					</div>
-					<div class="form-group">
-						<label>Request</label>
-						<textarea class="form-control" ng-model='info'></textarea>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='report("request")' class="btn btn-primary" data-dismiss="modal">Submit</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="about">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">About us</h4>
-				</div>
-				<div class="modal-body">
-					<h5>Creator:</h5>
-					<p>Alex Thomas(Sonicdeadlock)</p>
-					<h5>Contact:</h5>
-					<p><a href="mailto:alexthomas.gsmst@gmail.com">alex.thomas.gsmst@gmail.com</a>
-					</p>
-					<h5>Source Code:</h5>
-					<p><a href="https://github.com/Sonicdeadlock/gsmst-chat">GitHub</a>
-					</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="inbox" inbox>
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Inbox</h4>
-
-				</div>
-				<div class="modal-body">
-                    <div role="tabpanel">
-                        <ul class="nav nav-tabs" role="tablist" id="messageTabs">
-                            <li role="presentation" class="active"><a aria-controls="received" data-target="#received" role="tab" data-toggle="tab">Received</a> </li>
-                            <li role="presentation" ><a aria-controls="sent" role="tab" data-toggle="tab" data-target="#sent">Sent</a> </li>
-                        </ul>
-
-                        <div class="tab-content">
-                            <div role="tabpanel" class="tab-pane active" id="received"><div ng-repeat='message in state.privates.receive'>
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h3 class="panel-title">{{message.username}}</h3>
-								<small>{{message.time | date : 'medium'}} </small>
-							</div>
-							<div class="panel-body">
-								{{message.message}}
-							</div>
-							<div class="panel-footer">
-								<button class='btn btn-primary' ng-click='replyToPrivate(message.from_username)' data-dismiss="modal" data-toggle="modal" data-target="#sendMessage">Reply</button>
-								<button class='btn btn-danger' ng-click='deletePrivate(message.id,true)'>Delete</button>
-							</div>
-
-						</div>
-
-					</div></div>
-                             <div role="tabpanel" class="tab-pane " id="sent"><div ng-repeat='message in state.privates.sent'>
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h3 class="panel-title">{{message.username}}</h3>
-								<small>{{message.time | date : 'medium'}} </small>
-							</div>
-							<div class="panel-body">
-								{{message.message}}
-							</div>
-							<div class="panel-footer">
-								<button class='btn btn-danger' ng-click='deletePrivate(message.id,false)'>Delete</button>
-							</div>
-
-						</div>
-
-					</div></div>
-                        </div>
-                    </div>
-
-
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="sendMessage">
-		<div class="modal-dialog">
-			<div class="modal-content" send>
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Send Message</h4>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label for="">To(Username)</label>
-						<input ng-model='to' class="form-control">
-					</div>
-					<div class="form-group">
-						<label>Message</label>
-						<textarea class="form-control" ng-model='privateMessage'></textarea>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='sendPrivate()' class="btn btn-primary" data-dismiss="modal">Send</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	<div class="modal fade" id="Change_Settings" settings>
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Settings</h4>
-				</div>
-				<div class="modal-body">
-					<form>
-						<div class="form-group">
-							<label>Show Rank</label>
-							<button class='btn btn-primary' ng-model='showRank' ng-click="toggleRank()">{{showRankState}}</button>
-						</div>
-						<div class="form-group">
-							<label>Show Time</label>
-							<button class='btn btn-primary' ng-model='showTime' ng-click="toggleTime()">{{showTimeState}}</button>
-						</div>
-						<div class='form-group'>
-							<label>Show Desktop Notifications</label>
-							<button class='btn btn-primary' ng-model='showNotification' ng-click='toggleNotifications()'>{{showNotificationsState}}</button>
-						</div>
-						<div class='form-group'>
-							<label>Desktop Notification Duration(ms)</label>
-							<input type='number' ng-model='notificationDuration' ng-change='updateDuration()'>
-						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" ng-click='saveSettings()' class="btn btn-primary" data-dismiss="modal">Save</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade" id="just_the_tip">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<h4 class="modal-title">Pro Tips</h4>
-				</div>
-				<div class="modal-body">
-					<ul>
-						<li>Enter a room by clicking on it</li>
-						<li>Exit a room by clicking on the arrow at the top left</li>
-						<li>If you put a link in chat it will automagically become a clickable link</li>
-						<li>Change your theme with the Change Style button</li>
-						<li>Change what is shown with the Change Settings button</li>
-						<li>Clear the chat room by exiting and coming back or with the Clear Chat button</li>
-						<li>Share an image with a chat by dragging and dropping it into chat</li>
-						<li>A link of an image will be come an image in chat</li>
-					</ul>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class='modal fade' id='ban'>
+            
+        </div>
+<div class="container">
+    <div class="page-header">
+        <h1>Chat Room</h1>
+    </div>
+    <div>
+        <p>When a user enters the room an entrance message is posted to the room to indicate to the current users in the room that a new user has entered.Specific entrance messages can be created for specific ranks</p>
+        <div class="container well">
+            <p>CMilsted has entered the room</p>
+        </div>
+        <p>When a user sends a message their chat is displayed precided by their username and rank and followed by the time that it was sent.The username is also a link to that user's user-page where more information about the user can be found. If a user chats a link then the link will be converted to become clickable and will open in a new page. If the link to an image is posted then the image will be posted. The posted image is clickable and will be enlarged in a new tab. In the exmaple below the user typed <i>"http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"</i> and the image below was posted to the room</p>
+        <div class="well container">
+        <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span>Simple message</span><small class="chat_time">14:45:01</small></p>
+            <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a href="https://google.com" target="_blank">www.google.com</a></span><small class="chat_time">14:45:01</small></p>
+            <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a target="blank" href="http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"><img src="http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"></a></span><small class="chat_time">14:58:10</small></p>
+        </div>
+        <p>Users with administrative privlages will see addional options next to the username in the chat</p>
+        <div class="container well">
+        <p><a href="#" data-toggle="modal" data-target="#ban"><span class="glyphicon glyphicon-ban-circle text-danger"></span>&nbsp;</a><a href="#" data-toggle="modal" data-target="#admin"><span class="glyphicon glyphicon-cog"></span>&nbsp;</a><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span>Who was the artist who made this painting?</span><small class="chat_time">15:10:29</small></p>
+        </div>
+        <p>An admin can click the red ban circle to open the ban dialog and select the amount of time to ban that user from the room.</p>
+        <div class='' id='ban'>
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -449,7 +184,8 @@
 			</div>
 		</div>
 	</div>
-	<div class='modal fade' id='admin'>
+        <p>An admin can use the blue gear to open the admin panel. Here they can give that user credit or change there rank in the system.</p>
+        <div class='' id='admin'>
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -463,7 +199,7 @@
 					        <label>Award Points</label>
 					        <input type='number' id='give_points'>
 					    </div>
-					    <button type'submit' class='btn btn-primary' id='submit_points'>SUBMIT</button>
+					    <button  class='btn btn-primary' id='submit_points'>SUBMIT</button>
 					</form>
 					<h4>Change Rank</h4>
 					<div class='btn-group-vertical'>
@@ -480,63 +216,26 @@
 			</div>
 		</div>
 	</div>
-	<div room style="display:none;height:60%" id='room'>
-
-
-
-
-		<div class="col-md-1">
-			<strong>Users</strong>
-			</br>
-			<p ng-repeat='user in room.users'>{{user}}</p>
-			</br>
-			<strong>Guests: </strong>{{room.guestCount}}
-		</div>
-		<div class="well col-md-10" style="height:100%">
-			<div id='chatArea' style="overflow:auto;height:100%;width:100%">
-				<p id='typing' style="position:absolute;bottom:0px;">{{typing}}</p>
-			</div>
-            <br><br>
-            <form >
-			<div ng-show="state.permissions.chat">
-				<div class='input-group'>
-					<input class="form-control" ng-model='message'  id='chatBox' >
-                    <div class="input-group-btn">
-
-                        <button class="btn btn-primary " id="chatButton" >send</button>
-                         <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-                        <ul class="dropdown-menu" role="menu" id="sentHistory">
-
-                        </ul>
-                    </div>
-				</div>
-
-			</div>
-		</form>
-
-		</div>
-
-
-	</div>
-	</div>
-	<script type="text/javascript">
-		// setInterval(function(){$('[rel="tooltip"]').tooltip();},100);
-
-	</script>
-	<script>
-		(function(i, s, o, g, r, a, m) {
-			i['GoogleAnalyticsObject'] = r;
-			i[r] = i[r] || function() {
-				(i[r].q = i[r].q || []).push(arguments)
-			}, i[r].l = 1 * new Date();
-			a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-			a.async = 1;
-			a.src = g;
-			m.parentNode.insertBefore(a, m)
-		})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-		ga('create', 'UA-53769917-1', 'auto');
-		ga('send', 'pageview');
-	</script>
-</body>
-
+        
+    </div>
+</div>
+<div class="container">
+    <div class="page-header">
+        <h1>User commands</h1>
+    </div>
+    <div class="btn-group bt-group-lg">
+        <button class="btn btn-primary"> SAT Question</button>
+        <button class="btn btn-primary">Spanish Conjugation</button>
+        <button class="btn btn-primary">Answer</button>
+    </div>
+    <ul>
+        <li>!SatQ - The server returns a SAT question to the room</li>
+        <li>!sc - The server returns a Spanish Conjugation question</li>
+        <li>!answer {answer}- The command to answer a question posted by the server</li>
+    </ul>
+</div>
+<div class="container">
+            <a href='/chat.html'><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
+        </div>
+    </body>
 </html>
