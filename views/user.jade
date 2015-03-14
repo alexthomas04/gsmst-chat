@@ -1,19 +1,41 @@
 doctype !!!5
 html
-    head
-        title #{username} - Page
-        link(rel='stylesheet',href='public/css/bootsrap.css')
-    body
-        h1 #{username} - Page
-        .well
-            p Real Name : #{name}
-            p Most Common Word : #{word} (#{wordUses} times)
-            p Second Most Common Word : #{wordnd} (#{wordUsesnd} times)
-            p Third Most Common Word : #{wordrd} (#{wordUsesrd} times)
-            p Most Common Letter : #{letter} (#{letterUses} times)
-            p Number of Bans : #{bans}
-            p Number of Infractions #{infractions}
-            p Time Online : #{onlineTime}
-            p Number of chats : #{chatCount}
-            p Lurk Factor : #{lurk}
-            p Points : #{points}
+	head
+		title #{username} - Page
+		link(rel='stylesheet',href='../css/bootstrap.css')
+	body
+		h1 #{username} - Page
+		table.table.table-striped
+			tr
+				td Real Name 
+				td #{name}
+			tr
+				td Most Common Word 
+				td #{word} (#{wordUses} times)
+			tr
+				td Second Most Common Word 
+				td #{wordnd} (#{wordUsesnd} times)
+			tr
+				td Third Most Common Word 
+				td #{wordrd} (#{wordUsesrd} times)
+			tr
+				td Most Common Letter 
+				td #{letter} (#{letterUses} times)
+			tr
+				td Number of Bans 
+				td #{bans}
+			tr
+				td Number of Infractions 
+				td #{infractions}
+			tr
+				td Time Online 
+				td #{onlineTime}
+			tr
+				td Number of chats 
+				td #{chatCount}
+			tr
+				td Lurk Factor 
+				td #{lurk}
+			tr
+				td Points 
+				td #{points}
