@@ -3,7 +3,6 @@
         <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Homework</title>
-	<script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
 	<script src="js/jquery-2.1.1.min.js"></script>
 	<script src="js/jquery.cookie.js"></script>
 	<script src="js/jquery.storageapi.min.js"></script>
@@ -121,18 +120,18 @@
             </div>
             <div>
                 <ul>
-                    <li><span class=' text-info glyphicon glyphicon-plus-sign' style=''></span> - This is a button that is only seen by users with permissions to create rooms, and is used to open the dialog to create a room. </li>
-                    <li><span class="text-info glyphicon glyphicon-refresh"></span> - This is a button that is only seen by users with permissions to restart the server and is used to do so.</li>
-                    <li><span class='text-info'>Archive</span> -  This is only viewable by users with permission to access the archive page, and will redirect them to the page.</li>
-                    <li><span class="text-info">ProTip!</span> - This is a button that when clicked, will display a dialog with a few quick tips on how to use the site.</li>
-                    <li><span class="text-info">Change Settings</span> - This is a button that when clicked, will display a dialog where the user can change their settings.</li>
+                    <li><span class=' text-info glyphicon glyphicon-plus-sign' style=''></span> - Is used to open the dialog to create a room, and is only seen by users with permissions to create rooms</li>
+                    <li><span class="text-info glyphicon glyphicon-refresh"></span> - Is used to restart the server, and is only see by users with permissions to do so.</li>
+                    <li><span class='text-info'>Archive</span> -  Is only viewable by users with permission to access the archive page, and will redirect them to the page.</li>
+                    <li><span class="text-info">ProTip!</span> -  When clicked, will display a dialog with a few quick tips on how to use the site.</li>
+                    <li><span class="text-info">Change Settings</span> - When clicked, will display a dialog where the user can change her settings.</li>
                     <li><span class="text-info">Contact</span> - When clicked, this button will dispaly a dialog where the user can get more information about how to contact the developers.</li>
                     <li><span class="text-info">Change Style</span> - When clicked, a drop down will appear where the user can change the theme of their page.</li>
                     <li><span class="text-info">Register</span> - When clicked, the user will be redirected to the registration page, and is only viewable if the user is not logged in.</li>
                     <li><span class="text-info">Login</span> - When clicked, the login dialog will be displayed. This button is only viewble when the user is not logged in.</li>
                     <li><span class="text-info"><span class="glyphicon glyphicon-inbox"></span></span> - When clicked, the private message inbox/outbox dialog is displayed. Beside the icon is a badge with the number of unread messages.</li>
                     <li><span class="text-info glyphicon glyphicon-envelope"></span> - When clicked, the priavate message composition dialog is displayed.</li>
-                    <li><span class="text-info">Logout</span> - When clicked, the user will be logged out. This button is only viewable when the user is logged in.</li>
+                    <li><span class="text-info">Logout</span> - When clicked, the user will be logged out. This option is only viewable when the user is logged in.</li>
                 </ul>
             </div>
         
@@ -249,10 +248,12 @@
         <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span>Simple message</span><small class="chat_time">14:45:01</small></p>
             <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a href="https://google.com" target="_blank">www.google.com</a></span><small class="chat_time">14:45:01</small></p>
             <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a target="blank" href="http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"><img src="http://images.metmuseum.org/CRDImages/ap/web-large/DP215410.jpg"></a></span><small class="chat_time">14:58:10</small></p>
+            <p><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span><a href="/reflection.docx" >reflection.docx</a></span><small class="chat_time">14:45:01</small></p>
         </div>
         <p>Users with administrative privlages will see addional options next to the username in the chat</p>
         <div class="container well">
         <p><a href="#" data-toggle="modal" data-target="#ban"><span class="glyphicon glyphicon-ban-circle text-danger"></span>&nbsp;</a><a href="#" data-toggle="modal" data-target="#admin"><span class="glyphicon glyphicon-cog"></span>&nbsp;</a><small class="chat_rank">[Helper] </small><a href="/u/21" target="_blank"><strong>test: </strong></a><span>Who was the artist who made this painting?</span><small class="chat_time">15:10:29</small></p>
+            
         </div>
         <p>An admin can click the red ban circle to open the ban dialog and select the amount of time to ban that user from the room.</p>
         <div class='' id='ban'>
