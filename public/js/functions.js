@@ -498,7 +498,7 @@ $(document).ready(function() {
 						if (name.match(image_regex))
 							reader.readAsDataURL(files[i]);
 						else
-							reader.readAsText(files[i]);
+							reader.readAsText(files[i],'UTF-8');
 					}
 					else
 						$('#chatArea').append('<p class="text-danger">File is too large, it must be less than 5 MB</p>')
@@ -561,6 +561,10 @@ $(document).ready(function() {
 	            socket.emit('sat',{type:'question'});
 	            $('#chatBox').focus();
 	            break;
+	         case 'sat-word':
+	            socket.emit('sat',{type:'word'});
+	            $('#chatBox').focus();
+	            break;
 	        case 'spanish':
 	            socket.emit('spanish');
 	            $('#chatBox').focus();
@@ -575,6 +579,10 @@ $(document).ready(function() {
 	            break;
 	        case 'apush':
 	        	socket.emit('question',{class:"APUSH"});
+	        	$('#chatBox').focus();
+	        	break;
+	        case 'econ':
+	        	socket.emit('question',{class:"ECON"});
 	        	$('#chatBox').focus();
 	        	break;
 	    }
@@ -619,6 +627,9 @@ $(document).ready(function() {
 					}
 					else if((message.indexOf('!APUSHQ') == 0) && state.permissions.chat){
 						socket.emit('question',{class:"APUSH"});
+					}
+					else if((message.indexOf('!ECONQ') == 0) && state.permissions.chat){
+						socket.emit('question',{class:"ECON"});
 					}
                     else if(message.indexOf('!answer') == 0 && state.permissions.chat){
 					    checkAnswer(message.substr('!answer'.length+1));
