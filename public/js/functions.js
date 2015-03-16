@@ -554,6 +554,31 @@ $(document).ready(function() {
                         message +
                         "</a></li>"); 
 	};
+	$('.command-btn').on('click','',function(e){
+	    var type = $(this).data('command');
+	    switch(type){
+	        case 'sat-question':
+	            socket.emit('sat',{type:'question'});
+	            $('#chatBox').focus();
+	            break;
+	        case 'spanish':
+	            socket.emit('spanish');
+	            $('#chatBox').focus();
+	            break;
+	        case 'answer':
+	            $('#chatBox').val('!answer ');
+	            $('#chatBox').focus();
+	            break;
+	        case 'sat-define':
+	            $('#chatBox').val('!satDefine ');
+	            $('#chatBox').focus();
+	            break;
+	        case 'apush':
+	        	socket.emit('question',{class:"APUSH"});
+	        	$('#chatBox').focus();
+	        	break;
+	    }
+	})
     $('#chatButton').on('click','',function(e){
         var message = $('#chatBox').val();
         lastSendId=-1;
@@ -591,6 +616,9 @@ $(document).ready(function() {
 					else if((message.indexOf('!spanishConjugations')==0 || message.indexOf('!sc') == 0) && state.permissions.chat){
 					socket.emit('spanish');
 					message = '!answer ';
+					}
+					else if((message.indexOf('!APUSHQ') == 0) && state.permissions.chat){
+						socket.emit('question',{class:"APUSH"});
 					}
                     else if(message.indexOf('!answer') == 0 && state.permissions.chat){
 					    checkAnswer(message.substr('!answer'.length+1));

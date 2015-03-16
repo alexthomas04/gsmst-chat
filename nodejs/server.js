@@ -384,25 +384,7 @@ socket.on('sat', function(message) {
 								answers.push(words.join(','));
 							}
 
-							function shuffle(array) {
-								var currentIndex = array.length,
-								temporaryValue, randomIndex;
 
-									// While there remain elements to shuffle...
-									while (0 !== currentIndex) {
-
-										// Pick a remaining element...
-										randomIndex = Math.floor(Math.random() * currentIndex);
-										currentIndex -= 1;
-
-										// And swap it with the current element.
-										temporaryValue = array[currentIndex];
-										array[currentIndex] = array[randomIndex];
-										array[randomIndex] = temporaryValue;
-									}
-
-									return array;
-								}
 								var shuffled = shuffle(answers);
 								var alphabet = ['a','b','c','d','e','f','g'];
 								for(var q=0;q<shuffled.length;q++){
@@ -435,6 +417,42 @@ chatToRoom(user, {
 }
 });
 
+    socket.on('question',function(message){
+        connection.query('SELECT id FROM classes WHERE class = \''+message.class+'\';',function(err1,result1){
+            if(err1)
+                console.error(err1);
+            if(result1 && result1[0]){
+                var class_id = result1[0].id;
+                connection.query('SELECT id FROM questions WHERE class_id = '+class_id,function(err2,result2){
+                    if(err1)
+                        console.error(err2);
+                   if(result2 && result2.length>0){
+                        var q_id = result2[Math.floor(Math.random()*result2.length)].id;
+                        connection.query('SELECT question,answers,correct_answer FROM questions WHERE id = '+q_id,function(err3,result3){
+                            if(err3)
+                                console.error(err3);
+                            var answers = JSON.parse(result3[0].answers);
+                            answers.push(result3[0].correct_answer);
+                            var shuffled = shuffle(answers);
+                            var alphabet = ['a','b','c','d','e','f','g'];
+								for(var q=0;q<shuffled.length;q++) {
+                                    shuffled[q] = alphabet[q] + ") " + shuffled[q];
+                                }
+                            var formattedAnswers = shuffled.join('<br>');
+                            chatToRoom(user, {
+                                chat:result3[0].question+"<br>"+formattedAnswers,
+                                correctAnswer:result3[0].correct_answer,
+                                user: 'SERVER',
+                                'user_id': -1,
+                                kickable: false,
+                                time: new Date()
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    });
 socket.on('spanish',function(message){
 	var forms = ['yo','tú','el','nosotros','ellos'];
 	var form = forms[Math.floor(Math.random()*forms.length)];
@@ -1590,6 +1608,26 @@ var chatToRoom = function(user, message) {
 		user.socket.emit('chat', message);
 	}
 };
+
+function shuffle(array) {
+								var currentIndex = array.length,
+								temporaryValue, randomIndex;
+
+									// While there remain elements to shuffle...
+									while (0 !== currentIndex) {
+
+										// Pick a remaining element...
+										randomIndex = Math.floor(Math.random() * currentIndex);
+										currentIndex -= 1;
+
+										// And swap it with the current element.
+										temporaryValue = array[currentIndex];
+										array[currentIndex] = array[randomIndex];
+										array[randomIndex] = temporaryValue;
+									}
+
+									return array;
+								}
 
 
 
