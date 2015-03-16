@@ -651,9 +651,8 @@ socket.on('sendFile', function(message) {
 	if (user !== undefined && user.room != undefined && user.username != undefined) {
 
 		var matching = getUsersByRoom(user.room);
-			//connection.query('INSERT INTO chat SET ?',{'user_id':user.id,'message':chat,"room_id":user.room.id},function(err,result){if(err != null)console.log(err)});
 			var response = {
-				"file_data": message,
+				"file": message,
 				'user': user.username,
 			    'user_id': user.id
 			};
@@ -1255,7 +1254,6 @@ var connect_bots=function(room){
         		data.slice(0,1000);
         	}
             data = new Buffer(JSON.stringify(data));
-            console.log(data.length);
            botsend.send(data,0,data.length,this.port,this.host,function(err,bytes){
                 if (err) {
                     console.error(err);
