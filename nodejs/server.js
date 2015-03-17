@@ -94,10 +94,15 @@ io.emit('alert', {
 	'alert': 'info',
 	'text': 'The server just restarted. Please refresh'
 });
+
+//event fired when client connects
 io.on('connection', function(socket) {
 	var user;
 	
+	//inform the client that they have connected
 	socket.emit('connected',{});
+
+	//event fired when the client disconnects
 	socket.on('disconnect', function() {
 
 		if (user !== undefined) {
@@ -120,16 +125,19 @@ io.on('connection', function(socket) {
 		}
 	});
 
+
 	socket.on('login', function(message) {
 		//check to see if the user has a registered hash
 		getUserFromHash(message.hash, function(callbackUser) {
 			if (callbackUser == undefined) {
-				//if they do not check to see if they have a valid username and password
+				//if not, check to see if they have a valid username and password
 				login(message.username, message.password, function(success) {
 					if (success) {
+						//if the client was previouly connected reset the connection
 						if (user !== undefined) {
 							user.socket = undefined;
 						}
+						//init the user
 						getUser(message.username, function(param) {
 							user = param;
 							user.sessionStart = new Date();
@@ -142,11 +150,12 @@ io.on('connection', function(socket) {
 
 					}
 				});
-			} else {
-				//if the user has a valid hash
+			} else {//if the user has a valid hash
+				
 				if (user !== undefined) {
 					user.socket = undefined;
 				}
+				//init user
 				user = callbackUser
 				user.sessionStart = new Date();
 				user.socket = socket;
@@ -159,28 +168,28 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('join-room', function(message) {
-		//check to see if the user can enter the room
-		var canEnterRoom = function(user, room, callback) {
-			if (user != undefined && user.permissions != undefined && user.permissions.god)
-				callback(true);
+		
+		var canEnterRoom = function(user, room, callback) { //function to check to see if the user can enter the room
+			if (user != undefined && user.permissions != undefined && user.permissions.god) // if the user is valid or can override the validation proccess
+				callback(true);//the user can enter the room
 			else {
-				isBanned(user, room, function(banned) {
+				isBanned(user, room, function(banned) { // check to see if the user is currently banned from the room
 					if (banned)
-						callback(false);
+						callback(false);//the user can not enter the room
 					else {
 						if (room.requirements) {
 							if (room.requirements.rank) {
 
-								if (!user || user.permissions == undefined || !(user.permissions[room.requirements.rank]))
-									callback(false);
+								if (!user || user.permissions == undefined || !(user.permissions[room.requirements.rank])) // if the user meets the room's rank requirements
+									callback(false);// the user can not enter the room
 
 							}
-							if (room.requirements.hasPassword && message.password != room.requirements.password) {
-								callback(false);
+							if (room.requirements.hasPassword && message.password != room.requirements.password) { //if the client meets the room's password requirements
+								callback(false);// the user can not enter the room
 							}
 						}
 
-						callback(true);
+						callback(true);// the user can enter the room.
 					}
 				});
 			}
@@ -192,21 +201,21 @@ io.on('connection', function(socket) {
 		var room = getRoomById(message.roomId);
 		if (room != undefined) {
 			canEnterRoom(user, room, function(canEnter) {
-				if (canEnter) {
-					if (user != undefined && user.room == undefined) {
+				if (canEnter) {//if the user can enter the room
+					if (user != undefined && user.room == undefined) {//if the user and room are valid
 						user.room = room;
 						emitRooms();
 						if (user.room != undefined && user.room.id >= 0) { // the user can enter the room
 							//get an appropreate entrance message for the class of user
 							connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
-								var matching = getUsersByRoom(user.room);
-								for (var i = matching.length - 1; i >= 0; i--) {
+								var matching = getUsersByRoom(user.room);//get the other users in the room
+								for (var i = matching.length - 1; i >= 0; i--) {//foreach user
 									var match = matching[i];
 									var entrance;
 									if (result != undefined && result.length > 0) {
-										entrance = result[Math.floor(Math.random() * result.length)].entrance;
+										entrance = result[Math.floor(Math.random() * result.length)].entrance;//select a random entrance message
 									}
-									match.socket.emit('alert', {
+									match.socket.emit('alert', { //inform the current users of the room that the user has entered
 										"alert": "entered",
 										'user': user.username,
 										"entrance": entrance
@@ -216,6 +225,7 @@ io.on('connection', function(socket) {
 							});
 						}
 					} else {//enter as a guest
+						//create a blank user
 						user = {};
 						user.room = getRoomById(message.roomId);
 						user.socket = socket;
@@ -223,15 +233,15 @@ io.on('connection', function(socket) {
 						users.push(user);
 						emitRooms();
 						if (user.room != undefined && user.room.id >= 0) {
-							connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {
-								var matching = getUsersByRoom(user.room);
-								for (var i = matching.length - 1; i >= 0; i--) {
+							connection.query('Select `entrance` from `entrances` where group_id=' + user.group_id, function(err, result) {//get an appropreate entrance message for the class of user
+								var matching = getUsersByRoom(user.room);//get the other users in the room
+								for (var i = matching.length - 1; i >= 0; i--) {//foreach user
 									var match = matching[i];
 									var entrance;
 									if (result != undefined && result.length > 0) {
 										entrance = result[Math.floor(Math.random() * result.length)].entrance;
 									}
-									match.socket.emit('alert', {
+									match.socket.emit('alert', {//inform the current users of the room that the user has entered
 										"alert": "entered",
 										'user': user.username,
 										"entrance": entrance
@@ -269,8 +279,9 @@ socket.on('chat', function(message) {
 			'user': user.username,
 			'user_id': user.id
 		};
-		response.kickable = !user.permissions.unkickable;
+		response.kickable = !user.permissions.unkickable;//if the user can be kicked from the room
 		var group = getGroupById(user.group_id);
+		//build the user's color data
 		if (user.attributes != undefined && user.attributes != '' && JSON.parse(user.attributes).color != undefined) {
 			response.color = JSON.parse(user.attributes).color;
 		} else if (group != undefined && group.attributes != undefined && group.attributes != '' && JSON.parse(group.attributes).color != undefined) {
@@ -278,7 +289,7 @@ socket.on('chat', function(message) {
 		}
 		response.rank = group.name;
 		response.time = new Date();
-		chatToRoom(user, response);
+		chatToRoom(user, response);//send message to the room
 	}
 });
 socket.on('random', function(message) { // get a random word or funny
@@ -314,8 +325,8 @@ socket.on('random', function(message) { // get a random word or funny
 		});
 	}
 });
-socket.on('sat', function(message) {
-	if (user && user.permissions && user.permissions.chat) {
+socket.on('sat', function(message) {//request for SAT data
+	if (user && user.permissions && user.permissions.chat) {//if the user has permission for the data
 		if (message.type == 'word') {
 			connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result) {//get the number of rows in the db
 				var indexes = [];
@@ -326,7 +337,7 @@ socket.on('sat', function(message) {
 					for (var j = 0; j < results.length; j++) {
 						words.push(results[j].word);
 					}
-					chatToRoom(user, {
+					chatToRoom(user, {//send response to room
 						chat: words.join(',').replace(/\w,/g, ", "),
 						user: 'SERVER',
 						'user_id': -1,
@@ -339,10 +350,10 @@ socket.on('sat', function(message) {
 			var word = message.word;
 			connectionRead.query('SELECT definition,part_of_speech FROM sat_words WHERE word ="' + word + '"', function(err, result) {
 				response = "Word not yet defined. Check your spelling or request that is it added";
-				if (result && result.length > 0) {
-					response = word + " " + result[0].part_of_speech + ". -" + result[0].definition;
+				if (result && result.length > 0) {//if there is a word with that definition, build the definition
+					response = word + " " + result[0].part_of_speech + " - " + result[0].definition;
 				}
-				chatToRoom(user, {
+				chatToRoom(user, {//send repsonse to room
 					chat: response,
 					user: 'SERVER',
 					'user_id': -1,
@@ -350,7 +361,7 @@ socket.on('sat', function(message) {
 					time: new Date()
 				});
 			});
-		} else if (message.type == 'sentence') {
+		} else if (message.type == 'sentence') {//no sentences are currently added
 			var response = 'A sentence for this word does not yet exist.';
 			chatToRoom(user, {
 				chat: response,
@@ -359,17 +370,17 @@ socket.on('sat', function(message) {
 				kickable: false,
 				time: new Date()
 			});
-		} else if (message.type == 'question') {
+		} else if (message.type == 'question') {//request a SAT question
 			var numberOfAnswers = 4;
 			connectionRead.query("SELECT COUNT(*) FROM sat_questions", function(err, result) {//get number of rows in table
 				var indexes = [];
-				indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));
+				indexes.push(' id=' + (Math.floor(Math.random() * result[0]['COUNT(*)'] + 1)));//randomly select one row
 				connectionRead.query('SELECT question,answer,number_of_answers FROM sat_questions WHERE ' + indexes.join(' or '), function(error, results) {//get random row from table
 					var answers = [];
 					answers.push(results[0].answer);
 					connectionRead.query("SELECT COUNT(*) FROM sat_words", function(err, result1) {//get number of rows in the table
 						var indexes = [];
-						for (var i = 0; i < numberOfAnswers * results[0].number_of_answers; i++) {//choose random words
+						for (var i = 0; i < numberOfAnswers * results[0].number_of_answers; i++) {//choose random word ids to add to the possible answers
 							indexes.push(' id=' + (Math.floor(Math.random() * result1[0]['COUNT(*)'] + 1)));
 
 						}
@@ -385,15 +396,15 @@ socket.on('sat', function(message) {
 							}
 
 
-								var shuffled = shuffle(answers);
+								var shuffled = shuffle(answers);//shuffle answers
 								var alphabet = ['a','b','c','d','e','f','g'];
 								for(var q=0;q<shuffled.length;q++){
 									shuffled[q]=alphabet[q]+") "+shuffled[q];
 }
 var formattedAnswers = shuffled.join('<br>');
 
-chatToRoom(user, {
-	chat:results[0].question+"<br>"+formattedAnswers,
+chatToRoom(user, {//send response
+	chat:results[0].question+"<br>"+formattedAnswers,//build question
 	correctAnswer:results[0].answer,
 	user: 'SERVER',
 	'user_id': -1,
@@ -404,7 +415,7 @@ chatToRoom(user, {
 });
 });
 });
-} else if (message.type == 'help') {
+} else if (message.type == 'help') {//respond to SAT help
 	var response = '</br>!satWord will return a random SAT word to the room</br>!satDefine {word} will return a definition for the word provdied as {word}</br>!satDefine {word} will return a sentence with the {word} used in it</br>!satHelp will return help for !sat commands</br>!satQuestion or !satQ will return a SAT Question</br>!answer or !satA {answer|answer choice} will check your answer for the most recent question';
 	chatToRoom(user, {
 		chat: response,
@@ -417,30 +428,30 @@ chatToRoom(user, {
 }
 });
 
-    socket.on('question',function(message){
-        connection.query('SELECT id FROM classes WHERE class = \''+message.class+'\';',function(err1,result1){
+    socket.on('question',function(message){//respond to general question
+        connection.query('SELECT id FROM classes WHERE class = \''+message.class+'\';',function(err1,result1){//get class id
             if(err1)
                 console.error(err1);
-            if(result1 && result1[0]){
+            if(result1 && result1[0]){//if class exists
                 var class_id = result1[0].id;
-                connection.query('SELECT id FROM questions WHERE class_id = '+class_id,function(err2,result2){
+                connection.query('SELECT id FROM questions WHERE class_id = '+class_id,function(err2,result2){//get question ids
                     if(err1)
                         console.error(err2);
                    if(result2 && result2.length>0){
-                        var q_id = result2[Math.floor(Math.random()*result2.length)].id;
-                        connection.query('SELECT question,answers,correct_answer FROM questions WHERE id = '+q_id,function(err3,result3){
+                        var q_id = result2[Math.floor(Math.random()*result2.length)].id;//get random question id
+                        connection.query('SELECT question,answers,correct_answer FROM questions WHERE id = '+q_id,function(err3,result3){//get question
                             if(err3)
                                 console.error(err3);
-                            var answers = JSON.parse(result3[0].answers);
-                            answers.push(result3[0].correct_answer);
-                            var shuffled = shuffle(answers);
+                            var answers = JSON.parse(result3[0].answers);//parse answers from JSON array
+                            answers.push(result3[0].correct_answer);//add correct answer
+                            var shuffled = shuffle(answers);//shuffle answers
                             var alphabet = ['a','b','c','d','e','f','g'];
-								for(var q=0;q<shuffled.length;q++) {
+								for(var q=0;q<shuffled.length;q++) {//assign letters to answer choices
                                     shuffled[q] = alphabet[q] + ") " + shuffled[q];
                                 }
                             var formattedAnswers = shuffled.join('<br>');
-                            chatToRoom(user, {
-                                chat:result3[0].question+"<br>"+formattedAnswers,
+                            chatToRoom(user, {//respond
+                                chat:result3[0].question+"<br>"+formattedAnswers,//build question
                                 correctAnswer:result3[0].correct_answer,
                                 user: 'SERVER',
                                 'user_id': -1,
@@ -453,13 +464,13 @@ chatToRoom(user, {
             }
         });
     });
-socket.on('spanish',function(message){
-	var forms = ['yo','tú','el','nosotros','ellos'];
-	var form = forms[Math.floor(Math.random()*forms.length)];
+socket.on('spanish',function(message){//request spanish conjugation question
+	var forms = ['yo','tú','el','nosotros','ellos'];//list of different forms
+	var form = forms[Math.floor(Math.random()*forms.length)];//select random form
 	connectionRead.query('SELECT COUNT(*) FROM spanish_verbs',function(err,result){
-		var id = Math.floor(Math.random() * result[0]['COUNT(*)'] + 1);
-		connectionRead.query('SELECT '+form+',tense,infinitive FROM spanish_verbs WHERE id='+id,function(error,results){
-			chatToRoom(user,{
+		var id = Math.floor(Math.random() * result[0]['COUNT(*)'] + 1);//select random word id
+		connectionRead.query('SELECT '+form+',tense,infinitive FROM spanish_verbs WHERE id='+id,function(error,results){//select form of random word
+			chatToRoom(user,{//send to room
 				chat:"Conjugate "+results[0].infinitive+" in the "+form+" "+results[0].tense+" tense",
 				user:'SERVER',
 				"user_id":-1,
@@ -471,14 +482,14 @@ socket.on('spanish',function(message){
 	});
 });
 
-var emitSelf = function(emitSocket) {
+var emitSelf = function(emitSocket) {//inform the client of the state of the user
 	var result = {};
-	if (user == undefined || user === {} || user.hash==undefined) {
+	if (user == undefined || user === {} || user.hash==undefined) {//the user is not logged in
 		result = {
 			"status": "Not logged in"
 		};
 		emitSocket.emit('me', result);
-	} else {
+	} else {// the user is logged in
 		result = {
 			"status": "Logged in",
 			"username": user.username,
@@ -486,26 +497,25 @@ var emitSelf = function(emitSocket) {
 		};
 		result.permissions = user.permissions;
 		result.hash = user.hash;
-		connection.query('INSERT INTO user_hash SET ?', {
+		connection.query('INSERT INTO user_hash SET ?', {//insert the hash into the db
 			user_id: user.id,
 			hash: user.hash
 		}, function(err, result) {});
 		
-		connection.query("SELECT * FROM private WHERE to_id = " + user.id + ' and receive_delete=0 order by id desc', function(err, results) {
+		connection.query("SELECT * FROM private WHERE to_id = " + user.id + ' and receive_delete=0 order by id desc', function(err, results) {//get recived messages
 			if(err)
 				console.error(err);
 			result.privates.receive = results;
 			result.unread = 0;
             if(results) {
-                for (var i = 0; i < results.length; i++) {
-                    //count unread messages
+                for (var i = 0; i < results.length; i++) {//count unread messages
                     var message = results[i];
                     if (message.read == 0) {
                         result.unread++;
                     }
                 }
             }
-                connection.query("SELECT * FROM private WHERE from_id = " + user.id + ' and send_delete=0 order by id desc',function(err1,result1) {
+                connection.query("SELECT * FROM private WHERE from_id = " + user.id + ' and send_delete=0 order by id desc',function(err1,result1) {//get sent messages
                     if(result1){
                     result.privates.sent = result1;
                     var ids = [];
@@ -515,7 +525,7 @@ var emitSelf = function(emitSocket) {
                     for (var i = 0; i < result.privates.sent.length; i++) {
                         ids.push(result.privates.sent[i].to_id);
                     }
-                    ids = ids.reduce(function (p, c) {
+                    ids = ids.reduce(function (p, c) {//remove duplicate ids from the array
                         if (p.indexOf(c) < 0) p.push(c);
                         return p;
                     }, []);
@@ -528,20 +538,20 @@ var emitSelf = function(emitSocket) {
                             ;
                             return '';
                         };
-                        for (var i = 0; i < result.privates.receive.length; i++) {
+                        for (var i = 0; i < result.privates.receive.length; i++) {//associate usernames with ids
                             var message = result.privates.receive[i];
                             message.username = getUsername(message.from_id);
                         }
-                        for (var i = 0; i < result.privates.sent.length; i++) {
+                        for (var i = 0; i < result.privates.sent.length; i++) {//associate usernames with ids
                             var message = result.privates.sent[i];
                             message.username = getUsername(message.to_id);
 
                         }
-                        emitSocket.emit('me', result);
+                        emitSocket.emit('me', result);//send to client
                     });
 
                 }else{
-                         emitSocket.emit('me', result);
+                         emitSocket.emit('me', result);//send to client
                     }
                 });
 
@@ -551,7 +561,7 @@ var emitSelf = function(emitSocket) {
 
 };
 
-socket.on('readMessages', function(message) {
+socket.on('readMessages', function(message) {//update which messages the user has read
 	if (user)
 		connection.query('UPDATE private SET ? WHERE to_id = ' + user.id, {
 			read: 1
@@ -559,7 +569,7 @@ socket.on('readMessages', function(message) {
 			emitSelf(socket);
 		});
 });
-socket.on('deletePrivate', function(message) {
+socket.on('deletePrivate', function(message) {//delete messages 
 	if (user) {
 		if(message.receiver)
 		{
@@ -575,88 +585,89 @@ socket.on('deletePrivate', function(message) {
 	}
 });
 
-socket.on('me', function(message) {
-	emitSelf(socket);
+socket.on('me', function(message) {//client call for self
+	emitSelf(socket);//emit the user to the client
 
 });
 
-socket.on('addRoom', function(message) {
-	if (user != undefined && user.permissions.create) {
-		addRoom(message, updateRooms(function() {
+socket.on('addRoom', function(message) {//cilent call to create a new room
+	if (user != undefined && user.permissions.create) {//if the user has permission
+		addRoom(message, updateRooms(function() {//add room
 			emitRooms();
 		}));
 	}
 });
 
-socket.on('deleteRoom', function(message) {
+socket.on('deleteRoom', function(message) {//client call to delete room
 	var room = getRoomById(message.id);
-	if (user != undefined && room != undefined && user.permissions != undefined && user.permissions.delete && (room.requirements.isDeleteable == undefined || room.requirements.isDeleteable || user.permissions.god)) {
+	if (user != undefined && room != undefined && user.permissions != undefined && user.permissions.delete && (room.requirements.isDeleteable == undefined || room.requirements.isDeleteable || user.permissions.god)) {//if the user has permissions to delete rooms and the room is deletable or the user has permissions to override whether or not the room id deletable
 		var usersInRoom = getUsersByRoom(room);
-		for (var i = usersInRoom.length - 1; i >= 0; i--) {
+		for (var i = usersInRoom.length - 1; i >= 0; i--) {//alert the users in that room that the rooms has been deleted
 			usersInRoom[i].socket.emit('alert', {
 				"alert": "danger",
 				"text": "The Room has been deleted"
 			});
-			usersInRoom[i].room = undefined;
+			usersInRoom[i].room = undefined;//set the room of the user as undefined 
 		};
-		deleteRoom(message, updateRooms(function() {
+		deleteRoom(message, updateRooms(function() {//delete the room
 			emitRooms();
 		}));
 	}
 });
 
-socket.on('leave room', function() {
-	if (user !== undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {
-		var matching = getUsersByRoom(user.room);
-		for (var i = matching.length - 1; i >= 0; i--) {
-			var match = matching[i];
-			match.socket.emit('alert', {
+socket.on('leave room', function() {//call from client to have the user leave the room
+	if (user !== undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {//if the user is in a rooom and in a room that is not independent
+		var matching = getUsersByRoom(user.room);//get the other users in that room
+		for (var i = matching.length - 1; i >= 0; i--) {//for each user
+			var match = matching[i];//the user
+			match.socket.emit('alert', {//inform the client that the user has left the room
 				"alert": "left",
 				'user': user.username
 			});
 		};
-		user.room = undefined;
+		user.room = undefined;//set the user's room as undefined
 		emitRooms();
 	} else if (user !== undefined) {
 		user.room = undefined;
 		emitRooms();
 	}
 });
-socket.on('startTyping', function() {
-	if (user != undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {
-		var matching = getUsersByRoom(user.room);
+socket.on('startTyping', function() {//call from client that the user has started typing
+	if (user != undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {//if the user is in a rooom and in a room that is not independent
+		var matching = getUsersByRoom(user.room);//get the other users in the room
 		for (var i = matching.length - 1; i >= 0; i--) {
 			var match = matching[i];
 			if (match.socket != undefined)
-				match.socket.emit('startTyping', {
+				match.socket.emit('startTyping', {//inform the clients that the user has started typing
 					'username': user.username
 				});
 		}
 	}
 });
-socket.on('stopTyping', function(message) {
-	if (user != undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {
-		var matching = getUsersByRoom(user.room);
+socket.on('stopTyping', function(message) {//call from client that the user has stopped typing
+	if (user != undefined && user.username != undefined && user.room != undefined && user.room.id >= 0) {//if the user is in a rooom and in a room that is not independent
+		var matching = getUsersByRoom(user.room);//get the other users in the room
 		for (var i = matching.length - 1; i >= 0; i--) {
 			var match = matching[i];
 			if (match.socket != undefined)
-				match.socket.emit('stopTyping', {
+				match.socket.emit('stopTyping', {//inform the clients that the user has started typing
 					'username': user.username
 				});
 		};
 	}
 });
 
-socket.on('sendFile', function(message) {
-	if (user !== undefined && user.room != undefined && user.username != undefined) {
+socket.on('sendFile', function(message) {//call from client to send a file
+	if (user !== undefined && user.room != undefined && user.username != undefined) {//if the user is valid
 
-		var matching = getUsersByRoom(user.room);
-			var response = {
-				"file": message,
+		var matching = getUsersByRoom(user.room);//get the other users in the room
+			var response = {//build response
+				"file_data": message,
 				'user': user.username,
 			    'user_id': user.id
 			};
             response.kickable = !user.permissions.unkickable;
+            //build color data
 			var group = getGroupById(user.group_id);
 			if (user.attributes != undefined && user.attributes != '' && JSON.parse(user.attributes).color != undefined) {
 				response.color = JSON.parse(user.attributes).color;
@@ -667,83 +678,83 @@ socket.on('sendFile', function(message) {
 		    response.time = new Date();
 			for (var i = matching.length - 1; i >= 0; i--) {
 				var match = matching[i];
-				match.socket.emit('file', response);
+				match.socket.emit('file', response);//send file to users
 			};
 		}
 	});
 
-socket.on('report', function(message) {
-	if (user != undefined && user.id != undefined) {
+socket.on('report', function(message) {//call from client to make a report
+	if (user != undefined && user.id != undefined) {//if the user is valid
 		message.user_id = user.id;
-		if (message.email != undefined && message.email.replace(/^\s+/, '').replace(/\s+$/, '') !== '')
+		if (message.email != undefined && message.email.replace(/^\s+/, '').replace(/\s+$/, '') !== '')//if the email is not valid
 			message.email = user.email;
 	}
-	connection.query('INSERT INTO reports SET ?', message, function(err, result) {
+	connection.query('INSERT INTO reports SET ?', message, function(err, result) {//insert the report into the db
 		if (err != undefined && err != null)
 			console.error(err);
-		sendEmails();
+		sendEmails();//send the emails
 	});
 });
 
-socket.on('kick', function(message) {
-	if (user != undefined && user.permissions != undefined && user.permissions.kick) {
+socket.on('kick', function(message) {//call from client to kick a user from the room
+	if (user != undefined && user.permissions != undefined && user.permissions.kick) {//if the kicking user is valid and the user has permissions
 		var bannedUser = getUserById(message.user_id);
-		if(!bannedUser.permissions.unkickable|| user.permissions.god)
+		if(!bannedUser.permissions.unkickable|| user.permissions.god)//if the kicked user can be kicked or the kicking user can override
 		{
-			ban(message.user_id, user.room.id,message.duration);
+			ban(message.user_id, user.room.id,message.duration);//ban the user
 			
-			if (bannedUser != undefined && bannedUser.socket != undefined) {
-				bannedUser.socket.emit('alert', {
+			if (bannedUser != undefined && bannedUser.socket != undefined) {//if the kicked user is valid
+				bannedUser.socket.emit('alert', {//inform the user that they have been banned
 					'alert': 'danger',
 					'text': 'You have been banned from this room for '+(message.duration/(60*1000))+' minutes'
 				});
-				bannedUser.room = undefined;
+				bannedUser.room = undefined;//remove the user from the room
 			}
 		}
-		else if(bannedUser.id == user.id){
-			user.socket.emit('alert',{'alert':'info',"text":"Did you really just try to ban yourself. What is wrong with you?"})
+		else if(bannedUser.id == user.id){//if a user tries to ban them self
+			user.socket.emit('alert',{'alert':'info',"text":"Did you really just try to ban yourself. What is wrong with you?"})//question their descision
 		}
-		else{
-			bannedUser.socket.emit('alert',{'alert':"info",'text':user.username+" tried to ban you, just though you would want to know."});
-			user.socket.emit('alert',{'alert':"info",'text':'You can\'t ban '+bannedUser.username+", you silly"});
+		else{//they user could not be banned
+			bannedUser.socket.emit('alert',{'alert':"info",'text':user.username+" tried to ban you, just though you would want to know."});//let the kicked user konw
+			user.socket.emit('alert',{'alert':"info",'text':'You can\'t ban '+bannedUser.username+", you silly"});//let the kicking user know
 		}
 
 	}
 });
 
-socket.on('restart', function(message) {
-	if (user != undefined && user.permissions != undefined && user.permissions.restart) {
-		io.emit('alert', {
+socket.on('restart', function(message) {//call from the client to restart the server
+	if (user != undefined && user.permissions != undefined && user.permissions.restart) {//if the user is valid and has permissions to restart the server
+		io.emit('alert', {//let all clients know that the server is restarting
 			'alert': 'info',
 			"text": "The server is restarting. Please refresh your page."
 		});
-		setTimeout(function() {
+		setTimeout(function() {//wait 100ms before closing the process. Forever will restart the proccess
 			process.exit()
 		}, 100);
 	}
 })
 
-socket.on('private', function(message) {
-	if (user != undefined && user.permissions.chat) {
-		if (message.message && message.to_username) {
-			getUser(message.to_username, function(to) {
-				if (to) {
-					var insertVars = {
+socket.on('private', function(message) {//call from the client to send a private message
+	if (user != undefined && user.permissions.chat) {//if the user is valid and has permissions
+		if (message.message && message.to_username) {//if the message and reciving username exist
+			getUser(message.to_username, function(to) {//get the revicing user
+				if (to) {//if that user exists
+					var insertVars = {//build data
 						to_id: to.id,
 						from_id: user.id,
 						"message": message.message,
 						time: new Date(),
 						from_username: user.username
 					};
-					connection.query('INSERT INTO private SET ?', insertVars, function(err, result) {
+					connection.query('INSERT INTO private SET ?', insertVars, function(err, result) {//insert data
 						if (err) {
 							console.error(err);
 						}
 					});
 					var onlineTo = getUserById(to.id);
-					if (onlineTo) {
+					if (onlineTo) {//if the user is online
 						emitSelf(onlineTo.socket);
-						onlineTo.socket.emit('alert', {
+						onlineTo.socket.emit('alert', {//let the user know that they have a new private message
 							'alert': 'new message',
 							'message': message.message,
 							'from': user.username
@@ -755,71 +766,72 @@ socket.on('private', function(message) {
 	}
 })
 
-socket.on('change_rank', function(message){
-    if(user != undefined && user.permissions && user.permissions.Admin){
-        var other_user = getUserById(message.user_id);
-        if(other_user){
+socket.on('change_rank', function(message){//client call to change the rank of a user
+    if(user != undefined && user.permissions && user.permissions.Admin){//if the user is valid and has adminsitrator permissions
+        var other_user = getUserById(message.user_id);//get the online user that is having their rank being changed
+        if(other_user){//if the other user exists
             var prev_rank = other_user.permissions.rank;
-            if(user.permissions.god){
-                connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){
+            if(user.permissions.god){//override
+                connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){//update the user in the database
                   if(err)
                     console.error(err);
-                      connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){
-                           if(result && result[0]) {
+                      connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){//update the online user's permissions
+                           if(result && result[0]) {//if the group is valid
                                var group = result[0];
                                group.permissions = JSON.parse(group.permissions);
                                other_user.permissions = group.permissions;
                                other_user.group_id=message.group;
-                               if(group.permissions.rank>prev_rank){
+                               if(group.permissions.rank>prev_rank){//let the user know that they have been promoted
                                    other_user.socket.emit('alert',{alert:'success',text:"You have been promoted to "+result[0].name});
                                }
-                               else{
+                               else{//let the user know that they have been demoted
                                    other_user.socket.emit('alert',{alert:'danger',text:"You have been demoted to "+result[0].name});
                                }
                            }
                       });
                 });
             }
-            else if(user.permissions.rank>other_user.permissions.rank){
-                connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){
+            else if(user.permissions.rank>other_user.permissions.rank){//if the user changing permissions is of a higher rank than the user who is having their permissions being changed
+                connection.query('SELECT name,permissions from groups where id ='+message.group,function(error,result){//get the new group information
                     if(error)
                         console.error(error);
-                   if(result && result[0]){
+                   if(result && result[0]){//if the group exists
                        var group = result[0];
                        group.permissions = JSON.parse(group.permissions);
-                       if(group.permissions.rank<user.permissions.rank){
-                           connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){
+                       if(group.permissions.rank<user.permissions.rank){//if the group rank is lower than the rank of the person who is changing the rank
+                           connection.query("UPDATE users SET group_id = "+message.group+" WHERE id = "+message.user_id,function(err,res){//update the user in the database
                               if(err)
                                 console.error(err);
+                            	//update the online user
                                other_user.permissions = group.permissions;
                                other_user.group_id=message.group;
-                               if(group.permissions.rank>prev_rank){
+                               if(group.permissions.rank>prev_rank){//inform the user that they have been promoted
                                    other_user.socket.emit('alert',{alert:'success',text:"You have been promoted to "+result[0].name});
                                }
-                               else{
+                               else{//inform the user that they have been demoted
                                    other_user.socket.emit('alert',{alert:'danger',text:"You have been demoted to "+result[0].name});
                                }
                            });
                        }
                        else
-                        user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});
+                        user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});//if the user changing the permissions does not have the right to do so; let them know
                    } 
                 });
             }
             else{
-                user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});
+                user.socket.emit("alert",{alert:"danger",text:"You are stepping out of bounds"});//if the user changing the permissiosn does not have the right to do so; let them know
             }
         }
     }
 });
 
-socket.on('points',function(message){
-   if(user.permissions.points_master){
-       var insertObj = {user_id:message.user_id,amount:message.amount};
-       connection.query('Insert into awarded_points SET ?',insertObj,function(err,res){
+socket.on('points',function(message){//client call to add points
+   if(user.permissions.points_master){//if the user has permissions to change points
+       var insertObj = {user_id:message.user_id,amount:message.amount};//the update object
+       connection.query('Insert into awarded_points SET ?',insertObj,function(err,res){//insert the points into the table
            var other_user = getUserById(message.user_id);
-           if(other_user){
-               other_user.socket.emit('alert',{alert:"success",text:"You have been awarded "+message.amount+" Points"})
+           if(other_user){//if the user is online
+               other_user.socket.emit('alert',{alert:"success",text:"You have been awarded "+message.amount+" Points"})//let them know
            }
            if(err)
                console.error(err);
@@ -829,28 +841,28 @@ socket.on('points',function(message){
 });
 
 
-var emitRooms = function() {
-
+var emitRooms = function() {//emit the list of rooms to all clients
+	//get the latest room data
 	updateRooms(function() {
 		var tempRooms = [];
-		for (var i = rooms.length - 1; i >= 0; i--) {
+		for (var i = rooms.length - 1; i >= 0; i--) {//foreach room
 			var room = rooms[i];
-			var roomUsers = getUsersByRoom(room);
+			var roomUsers = getUsersByRoom(room);//get the users in the room
 			room.guestCount = 0;
 			room.userCount = 0;
 			room.users = [];
-			for (var j = roomUsers.length - 1; j >= 0; j--) {
+			for (var j = roomUsers.length - 1; j >= 0; j--) {//foreach user in the room
 				var user = roomUsers[j];
 				if (user != undefined) {
-					if (user.username != undefined) {
+					if (user.username != undefined) {//if the user is logged in then add them to the user list and increase the user count
 						room.users.push(user.username);
 						room.userCount++;
-					} else {
+					} else {//if they are not logged in add them to the guest count
 						room.guestCount++;
 					}
 				}
 			};
-				//clone
+				//clone the room so that only the nesseary data will be passed to the client
 			var tempRoom = {};
             tempRoom.guestCount = room.guestCount;
             tempRoom.id = room.id;
@@ -860,31 +872,31 @@ var emitRooms = function() {
             tempRoom.users = room.users;
 
 			if (tempRoom.requirements != undefined && tempRoom.requirements.password != undefined)
-				delete tempRoom.requirements.password;
-            delete tempRoom.bots;
+				delete tempRoom.requirements.password;//remote the password data from the information passed to the client
+            delete tempRoom.bots;//remove the bot data from the information passed to the client
 			tempRooms.push(tempRoom);
 
 			};
-			io.emit('rooms', {
+			io.emit('rooms', {//send the rooms to all the users
 				"rooms": tempRooms
 			});
 		});
 };
 
-emitRooms();
-setInterval(emitRooms, 60000);
+emitRooms();//emit the rooms on startup
+setInterval(emitRooms, 60000);//emit the rooms every 60 seconds
 
 
 });
 
 
-app.post('/reguser', function(req, res) {
+app.post('/reguser', function(req, res) {//register user post directory
 	isValidUser(req.body, function(errors) {
-		if (errors.length == 0) {
-			insertUser(req.body);
+		if (errors.length == 0) {//if the registration is valid
+			insertUser(req.body);//insert the user into the database
 			var result = {};
 			result.status = 'OK';
-			result.redirect = '/index.html';
+			result.redirect = '/chat.html';//reirect the user to the chat page
 			req.session.username = req.body.username;
 			res.json(result);
 		} else {
@@ -892,13 +904,13 @@ app.post('/reguser', function(req, res) {
 			result.status = 'errors';
 			result.errors = errors;
 			console.log(errors);
-			res.json(result);
+			res.json(result);//let the client know what the errors were
 		}
 	});
 
 });
 
-app.post('/me', function(req, res) {
+app.post('/me', function(req, res) {//post directory for loginstatus
 	if (req.session.username == undefined)
 		res.json({
 			"status": "Not logged in"
@@ -909,7 +921,7 @@ app.post('/me', function(req, res) {
 		});
 });
 
-app.post('/login', function(req, res) {
+app.post('/login', function(req, res) {//login through post directory
 	var body = req.body;
 	getUserFromHash(body.hash,function(callbackUser){
 		if(!callbackUser){
@@ -935,16 +947,17 @@ app.post('/login', function(req, res) {
 	
 });
 
-app.post('/archive', function(req, res) {
+app.post('/archive', function(req, res) {//archive data post direcotry
 	var body = JSON.parse(req.body.blarg);
-	body.order = body.order || {};
-	body.order.by = body.order.by || 'id';
-	body.order.direction = body.order.direction || 'ASC';
-	if (req.session.username) {
-		getUser(req.session.username, function(user) {
-			if (user && user.permissions && user.permissions.archive) {
+	body.order = body.order || {};// either sent order or new object
+	body.order.by = body.order.by || 'id';//either order by what was sent or id
+	body.order.direction = body.order.direction || 'ASC';//either order by what was sent to or by Ascending
+	if (req.session.username) {//if the user is logged in through the session
+		getUser(req.session.username, function(user) {//get the user
+			if (user && user.permissions && user.permissions.archive) {//if they have permission to use the archive
 				try {
-					if (body.type == 'chat') {
+					if (body.type == 'chat') {//if the archive requested is chat
+						//build sql statement
 						var sql = 'SELECT user_id,room_id,message,time FROM chat ';
 						if (body.where.field) {
 							sql += 'WHERE ' + body.where.field + ' ' + body.where.equals + ' ';
@@ -954,13 +967,13 @@ app.post('/archive', function(req, res) {
 							sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
 						}
 						connection.query(sql, function(err1, results) {
-							if (!results) {
+							if (!results) {//if there were no results let the user know
 								res.json({
 									'success': false,
 									'message': 'SQL ERROR/NO RESULTS'
 								})
 							} else {
-								connection.query('SELECT id,username FROM users', function(err2, users) {
+								connection.query('SELECT id,username FROM users', function(err2, users) {//get the usernames and id to insert the usernames in to the table
 									if (err1 || err2) {
 										res.json({
 											'success': false,
@@ -990,7 +1003,8 @@ app.post('/archive', function(req, res) {
 							}
 						});
 
-} else if (body.type == 'users') {
+} else if (body.type == 'users') {//if the user wanted user data
+	//build sql statement
 	var sql = 'SELECT id,username,first_name,last_name,email,group_id FROM users ';
 	if (body.where.field) {
 		sql += 'WHERE ' + body.where.field + '  =  "' + body.where.equals + '" ';
@@ -999,7 +1013,7 @@ app.post('/archive', function(req, res) {
 	if (body.range.length != 0) {
 		sql += ' LIMIT ' + body.range.start + ',' + body.range.length + ' ';
 	}
-	connection.query(sql, function(err1, results) {
+	connection.query(sql, function(err1, results) {//if there was a problem let the user knjow
 		if (!results) {
 			res.json({
 				'success': false,
@@ -1007,7 +1021,7 @@ app.post('/archive', function(req, res) {
 			})
 		} else {
 			connection.query('SELECT id,name FROM groups', function(err2, groups) {
-				if (err1 || err2) {
+				if (err1 || err2) {//if there was a problem let the user know
 					res.json({
 						'success': false,
 						'message': 'SQL ERROR'
@@ -1055,13 +1069,13 @@ app.post('/archive', function(req, res) {
 }
 });
 
-app.get('/metrics.json',function(req,res){
+app.get('/metrics.json',function(req,res){//get the latest metrics data
 	connection.query('SELECT metrics,id FROM metrics ORDER BY time DESC LIMIT 1',function(err,result){
 		res.send(200,result[0].metrics);
 	});
 });
 
-app.get('/u/:id',function(req,res){
+app.get('/u/:id',function(req,res){//get a user page
 	userData.getUserData(connection,req.params.id,function(data){
 		res.render('user',data);
 	});
@@ -1074,7 +1088,7 @@ app.get('/forgot', function(req, res) {
 
 
 
-var isValidUser = function(data, callback) {
+var isValidUser = function(data, callback) {//validate user
 	var errors = [];
 	var dataKeys = Object.keys(data);
 	var j = dataKeys.length - 1;
@@ -1082,10 +1096,10 @@ var isValidUser = function(data, callback) {
 	var currentValidation = 0;
 
 
-	var validate = function(rule, ruleVal, dataKey, value, next) {
+	var validate = function(rule, ruleVal, dataKey, value, next) {//validate one field
 		if (rule == 'min') {
 			if (value.length < ruleVal)
-				errors.push({
+				errors.push({//if there was a problem, add it to the array
 					'rule': rule,
 					'ruleVal': ruleVal,
 					"element": dataKey,
@@ -1096,7 +1110,7 @@ var isValidUser = function(data, callback) {
 			}, 1);
 		} else if (rule == 'max') {
 			if (value.length >= ruleVal)
-				errors.push({
+				errors.push({//if there was a problem, add it to the array
 					'rule': rule,
 					'ruleVal': ruleVal,
 					"element": dataKey,
@@ -1109,7 +1123,7 @@ var isValidUser = function(data, callback) {
 			connection.query("SELECT `id` from " + ruleVal.table + " where " + ruleVal.column + " = '" + value + "'", function(err, result) {
 				console.log(err);
 				if (result !== undefined && result.length > 1)
-					errors.push({
+					errors.push({//if there was a problem, add it to the array
 						"element": dataKey,
 						"text": "Your " + dataKey + " must be unique"
 					});
@@ -1119,7 +1133,7 @@ var isValidUser = function(data, callback) {
 			});
 		} else if (rule == 'matches') {
 			if (value !== data[ruleVal])
-				errors.push({
+				errors.push({//if there was a problem, add it to the array
 					'rule': rule,
 					'ruleVal': ruleVal,
 					"element": dataKey,
@@ -1129,7 +1143,7 @@ var isValidUser = function(data, callback) {
 		} else
 		next(errors);
 	};
-	var runNextValidation = function(errors) {
+	var runNextValidation = function(errors) {//callaback to run the next validation
 		var dataKey = dataKeys[j];
 		var value = data[dataKey];
 
@@ -1155,7 +1169,7 @@ var isValidUser = function(data, callback) {
 		var ruleKey = rules[i];
 		var datavalue = data[ruleKey];
 		if (config.register_validataions[ruleKey].required == true && (datavalue === undefined || datavalue.trim() === '')) {
-			errors.push({
+			errors.push({//if there was a problem, add it to the array
 				"element": ruleKey,
 				"rule": "required",
 				"text": ruleKey + " is required"
@@ -1172,34 +1186,35 @@ var isValidUser = function(data, callback) {
 
 };
 
-var insertUser = function(userData) {
+var insertUser = function(userData) {//insert the user into the database
 	var user = {};
 	user.username = userData.username;
 	user.first_name = userData.firstname;
 	user.last_name = userData.lastname;
 	user.email = userData.email;
 	user.group_id = 1;
-	var salt = crypto.randomBytes(128).toString('base64');
-	user.password = hash(salt, userData.password)
+	var salt = crypto.randomBytes(128).toString('base64');//generate a random salt
+	user.password = hash(salt, userData.password)//hash the password and salt
 	user.salt = salt;
-	var query = connection.query('INSERT INTO users SET ?', user, function(err, result) {
+	var query = connection.query('INSERT INTO users SET ?', user, function(err, result) {//insert user
 		console.log(err);
-		login(userData.username, userData.password, undefined);
-		sendEmails();
+		login(userData.username, userData.password, undefined);//log them in
+		sendEmails();//send them an email
 	});
 
 
 };
 
-var addRoom = function(data, callback) {
+var addRoom = function(data, callback) {//function to add a room
+	//build requirements
 	var requirements = {};
 	requirements.hasPassword = data.hasPassword;
 	if (data.hasPassword)
 		requirements.password = data.password;
 	requirements.isDeleteable = data.isDeleteable;
-	if (data.rank !== 'Guest')
+	if (data.rank !== 'Guest')//if the rank requirement is guest make no requirement for rank
 		requirements.rank = data.rank;
-	var query = connection.query('INSERT INTO rooms SET ?', {
+	var query = connection.query('INSERT INTO rooms SET ?', {//insert into db
 		"name": data.name,
 		'requirements': JSON.stringify(requirements),
 		'bots':[]
@@ -1211,7 +1226,7 @@ var addRoom = function(data, callback) {
 	});
 };
 
-var deleteRoom = function(data, callback) {
+var deleteRoom = function(data, callback) {//function to delete a room
 	connection.query('DELETE FROM rooms WHERE id = ' + data.id, function(err, result) {
 		if (err !== null)
 			console.error("At delete room: %s", err);
@@ -1222,16 +1237,16 @@ var deleteRoom = function(data, callback) {
 	});
 }
 
-var updateRooms = function(callback) {
+var updateRooms = function(callback) {//get the rooms from the db
 	var query = connection.query("SELECT * FROM rooms", function(err, result) {
 		if (err !== null)
 			console.error("At Update room: %s", err);
 		rooms = [];
-		for (var i = result.length - 1; i >= 0; i--) {
+		for (var i = result.length - 1; i >= 0; i--) {//foreach room
 			result[i].requirements = JSON.parse(result[i].requirements);
             result[i].bots = JSON.parse(result[i].bots);
             if(result[i].bots)
-                connect_bots(result[i]);
+                connect_bots(result[i]);//connect the bots
 			rooms.push(result[i]);
 		}
 		if (callback !== null && callback !== undefined)
@@ -1243,18 +1258,18 @@ updateRooms();
 
 
 
-var connect_bots=function(room){
-    for(var i =0;i<room.bots.length;i++){
+var connect_bots=function(room){//function to connect the bots
+    for(var i =0;i<room.bots.length;i++){//foreach bot
         var bot = room.bots[i];
 
 
 
-        bot.send = function(data){
+        bot.send = function(data){//create send function
         	if(data.length>1000){
         		data.slice(0,1000);
         	}
-            data = new Buffer(JSON.stringify(data));
-           botsend.send(data,0,data.length,this.port,this.host,function(err,bytes){
+            data = new Buffer(JSON.stringify(data));//put the data in a buffer
+           botsend.send(data,0,data.length,this.port,this.host,function(err,bytes){//send the data to the bot
                 if (err) {
                     console.error(err);
                 }
@@ -1264,15 +1279,17 @@ var connect_bots=function(room){
     }
 }
 
-var getUser = function(username, callback) {
+var getUser = function(username, callback) {//get user by username
 	var query = connection.query('SELECT * from users where username = "' + username + '"', function(err, result) {
+		if(result && result[0]){//if the user exists
 		var user = result[0];
-		connection.query('SELECT * from groups where id = ' + user.group_id, function(err, res) {
+		connection.query('SELECT * from groups where id = ' + user.group_id, function(err, res) {//get the user's permissions
 			if (err != null)
 				console.error("At get User group : " + err);
 			user.permissions = JSON.parse(res[0].permissions);
 			callback(user);
 		});
+	}
 
 	});
 };
@@ -1282,7 +1299,7 @@ var hash = function(salt, raw) {
 	return crypto.pbkdf2Sync(raw, salt, config.hash.itterations, config.hash.length).toString('base64');
 };
 
-var login = function(username, password, callback) {
+var login = function(username, password, callback) {//login function, returns boolean of login success
 	if (password != '' && password != undefined) {
 		var query = connection.query('SELECT `username`,`password`,`salt` from users where username = "' + username + '"', function(err, result) {
 			if (result.length > 0 && result[0].password === hash(result[0].salt, password)) {
@@ -1299,7 +1316,7 @@ var login = function(username, password, callback) {
 	}
 };
 
-var guid = function() {
+var guid = function() {//guid generation function
 	function s4() {
 		return Math.floor((1 + Math.random()) * 0x10000)
 		.toString(16)
@@ -1311,14 +1328,14 @@ var guid = function() {
 	};
 };
 
-var getUserBySocket = function(socket) {
+var getUserBySocket = function(socket) {//get online user by their socket
 	for (var i = users.length - 1; i >= 0; i--) {
 		var user = users[i];
 		if (user.socket != undefined && user.socket.id == socket.id)
 			return user;
 	};
 }
-var getUserById = function(id) {
+var getUserById = function(id) {//get online use by id
 	for (var i = users.length - 1; i >= 0; i--) {
 		var user = users[i];
 		if (user.id != undefined && user.id == id)
@@ -1326,7 +1343,7 @@ var getUserById = function(id) {
 	};
 }
 
-var getRoomById = function(id) {
+var getRoomById = function(id) {//get room by id
 	for (var i = rooms.length - 1; i >= 0; i--) {
 		var room = rooms[i];
 		if (room.id == id)
@@ -1334,7 +1351,7 @@ var getRoomById = function(id) {
 	};
 }
 
-var getUsersByRoom = function(room) {
+var getUsersByRoom = function(room) {//get all the online users in a room
 	var matching = [];
 	for (var i = users.length - 1; i >= 0; i--) {
 		var user = users[i];
@@ -1344,7 +1361,7 @@ var getUsersByRoom = function(room) {
 	return matching;
 }
 
-var getWordList=function(){
+var getWordList=function(){//generate the blacklist regex
 	var pattern = [],replace=[];
 	pattern.push('[Aa]'); replace.push('(a|A|@)');
 	pattern.push('[CcKk]'); replace.push('(?:(c|C|\\(|k|K))');
@@ -1386,7 +1403,7 @@ var getWordList=function(){
 	};
 
 	getWordList();
-	var handleChatLinks=function(chat){
+	var handleChatLinks=function(chat){//function that returns the chat with links converted to clickable html
 		var reg_exUrl = new RegExp(/(((http|https|ftp|ftps)\:\/\/|www\.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)|(\d{1,3}\.){3}\d{1,3}(\/\S*)?/g);
 		var matches = chat.match(reg_exUrl) || [];
 		for (var i = matches.length - 1; i >= 0; i--) {
@@ -1399,7 +1416,7 @@ var getWordList=function(){
 		};
 		return chat;
 	}
-	var sanitize = function(chat,user) {
+	var sanitize = function(chat,user) {//santitize html from chat and blacklisted words
 		chat = validator.escape(chat);
 		for(var j =0;j<blacklistRegex.length;j++){
 			var regex = blacklistRegex[j];
@@ -1415,21 +1432,21 @@ var getWordList=function(){
 		return chat;
 	}
 
-	var getGroups = function() {
+	var getGroups = function() {//returns the groups from the database
 		connection.query('Select * from groups', function(err, result) {
 			groups = result;
 		});
 	};
 	getGroups();
 
-	var getGroupById = function(id) {
+	var getGroupById = function(id) {//get group by id
 		for (var i = groups.length - 1; i >= 0; i--) {
 			var group = groups[i];
 			if (group.id == id)
 				return group;
 		};
 	};
-	var ban = function(user, room, duration) {
+	var ban = function(user, room, duration) {//function to ban a user
 		var insertVars = {
 			user_id: user,
 			room_id: room,
@@ -1442,7 +1459,7 @@ var getWordList=function(){
 		});
 	}
 
-	var isBanned = function(user, room, callback) {
+	var isBanned = function(user, room, callback) {//function to check if a user is currently banned from a room
 		if (user) {
 			connection.query("SELECT id,time,duration FROM kicks WHERE user_id = " + user.id + " and room_id = " + room.id, function(err, results) {
 				if (results == undefined || results == null || results.length == 0) {
@@ -1481,7 +1498,8 @@ var getWordList=function(){
 
 
 
-	function mail(from, to, message) {
+	function mail(from, to, message) {//send an email
+		//build client
 		var client = simplesmtp.connect(465, 'smtp.gmail.com', {
 			secureConnection: true,
 			auth: {
@@ -1517,8 +1535,8 @@ var getWordList=function(){
 		});
 	}
 
-	var sendEmails = function() {
-		connection.query('SELECT `id`,`name`,`email`,`type`,`report` FROM `reports` WHERE informed = 0', function(err, results) {
+	var sendEmails = function() {//send all emails
+		connection.query('SELECT `id`,`name`,`email`,`type`,`report` FROM `reports` WHERE informed = 0', function(err, results) {//send emails from reports
 			for (var i = results.length - 1; i >= 0; i--) {
 				var result = results[i];
 				var message = 'subject: NOREPLY\r\n\r\n';
@@ -1551,7 +1569,7 @@ var getWordList=function(){
 				});
 			};
 		});
-connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `users` WHERE informed = 0', function(err, results) {
+connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `users` WHERE informed = 0', function(err, results) {//send emails for new accounts
 	for (var i = results.length - 1; i >= 0; i--) {
 		var result = results[i];
 		var message = 'subject: NOREPLY\r\n\r\n';
@@ -1569,7 +1587,7 @@ connection.query('SELECT `id`,`username`,`first_name`,`last_name`,`email` FROM `
 });
 };
 
-var getUserFromHash = function(hash, callback) {
+var getUserFromHash = function(hash, callback) {//get the user with that hash
 	connection.query("SELECT user_id FROM user_hash WHERE hash = '" + hash + "'", function(err, result) {
 		if (result == undefined || result.length == 0) {
 			callback();
@@ -1581,8 +1599,8 @@ var getUserFromHash = function(hash, callback) {
 	});
 }
 
-var chatToRoom = function(user, message) {
-	connectionChat.query('INSERT INTO chat SET ?', {
+var chatToRoom = function(user, message) {//chat to a room
+	connectionChat.query('INSERT INTO chat SET ?', {//insert the chat into the database
 		'user_id':message.user_id,
 		'message': message.chat,
 		"room_id": user.room.id
@@ -1596,13 +1614,13 @@ var chatToRoom = function(user, message) {
         bot.send(message);
     }
 
-	if (user.room.id >= 0) {
+	if (user.room.id >= 0) {//if the room id is greater than 0 send it to all the users in the room
 		var matching = getUsersByRoom(user.room);
 		for (var i = matching.length - 1; i >= 0; i--) {
 			var match = matching[i];
 			match.socket.emit('chat', message);
 		};
-	} else {
+	} else {//this is a independent room and should only be sent to the user that orginally sent the chat
 		user.socket.emit('chat', message);
 	}
 };
