@@ -650,7 +650,10 @@ $(document).ready(function() {
 });
 
 
-
+function forgot(){
+	var username = $('#forgot input').val();
+	$.post('/forgot-request',{"username":username},function(data, textStatus, xhr){});
+}
 
 
 var settings = {};

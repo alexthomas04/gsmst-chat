@@ -15,6 +15,7 @@
     <script src="js/questions.js"></script>
 	<script src="js/misc.js"></script>
 	<script src="js/emoticons.js"></script>
+	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 	<script src="controllers/util.js"></script>
@@ -35,12 +36,12 @@
     </head>
     <body>
         <div class='page-header'>
-            <h1>Welcome To GSMST-Chat <small>A new way to do the thing. WHERE IS ZHU LI!?!?!?!?!?</small></h1> 
+            <h1>Welcome To GSMST-Chat <small></small></h1> 
             <p>Ths objective of this project is to provide a solution for students who require assistance with various subjects.</p>
         </div>
         
         <div class="container">
-            <a href='/chat.html'><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
+            <a href='#' data-toggle="modal" data-target="#navigate"><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
         </div>
         <div class="container">
             <div class="page-header">
@@ -335,7 +336,30 @@
     </ul>
 </div>
 <div class="container">
-            <a href='/chat.html'><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
+            <a href='#' data-toggle="modal" data-target="#navigate"><button style="width:100%;" class='btn btn-primary btn-lg col-md-12'>Click here to enter Chat</button></a>
         </div>
+        </div>
+        <div class="modal fade" id="navigate">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form action="/rooms" method="POST">
+						<div class="g-recaptcha" data-sitekey="6LcKvgMTAAAAAJFb_TxiNlCquitKvRAU7WJJcdN9"></div>
+						<input type="submit">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<!-- /.modal -->
     </body>
 </html>

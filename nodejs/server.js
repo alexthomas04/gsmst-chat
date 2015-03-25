@@ -11,6 +11,8 @@ var port = config.port || 3000;
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+var http = require('http');
+var https = require('https');
 var socketSessions = require('socket.io-handshake');
 
 var bodyParser = require('body-parser');
@@ -910,6 +912,33 @@ app.post('/reguser', function(req, res) {//register user post directory
 
 });
 
+app.post('/rooms',function(req,res){
+	var secret=config.secret;
+	https.get("https://www.google.com/recaptcha/api/siteverify?secret=" + secret + "&response=" + req.body['g-recaptcha-response']+"&remoteip="+req.ip, function(response) {
+                var str = '';
+		response.on('data', function (chunk) {
+		    str += chunk;
+		  });
+
+		  response.on('end', function () {
+		  	console.log(str);
+		    var res2 = JSON.parse(str);
+		    console.log(res2);
+		    if (res2.success) {
+		    	fs.readFile(config.dir+"/chat.html",function(err,data){
+		    		if(err) console.error(err);
+		    		else{
+		    			res.send(data.toString('utf8'));
+		    		}
+		    	});
+		    }
+		    else{
+		    	res.send("<h1>LOOKS LIKE YOU ARE NOT A HUMAN!</h1><br><a href='"+config.domain+">Go back to landing page</a>");
+		    }
+		  });
+        })
+});
+
 app.post('/me', function(req, res) {//post directory for loginstatus
 	if (req.session.username == undefined)
 		res.json({
@@ -1082,8 +1111,66 @@ app.get('/u/:id',function(req,res){//get a user page
 });
 
 
-app.get('/forgot', function(req, res) {
-	res.send(200, '<h1>HAHA that sucks</h1>')
+app.get('/forgot/:id/:hash', function(req, res) {
+	connection.query('SELECT id FROM forgot WHERE user_id = '+req.params.id+" AND hash = '"+req.params.hash+"'",function(err,result){
+		if(err)
+			console.error(err);
+		if(result && result[0]){
+			fs.readFile(config.dir+"/forgot.html",function(err1,data){
+		    		if(err1) console.error(err1);
+		    		else{
+		    			res.send(data.toString('utf8'));
+		    		}
+		    	});
+		}else{
+			res.send("<h1>You have an Invalid hash</h1><br><a href='"+config.domain+">Go back to landing page</a>");
+		}
+	});
+});
+
+app.post('/reset-password',function(req,res){
+	var body = req.body;
+	connection.query('SELECT id FROM forgot WHERE user_id = '+body.id+" AND hash = '"+body.hash+"'",function(err,result){
+		if(err)
+			console.error(err);
+		if(result && result[0]){
+			connection.query('DELETE FROM forgot WHERE id = '+result[0].id,function(err1,result1){if(err1)console.error(err1);});
+			var salt = crypto.randomBytes(128).toString('base64');//generate a random salt
+			var password = hash(salt, body.password)//hash the password and salt
+			connection.query("UPDATE users SET salt = '"+salt+"'",function(err2,result2){if(err2)console.error(err2);});
+            connection.query("UPDATE users SET password='"+password+"'",function(err3,result3){if(err3)console.error(err3);});
+			res.json({
+				success:true,
+				errors:[]
+			});
+		}
+        else {
+            res.json({
+                success: false,
+                errors: ["invalid hash"]
+            });
+        }
+	});
+});
+
+app.post('/forgot-request',function(req,res){
+	var username = req.body.username;
+	connection.query("SELECT id,first_name,username,email FROM users WHERE username = '"+ username +"'",function(err,result){
+		if(result && result[0]){
+			var hash = crypto.randomBytes(50).toString('base64').replace(new RegExp('/','g'), '');
+			var message = 'subject: NOREPLY\r\n\r\n';
+			message+= 'Hi '+result[0].first_name+ "("+result[0].username+"),\n";
+			message+="It would appear that you have forggoten your password. Please click this link to reset it "+config.domain+"/forgot/"+result[0].id+"/"+hash+"\n\n\n";
+			mail('gsmstchat@gmail.com', result[0].email, message);
+
+			connection.query('INSERT into forgot SET ?',{user_id:result[0].id,hash:hash},function(err,result1){if(err)console.error(err);});
+		}else{
+			res.json({
+				success:false,
+				errors:["invalid username"]
+			});
+		}
+	});
 });
 
 
