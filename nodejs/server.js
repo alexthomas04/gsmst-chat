@@ -664,7 +664,7 @@ socket.on('sendFile', function(message) {//call from client to send a file
 
 		var matching = getUsersByRoom(user.room);//get the other users in the room
 			var response = {//build response
-				"file_data": message,
+				"file": message,
 				'user': user.username,
 			    'user_id': user.id
 			};
@@ -1134,22 +1134,19 @@ app.post('/reset-password',function(req,res){
 		if(err)
 			console.error(err);
 		if(result && result[0]){
-			connection.query('DELETE FROM forgot WHERE id = '+result[0].id,function(err1,result1){if(err1)console.error(err1);});
+			connection.query('DELETE FROM fogot WHERE id = '+result.id,function(err1,result1){if(err1)console.error(err1);});
 			var salt = crypto.randomBytes(128).toString('base64');//generate a random salt
 			var password = hash(salt, body.password)//hash the password and salt
-			connection.query("UPDATE users SET salt = '"+salt+"'",function(err2,result2){if(err2)console.error(err2);});
-            connection.query("UPDATE users SET password='"+password+"'",function(err3,result3){if(err3)console.error(err3);});
+			connection.query("UPDATE USERS SET salt = '"+salt+"' password='"+password+"'",function(err1,result1){if(err1)console.error(err1);});
 			res.json({
 				success:true,
 				errors:[]
 			});
 		}
-        else {
-            res.json({
-                success: false,
-                errors: ["invalid hash"]
-            });
-        }
+		res.json({
+				success:false,
+				errors:["invalid hash"]
+			});
 	});
 });
 

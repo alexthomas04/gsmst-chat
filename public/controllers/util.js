@@ -169,7 +169,11 @@ app.directive('send', [function () {
 		restrict: 'A',
 		link: function (scope, iElement, iAttrs) {
 			scope.sendPrivate = function(type){
-				socket.emit('private',{to_username:scope.to,message:scope.privateMessage});
+				socket.emit('private',{to_username:$('#private-to').val(),message:scope.privateMessage});
+				text = '<div class="alert alert-info">To '+$('#private-to').val()+': '+scope.privateMessage+'</div>';
+				$('#chatArea').append($('<div></div>').append(text));
+				height+=400;
+				$('#chatArea').scrollTop(height);
 				scope.privateMessage='';
 				scope.to='';
 			};

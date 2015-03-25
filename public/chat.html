@@ -351,7 +351,7 @@
 				<div class="modal-body">
 					<div class="form-group">
 						<label for="">To(Username)</label>
-						<input ng-model='to' class="form-control">
+						<input ng-model='to' class="form-control" id='private-to'>
 					</div>
 					<div class="form-group">
 						<label>Message</label>
@@ -517,7 +517,10 @@
 		<div class="col-md-1">
 			<strong>Users</strong>
 			</br>
-			<p ng-repeat='user in room.users'>{{user}}</p>
+			<div ng-repeat='user in room.users' >
+			<a class="side-bar-name" data-toggle="modal" data-target="#sendMessage">{{user}}</a>
+			<br>
+			</div>
 			</br>
 			<strong>Guests: </strong>{{room.guestCount}}
 		</div>

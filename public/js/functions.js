@@ -587,6 +587,9 @@ $(document).ready(function() {
 	        	break;
 	    }
 	})
+	$(document).on('click','.side-bar-name',function(e){
+		$('#private-to').val($(this).text());
+	});
     $('#chatButton').on('click','',function(e){
         var message = $('#chatBox').val();
         lastSendId=-1;
